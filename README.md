@@ -68,7 +68,7 @@ The following example projects are provided to help get started with the package
 
 # About
 
-This package was inspired by the [Marathon Environments project](https://joanllobera.github.io/marathon-envs/). It was started to investigate both interactive physics based character animation, and locomotion synthesis for applications in the field of assistive robotics[^4].
+This package was inspired by the [Marathon Environments project](https://joanllobera.github.io/marathon-envs/). Modular Agents was started to investigate both interactive physics based character animation, and locomotion synthesis for applications in the field of assistive robotics[^4].
 [^4]: Hodossy, B. and Farina, D., 2022. Shared Autonomy Locomotion Synthesis with Virtual Wearable Robotic  (preprint).
 
 The initial contributors were:
