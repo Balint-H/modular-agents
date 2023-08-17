@@ -1,0 +1,16 @@
+{
+    "name": "MjUnityExtensions",
+    "rootNamespace": "",
+    "references": [
+        "GUID:62e270fc6ccbe61c59f510a8e31d067c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

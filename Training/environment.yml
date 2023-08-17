@@ -1,0 +1,16 @@
+name: ml-agents
+channels:
+  - pytorch
+dependencies:
+  - python=3.8
+  - pip
+  - pytorch 
+  - torchvision 
+  - torchaudio 
+  # - cudatoolkit=10.2
+  - numpy
+  - protobuf=3.20
+  - pip:
+     - mlagents==0.29     #- corresponds to mlagents 2.0.1 in C#
+
+

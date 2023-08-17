@@ -1,0 +1,19 @@
+{
+    "name": "ModularAgents.PhysX",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:21259e388650e4af39bc7daca324115e",
+        "GUID:85e0054f8e64b47309646d35f8851f81",
+        "GUID:bf1449d1ee3a8ce41ba02f19e167cefb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
