@@ -58,7 +58,7 @@ The following example projects are provided to help get started with the package
 - [**Unity Mj Examples**](UnityMjExamples/README.md): it contains several examples of physics-based agents set up and trained using MuJoCo. This includes the inverting cart-pole pendulum, and simple walking and throwing animations trained using the *DeepMimic* and *DReCon* architectures.
   There is also guidance for structuring your own scenes, and training policies.
 
-- [**Unity PhysX Examples**](UnityPhysxExamples/README.md): We are in the process of translating the MuJoCo environments to PhysX, with current challenges in working around the limited access to the PhysX runtime. Contributions welcome!
+- [**Unity PhysX Examples**](UnityPhysxExamples/README.md): We are in the process of translating the MuJoCo environments to PhysX, with current challenges in working around the limited access to the PhysX runtime. The PhysX example project is not ready yet for release, but will be added in the future. Contributions welcome, get in touch if you are interested!
 
 ### Related repositories:
 
