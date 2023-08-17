@@ -1,0 +1,7 @@
+{
+  "name": "com.github.modular-agents.shared-assets",
+  "displayName": "Modular Agents Shared Assets",
+  "version": "0.1.0",
+  "unity": "2021.2",
+  "description": "Example environments using the Modular Agents package"
+}

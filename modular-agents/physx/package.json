@@ -1,0 +1,10 @@
+{
+  "name": "com.github.modular-agents.physx",
+  "displayName": "Modular Agents PhysX",
+  "version": "0.1.0",
+  "unity": "2020.3",
+  "description": "Extension of modular agents to be used within PhysX projects. It can be used within the Marathon Environments project, or as a standalone project.",
+  "dependencies": {
+    "com.unity.mathematics": "1.2.1"
+  }
+}

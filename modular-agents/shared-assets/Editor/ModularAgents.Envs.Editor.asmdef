@@ -1,0 +1,18 @@
+{
+    "name": "ModularAgents.Envs.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b7b923a1291983d4aa479c8096395675"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

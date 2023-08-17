@@ -1,0 +1,19 @@
+{
+    "name": "ModularAgents.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:bf1449d1ee3a8ce41ba02f19e167cefb",
+        "GUID:85e0054f8e64b47309646d35f8851f81"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

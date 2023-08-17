@@ -1,0 +1,10 @@
+{
+  "name": "com.github.modular-agents.core",
+  "displayName": "Modular Agents",
+  "version": "0.1.0",
+  "unity": "2021.2",
+  "description": "Modular system for collecting observations and rewards for gait policy agents",
+  "dependencies": {
+    "com.unity.ml-agents": "2.2.1"
+  }
+}

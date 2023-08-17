@@ -1,0 +1,22 @@
+{
+    "name": "ModularAgents.Mujoco.Editor.asmdef",
+    "rootNamespace": "",
+    "references": [
+        "GUID:62e270fc6ccbe61c59f510a8e31d067c",
+        "GUID:bf1449d1ee3a8ce41ba02f19e167cefb",
+        "GUID:85e0054f8e64b47309646d35f8851f81",
+        "GUID:046f0e164cbb19645a71b4fc344ee91a",
+        "GUID:97b95f856ad17db4e855cd960cd3170f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

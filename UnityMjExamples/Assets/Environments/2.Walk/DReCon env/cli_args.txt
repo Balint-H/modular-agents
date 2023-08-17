@@ -1,0 +1,1 @@
+mlagents-learn config/amp_config.yaml  --run-id="Your ID"  --time-scale=1 --env="Path to build" --no-graphics --num-envs="Roughly equal to the number of CPU cores you have"

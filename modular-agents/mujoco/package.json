@@ -1,0 +1,13 @@
+{
+  "name": "com.github.modular-agents.mujoco",
+  "displayName": "Mj Modular Agents",
+  "version": "0.1.0",
+  "unity": "2021.2",
+  "description": "MuJoCo Extensions of the Modular Agents package",
+  "type": "",
+  "dependencies": {
+   "com.github.modular-agents.core": "0.1.0",
+   "com.github.mj-unity-extensions": "0.1.0",
+   "org.mujoco": "2.3.1"
+  }
+}
