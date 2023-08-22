@@ -12,7 +12,7 @@ namespace ModularAgents.TrainingEvents {
 /// To reset the reference animation please check "Animation Event > JumpToClipHandler"
 /// </summary>
 
-public abstract class BasicSetupHandler : DelayableEventHandler
+public abstract class BasicSetupHandler : TrainingEventHandler
 {
 	// The pelvis/animation root may not be the same transform. So to reset to the correct height we have to keep them separate
 	// Assuming root position not baked into animation, but applied to gameobject.
@@ -68,7 +68,7 @@ public abstract class BasicSetupHandler : DelayableEventHandler
 
     public virtual void HandleSetup(object sender, EventArgs eventArgs)
     {
-		if (IsWaiting) return;
+		
 		//First we move the animation back to the start 
 		kinematicRig.TrackKinematics();
 		if (shouldResetPosition) referenceAnimationParent.position = resetOrigin;
@@ -80,12 +80,7 @@ public abstract class BasicSetupHandler : DelayableEventHandler
 		}
 			
 
-        if (framesToWait > 0)
-        {
-            StartCoroutine(DelayedExecution(sender, eventArgs));
-            return;
-        }
-
+     
 		//Then we move the ragdoll as well, still in different joint orientations, but overlapping roots.
 		if (shouldResetPosition) kineticChainToReset.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
 
@@ -93,24 +88,6 @@ public abstract class BasicSetupHandler : DelayableEventHandler
         kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
     }
 
-	protected override IEnumerator DelayedExecution(object sender, EventArgs eventArgs)
-    {
-		IsWaiting = true;
-		yield return WaitFrames();
-		//Debug.Log("Teleporting Root!");
-		//Then we move the ragdoll as well, still in different joint orientations, but overlapping roots.
-		kineticChainToReset.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
-
-
-		//Debug.Log("Copying Kinematics!");
-		//We copy the rotations, velocities and angular velocities from the kinematic reference (which has the "same" pose as the animation).
-		kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
-
-		//Debug.Log("Teleporting Kinematic Root just in case!");
-		kinematicRig.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
-		IsWaiting = false;
-
-	}
 
 	//As I can see this handler to be extended to chains other then Articulationbody ones, here's a WIP interface
     public interface IResettable

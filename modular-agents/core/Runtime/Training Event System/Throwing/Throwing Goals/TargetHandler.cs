@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ModularAgents.Throwing
 {
-    public class TargetHandler : DelayableEventHandler
+    public class TargetHandler : TrainingEventHandler
     {
       
 
@@ -40,7 +40,7 @@ namespace ModularAgents.Throwing
         public Vector3 CurrentTargetPosition{ get => currentTarget.position; }
 
 
-    public override EventHandler Handler => (sender, args) => WrappedReset();
+    public override EventHandler Handler => (sender, args) => ResetTarget();
 
 
     private void Awake()
@@ -52,17 +52,7 @@ namespace ModularAgents.Throwing
 
 
 
-    void WrappedReset()
-    {
-        if (IsWaiting) return;
-        if (framesToWait != 0)
-        {
-            StartCoroutine(DelayedExecution(this, EventArgs.Empty));
-            return;
-        }
 
-        ResetTarget();
-    }
 
     void ResetTarget()
     {
@@ -96,12 +86,6 @@ namespace ModularAgents.Throwing
         
     }
 
-    protected override IEnumerator DelayedExecution(object sender, EventArgs args)
-    {
-        IsWaiting = true;
-        yield return WaitFrames();
-        ResetTarget();
-        IsWaiting = false;
-    }
+  
 }
 }
