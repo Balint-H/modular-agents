@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ResetMjState : TrainingEventHandler
+public class MjResetState : TrainingEventHandler
 {
     public override EventHandler Handler => (_, _) => ResetMj();
 

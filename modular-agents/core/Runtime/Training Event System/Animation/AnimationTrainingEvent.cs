@@ -2,16 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class AnimationTrainingEvent : TrainingEvent
 {
-    [SerializeField] Animator animator;
+//    [SerializeField] string clipName;
     [SerializeField] int clipId;
     [SerializeField] float time;
 
     // Start is called before the first frame update
     void Awake()
     {
-        AnimationClip clip = animator.runtimeAnimatorController.animationClips[clipId];
+  //      GetComponent<Animator>()
+        AnimationClip clip = GetComponent<Animator>().runtimeAnimatorController.animationClips[clipId];
 
         var animEvent = new AnimationEvent();
         animEvent.functionName = "AnimEventWrapper";

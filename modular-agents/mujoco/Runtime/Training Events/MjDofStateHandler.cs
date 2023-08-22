@@ -4,7 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SetDofStateEvent : TrainingEventHandler
+/// <summary>
+/// Sets the position, velocity and acceleration state vectors of a given degrees of freedom to values specified by a given vector.
+/// </summary>
+public class MjDofStateHandler
+
+    : TrainingEventHandler
 {
     public override EventHandler Handler => (_, _) => ResetMj();
 
