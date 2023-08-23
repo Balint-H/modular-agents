@@ -134,24 +134,6 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
         MjState.TeleportMjRoot(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>(), posLag + position, rotLag * riggedTransforms[0].rotation);
     }
 
-    public void ReplaceMocapBodies()
-    {
-        foreach(var weld in weldRoot.GetComponentsInChildren<MjWeld>())
-        {
-            var mocapGO = weld.Body1.gameObject;
-            DestroyImmediate(weld.Body1);
-            var newBody = mocapGO.AddComponent<MjMocapBody>();
-            weld.Body1 = newBody;
-        }
-
-        foreach (var remainingBody in weldRoot.parent.GetComponentsInDirectChildren<MjBody>().Where(bd => bd.name.Contains(prefix)))
-        {
-            var bodyGO = remainingBody.gameObject;
-            DestroyImmediate(remainingBody);
-            bodyGO.AddComponent<MjMocapBody>();
-        }
-    }
-
     public unsafe void TrackKinematicsOffline()
     {
 

@@ -30,7 +30,18 @@ public abstract class TrainingEvent : MonoBehaviour
 
     public void ManuallyTrigger(EventArgs e)
     {
-        OnTrainingEvent(e);
+
+        if (!Application.isPlaying)
+        {
+            foreach(var eventHandler in triggeredHandlers)
+            {
+                eventHandler.Handler?.Invoke(this, e);
+            }
+        }
+        else
+        {
+            OnTrainingEvent(e);
+        }
     }
 
     [SerializeField, Tooltip("All handlers in this list will subscribe to this event. Can be empty if you subscribe to this event elsewhere (e.g. an EventBuilder).")]

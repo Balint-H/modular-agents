@@ -25,6 +25,7 @@ public class JumpToClipHandler : TrainingEventHandler
         
 
         animator.Play(stateName:clipName, layer: 0, normalizedTime: UnityEngine.Random.Range(0f, normalizedTimeRange));
+        animator.Update(0f);
     }
 
     

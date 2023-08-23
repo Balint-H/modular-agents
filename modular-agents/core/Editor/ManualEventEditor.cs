@@ -18,7 +18,9 @@ public class ManualEventEditor : Editor
         {
             ManualEvent t = target as ManualEvent;
 
+
             t.ManuallyTrigger(System.EventArgs.Empty);
+            
         }
 
 

@@ -25,7 +25,7 @@ namespace ModularAgents.DReCon
             string defaultName = "HEAD";
 
 
-            if (GUILayout.Button("Attempt to auto-populate subset"))
+            if (GUILayout.Button("Attempt to find head"))
             {
                 DReConRewardSource t = target as DReConRewardSource;
 

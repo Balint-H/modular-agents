@@ -19,13 +19,6 @@ namespace ModularAgents.EditorScripts
 
             base.OnInspectorGUI();
 
-
-            if (GUILayout.Button("Fix Mocapbodies"))
-            {
-                MjKinematicRig t = target as MjKinematicRig;
-                t.ReplaceMocapBodies();
-            }
-
             if (GUILayout.Button("Loosen Joints"))
             {
                 MjKinematicRig t = target as MjKinematicRig;
