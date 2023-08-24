@@ -30,8 +30,8 @@ The scaling functionality is still in its early stages, and contributions refini
    ![Image showing an imported humanoid consisting of blue capsule-shaped segments in T-Pose.](../../Images/import.png)
 
 3. Export a FBX model from the parent GameObject of the root body segment.
-1. 
-   ![Image showing the hierarchy view of the Unity editor, with GameObjects in a nested structure. The parent object of the root component is right clicked showing a dropdown menu with the option "Export to FBX".](../../../../Images/export.png)
+ 
+   ![Image showing the hierarchy view of the Unity editor, with GameObjects in a nested structure. The parent object of the root component is right clicked showing a dropdown menu with the option "Export to FBX".](../../Images/export.png)
 
 4. Configure the exported avatar to use the Mecanim humanoid format, and edit it to ensure correct mapping between body segments.
    
