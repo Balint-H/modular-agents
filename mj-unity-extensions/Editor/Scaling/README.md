@@ -63,6 +63,8 @@ A source humanoid and its Mecanim avatar is available in the [MuJoCo example pro
 5. Check with the visualization tools (*Show* toggle buttons) that the segments, their parenting and length have been interpreted correctly.
 6. Set how you want end effector scaling handled, optionally set the desired total mass of the human, and set how should segment thickness be scaled based on the length scaling.
 7. Click `Scale Humanoid` to apply the scaling. The operation is not Undo-tracked, so make sure to work on a copy of the humanoid, or that you have a prefab saved. 
+8. Due to some `MjBody` objects being in multiple Mecanim bones potentially, each requesting a different scale (the average of which is applied), you might need to click `Scale Humanoid` a couple more times until the humanoid converges to a final configuration.
+9. You might want to export an FBX of the scaled MuJoCo humanoid as well, due to the 1:1 correspondence in the transforms as well as the mecanim bones.
 
 Information/explanation regarding each of these fields is available as tooltips when you hover over their labels. Hovering over the name of the visualized segments in the Scene view will also bring up a tooltip containing information about which bones does that segment connect, and its length.
 
@@ -72,6 +74,7 @@ Information/explanation regarding each of these fields is available as tooltips 
 - You can make adjustments to the avatar of either the reference or the MuJoCo avatar by clicking "Configure Avatar" in the inspector (e.g. to adjust a bone location in the reference avatar to match the structure of the MuJoCo humanoid better). 
 - This may be necessary if there's a fundamental mismatch on where the origin of a segment should be (most likely to be in the root, as the free joint's location is not anatomically defined).
 - For people shorter than the original MuJoCo humanoid, "orthogonal ratio" should be higher than for taller people.
+- You might need to excludes ome collision pairs based on how much the geometry changed. For example, with narrow shoulders you might need to disable collisions between the upper arm and the thorax.
 
 
 ## Implementation Details
@@ -85,5 +88,5 @@ Information/explanation regarding each of these fields is available as tooltips 
   To reconcile this, the final scaling will be in the average direction and magnitude requested by `ScalingSegment`s, weighted by how well the direction is aligned with the geoms of the body (based on a dot product).
 - End effectors can be scaled based on end bones in the reference if they exist (with a naming convention of having the "End" substring, Alternatively we can inherit the scaling of the parent.
 - The orthogonal scale is determined from the longitudinal scale (lacking segment thickness information from the unskinned avatar). The "orthogonal ratio" parameter controls this, which linearly scales the orthogonal scale factor from 1 (no scaling) to the longitudinal scaling. 
-
+- Bilateral segments are forced to be symmetric in scale.
 
