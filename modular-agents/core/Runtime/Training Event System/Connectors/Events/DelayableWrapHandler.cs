@@ -1,14 +1,12 @@
-
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 
-
-public  class DelayableEventHandler: TrainingEventHandler
+/// <summary>
+/// Invokes the wrapped handler after a delay of the specified number of FixedUpdates.
+/// </summary>
+public class DelayableEventHandler: TrainingEventHandler
 {
     [SerializeField]
     protected int framesToWait;
@@ -29,7 +27,7 @@ public  class DelayableEventHandler: TrainingEventHandler
             return;
             
 
-        StartCoroutine(DelayedExecution(this, EventArgs.Empty));
+        StartCoroutine(DelayedExecution(sender, e));
     };
 
     protected IEnumerator DelayedExecution(object sender, EventArgs args)

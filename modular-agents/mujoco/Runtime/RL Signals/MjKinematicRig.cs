@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Mujoco;
+using Mujoco.Extensions;
 using System;
 using ModularAgents.Kinematic.Mujoco;
 using UnityEngine.Serialization;

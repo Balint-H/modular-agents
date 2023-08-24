@@ -1,13 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
-using static Mujoco.MjScene;
 using MathNet.Numerics.LinearAlgebra;
-using System.Runtime.InteropServices;
 using Unity.MLAgents.Actuators;
 using Mujoco;
+using Mujoco.Extensions;
 using static ModularAgents.MathNet.Numerics.LinearAlgebra.LinAlgUtils;
 
 namespace ModularAgents.MotorControl.Mujoco

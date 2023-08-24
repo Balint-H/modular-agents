@@ -5,7 +5,7 @@ using UnityEditor;
 using System.Linq;
 using Mujoco;
 
-namespace ModularAgents
+namespace Mujoco.Extensions
 {
 
     public class ChainConverterEditorWindow : EditorWindow

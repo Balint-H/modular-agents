@@ -1,5 +1,6 @@
 using ModularAgents.Kinematic;
 using Mujoco;
+using Mujoco.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace ModularAgents.Kinematic.Mujoco
 {
     public class MjBodyChain : BodyChain
     {
+
 
         public MjBodyChain(Transform chainRoot) : base(chainRoot) { }
 

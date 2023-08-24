@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using System;
 using Mujoco;
+using Mujoco.Extensions;
 using ModularAgents.Kinematic.Mujoco;
 
 namespace ModularAgents.DReCon

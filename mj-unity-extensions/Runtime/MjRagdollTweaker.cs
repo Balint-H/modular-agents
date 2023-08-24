@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 
-namespace Mujoco
+namespace Mujoco.Extensions
 {
 
     public class MjRagdollTweaker : MonoBehaviour

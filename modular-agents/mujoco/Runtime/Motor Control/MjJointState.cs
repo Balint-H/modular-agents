@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Mujoco;
-using static Mujoco.MjState;
+using static Mujoco.Extensions.MjState;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace ModularAgents.MotorControl

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Mujoco;
+using Mujoco.Extensions;
 using System.Data;
 using ModularAgents.Kinematic;
 

@@ -5,7 +5,7 @@ using UnityEditor;
 using System.Linq;
 using Mujoco;
 
-namespace Mujoco
+namespace Mujoco.Extensions
 { 
 
 

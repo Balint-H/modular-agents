@@ -5,7 +5,7 @@ using UnityEditor;
 using Mujoco;
 
 
-namespace Mujoco
+namespace Mujoco.Extensions
 {
     [CustomEditor(typeof(MjRagdollTweaker))]
     public class MjRagdollTweakerEditor : Editor

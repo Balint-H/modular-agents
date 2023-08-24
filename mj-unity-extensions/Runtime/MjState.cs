@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 
-namespace Mujoco
+namespace Mujoco.Extensions
 {
     public static class MjState
     {

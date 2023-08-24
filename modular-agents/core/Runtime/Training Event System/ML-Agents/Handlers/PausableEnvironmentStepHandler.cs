@@ -24,5 +24,9 @@ public class PausableEnvironmentStepHandler : TrainingEventHandler
         Academy.Instance.AutomaticSteppingEnabled = false;
     }
 
+    public void SetFramesToWait(int framesToWait) 
+    {
+        this.framesToWait = framesToWait;
+    }
 
 }
