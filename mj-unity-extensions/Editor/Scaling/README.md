@@ -26,13 +26,21 @@ The scaling functionality is still in its early stages, and contributions refini
 ### Step 1: Setting up a new source humanoid
 1. Import the MuJoCo humanoid into a new scene through the [XML importer](https://mujoco.readthedocs.io/en/latest/unity.html#using-the-plug-in).
 2. Configure the humanoid into a T-pose.
+
    ![Image showing an imported humanoid consisting of blue capsule-shaped segments in T-Pose.](../../Images/import.png)
+
 3. Export a FBX model from the parent GameObject of the root body segment.
+1. 
    ![Image showing the hierarchy view of the Unity editor, with GameObjects in a nested structure. The parent object of the root component is right clicked showing a dropdown menu with the option "Export to FBX".](../../../../Images/export.png)
+
 4. Configure the exported avatar to use the Mecanim humanoid format, and edit it to ensure correct mapping between body segments.
+   
    ![Image showing the Project view selecting the exported FBX file, and the inspector showing the Rig tab of the asset.](../../Images/configure.png)
+
 5. Double check the mapping, fixing incorrect default assignments. Common issues might be in associating wrong bodies with hands and neck. Optionally remove finger mapping.
+   
    ![Image showing the avatar during configuration.](../../Images/avatar.png)
+
 6. [Export a prefab asset](https://docs.unity3d.com/Manual/CreatingPrefabs.html) of your humanoid in your Scene. That prefab will house all the MuJoCo components, while the FBX is used only for the reference Mecanim mapping, and to be animated by motion clips.
 
 A source humanoid and its Mecanim avatar is available in the [MuJoCo example project](https://github.com/Balint-H/modular-agents/tree/main/UnityMjExamples) of the Modular Agents package.
