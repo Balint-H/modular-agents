@@ -6,10 +6,10 @@ using ModularAgents.MotorControl.CircularBuffer;
 using System.Linq;
 
 
-namespace ModularAgents
+namespace ModularAgents.Kinematic.Mujoco
 {
     /// <summary>
-    /// A MocapBody that can provide 6 DOF velocity etimates based n finite differences.
+    /// A MocapBody that can provide 6 DOF velocity estimates based on finite differences.
     /// </summary>
 
     public unsafe class MjFiniteDifferencesBody : MjMocapBody

@@ -16,7 +16,6 @@ public class PausableEnvironmentStepHandler : TrainingEventHandler
             return;
         }
         framesToWait--;
-    
     };
 
     private void Awake()
@@ -24,6 +23,10 @@ public class PausableEnvironmentStepHandler : TrainingEventHandler
         Academy.Instance.AutomaticSteppingEnabled = false;
     }
 
+
+    /// <summary>
+    /// Can be invoked, e.g., by a UnityEventHandler.
+    /// </summary>
     public void SetFramesToWait(int framesToWait) 
     {
         this.framesToWait = framesToWait;

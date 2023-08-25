@@ -11,14 +11,16 @@ namespace ModularAgents.DReCon
 { 
     public class MjDReConRewardSource : DReConRewardSource
     {
-        private bool hasInitialized;
         unsafe public override void OnAgentStart()
         {
-            if (hasInitialized) return;
-            //MjScene.Instance.CreateScene();
+            MjState.ExecuteAfterMjStart(MjInitialize);
+        }
+
+        private void MjInitialize()
+        {
             AddColliders(simulationTransform);
             AddColliders(kinematicTransform);
-        
+
 
             kinChain = new BoundingBoxChain(new MjBodyChain(kinematicTransform));
             simChain = new BoundingBoxChain(new MjBodyChain(simulationTransform));
@@ -32,7 +34,6 @@ namespace ModularAgents.DReCon
 
             RemoveColliders(simulationTransform);
             RemoveColliders(kinematicTransform);
-            hasInitialized = true;
         }
 
         public void AddColliders(Transform rootTransform)

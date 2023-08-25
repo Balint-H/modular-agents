@@ -8,5 +8,5 @@ public abstract class ObservationSource: MonoBehaviour
 {
     public abstract void FeedObservationsToSensor(VectorSensor sensor);
     public abstract void OnAgentStart();
-    public virtual int Size { get; }
+    public abstract int Size { get; }
 }

@@ -1,5 +1,7 @@
 using UnityEngine;
 
+namespace ModularAgents.Kinematic
+{
     public struct ReferenceFrame
     {
         Matrix4x4 space;
@@ -8,11 +10,11 @@ using UnityEngine;
         public Matrix4x4 Matrix { get => space; }
         public Matrix4x4 InverseMatrix { get => inverseSpace; }
 
-        public ReferenceFrame(Vector3 heading, Vector3 centerOfMass)
+        public ReferenceFrame(Vector3 heading, Vector3 origin)
         {
             // Instead of using the heading as the LookAt direction, we use world up, and set heading as the LookAt "up"
             // This gives us the horizontal projection of the heading for free
-            space = Matrix4x4.LookAt(centerOfMass, centerOfMass + Vector3.up, heading);
+            space = Matrix4x4.LookAt(origin, origin + Vector3.up, heading);
             // In this representation z -> up, y -> forward, x -> left
 
             // So this means we have to roll the axes if we want z -> forward, y -> up, x -> right for consistency
@@ -59,4 +61,4 @@ using UnityEngine;
 
     }
 
-    
+}

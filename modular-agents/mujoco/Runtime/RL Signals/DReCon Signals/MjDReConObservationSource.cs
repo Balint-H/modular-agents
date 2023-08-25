@@ -1,6 +1,6 @@
 using ModularAgents.Kinematic.Mujoco;
 using ModularAgents.MotorControl;
-
+using Mujoco.Extensions;
 
 namespace ModularAgents.DReCon
 {
@@ -12,6 +12,12 @@ namespace ModularAgents.DReCon
             userInputs = inputObject.GetComponent<IAnimationController>();
             previousActionProvider = previousActionGameObject.GetComponent<IRememberPreviousActions>();
 
+            MjState.ExecuteAfterMjStart(MjInitialize);
+            
+        }
+
+        private void MjInitialize()
+        {
             kinChain = kinematicTransform.GetBodyChain();
             simChain = simulationTransform.GetBodyChain();
             kinSubsetBodies = kinematicSubset.GetBodyChain();

@@ -712,5 +712,39 @@ namespace Mujoco.Extensions
             return _mb.transform.parent != null ? !_mb.transform.parent.GetComponent<MjBody>() : true;
         }
 
+        /// <summary>
+        /// If called before the MuJoCo scene is created, this handler will be invoked once the scene is ready. Otherwise, invoke immediately.
+        /// </summary>
+        public unsafe static void ExecuteAfterMjStart(EventHandler<MjStepArgs> handler)
+        {
+            if(!MjScene.InstanceExists || MjScene.Instance.Data == null)
+            {
+                MjScene.Instance.sceneCreatedCallback += handler;
+            }
+
+            else
+            {
+                handler?.Invoke(MjScene.Instance, new MjStepArgs(MjScene.Instance.Model, MjScene.Instance.Data));
+            }
+
+        }
+
+        /// <summary>
+        /// If called before the MuJoCo scene is created, this action will be executed once the scene is ready. Otherwise, execute immediately.
+        /// </summary>
+        public unsafe static void ExecuteAfterMjStart(Action action)
+        {
+            if (!MjScene.InstanceExists || MjScene.Instance.Data == null)
+            {
+                MjScene.Instance.sceneCreatedCallback += (_, _) => action?.Invoke();
+            }
+
+            else
+            {
+                action?.Invoke();
+            }
+
+        }
+
     }
 }

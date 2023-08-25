@@ -120,6 +120,7 @@ namespace ModularAgents.MotorControl.Mujoco
 
         unsafe private void UpdateTorque(object sender, MjStepArgs e)
         {
+            //Debug.Log("Control");
             var posError = useRegularPD? IMjJointState.GetPosErrorVector(jointStates) + nextActions : IMjJointState.GetStablePosErrorVector(jointStates, dt) + nextActions;
             var velError = IMjJointState.GetVelErrorVector(jointStates);
 
@@ -146,6 +147,7 @@ namespace ModularAgents.MotorControl.Mujoco
 
         unsafe public void ApplyActions(float[] actions)
         {
+            //Debug.Log("Action");
             nextActions = actionScale * ActionsToVector(actions, activeDofLocalIndices, dofAddresses.Length);
 
         }
@@ -220,17 +222,7 @@ namespace ModularAgents.MotorControl.Mujoco
 
         private unsafe void Start()
         {
-            if (updateAlone)
-            {
-                if (MjScene.InstanceExists && MjScene.Instance.Data != null)
-                {
-                    MjInitialize();
-                }
-                else
-                {
-                    MjScene.Instance.sceneCreatedCallback += (_, _) => MjInitialize();
-                }
-            }
+            MjState.ExecuteAfterMjStart(MjInitialize);
         }
 
         public void SetStiffnessMatrix(Matrix<double> stiffness)
@@ -247,7 +239,6 @@ namespace ModularAgents.MotorControl.Mujoco
         {
             if (agent)
             {
-                MjScene.Instance.sceneCreatedCallback += (_, _) => MjInitialize();
                
                 if (smoothingObject)
                 {
