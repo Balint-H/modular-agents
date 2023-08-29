@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mujoco;
 using System;
+using Mujoco.Extensions;
 using Unity.VisualScripting;
 
 /// <summary>

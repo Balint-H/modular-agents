@@ -37,7 +37,7 @@
 *.pdb
 *.vsidx
 *.vsconfig
-
+*.h5
 # Unity3D generated meta files
 *.pidb.meta
 
