@@ -719,7 +719,7 @@ namespace Mujoco.Extensions
         {
             if(!MjScene.InstanceExists || MjScene.Instance.Data == null)
             {
-                MjScene.Instance.sceneCreatedCallback += handler;
+                MjScene.Instance.postInitEvent += handler;
             }
 
             else
@@ -736,7 +736,7 @@ namespace Mujoco.Extensions
         {
             if (!MjScene.InstanceExists || MjScene.Instance.Data == null)
             {
-                MjScene.Instance.sceneCreatedCallback += (_, _) => action?.Invoke();
+                MjScene.Instance.postInitEvent += (_, _) => action?.Invoke();
             }
 
             else

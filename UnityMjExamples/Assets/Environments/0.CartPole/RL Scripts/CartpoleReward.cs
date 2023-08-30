@@ -8,6 +8,7 @@ using System.Linq;
 using Mujoco;
 using ModularAgents.Kinematic.Mujoco;
 using ModularAgents.Kinematic;
+using Mujoco.Extensions;
 
 namespace Examples.Cartpole
 {
@@ -33,7 +34,7 @@ namespace Examples.Cartpole
 
         private void Awake()
         {
-            MjScene.Instance.sceneCreatedCallback += MjIntialize;
+            MjState.ExecuteAfterMjStart(MjIntialize);
         }
 
         private void MjIntialize(object sender, MjStepArgs e)

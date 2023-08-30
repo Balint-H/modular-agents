@@ -1,4 +1,5 @@
 using Mujoco;
+using Mujoco.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,9 +8,7 @@ using UnityEngine;
 /// <summary>
 /// Sets the position, velocity and acceleration state vectors of a given degrees of freedom to values specified by a given vector.
 /// </summary>
-public class MjDofStateHandler
-
-    : TrainingEventHandler
+public class MjDofStateHandler: TrainingEventHandler
 {
     public override EventHandler Handler => (_, _) => ResetMj();
 
@@ -26,7 +25,7 @@ public class MjDofStateHandler
         // we know we will start in the correct state so we can skip it.
         if (MjScene.Instance.Data == null)
         {
-            MjScene.Instance.sceneCreatedCallback += (_, _) => ResetMj();
+            MjState.ExecuteAfterMjStart(ResetMj);
             return;
         }
 

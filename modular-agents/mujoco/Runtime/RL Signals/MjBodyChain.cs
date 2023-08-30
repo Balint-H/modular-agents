@@ -74,18 +74,8 @@ namespace ModularAgents.Kinematic.Mujoco
         public unsafe MjBodyAdapter(MjBody mjBody)
         {
             this.mjBody = mjBody;
-            
-            if(MjScene.InstanceExists) 
-            {
-                if(MjScene.Instance.Data == null) 
-                {
-                    MjScene.Instance.sceneCreatedCallback += (_, _) => MjInitialize();
-                }
-                else
-                {
-                    MjInitialize();
-                }
-            }
+
+            MjState.ExecuteAfterMjStart(MjInitialize);
 
             parentBody = mjBody.transform.parent.GetComponent<MjBody>();
             isRoot = parentBody == null;
