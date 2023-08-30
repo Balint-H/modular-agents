@@ -88,6 +88,17 @@ namespace ModularAgents.DeepMimic
             kinEEs = kinEETransforms.Select(x => x.GetKinematic()).ToList();
             simEEs = simEETransforms.Select(x => x.GetKinematic()).ToList();
         }*/
+
+        /// <summary>
+        /// Only intended for editor scripts.
+        /// </summary>
+        public void SetEndEffectors(IEnumerable<Transform> kinEEInput, IEnumerable<Transform> simEEInput)
+        {
+            kinEETransforms = kinEEInput.ToList();
+            simEETransforms = simEEInput.ToList();
+        }
+        public Transform KinRoot => kinRoot;
+        public Transform SimRoot => simRoot;
     }
 
 }
