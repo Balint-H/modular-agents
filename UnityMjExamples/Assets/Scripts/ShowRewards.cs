@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Mujoco;
+using Mujoco.Extensions;
 
 public class ShowRewards : RewardSignal
 {
@@ -34,16 +35,7 @@ public class ShowRewards : RewardSignal
 
     private unsafe void Start()
     {
-        if (MjScene.InstanceExists && (MjScene.Instance.Data != null))
-        {
-
-            OnAgentStart();
-
-        }
-        else {
-            MjScene.Instance.sceneCreatedCallback += (_, _) => OnAgentStart();
-
-        }
+        MjState.ExecuteAfterMjStart(() => OnAgentStart());
     }
 
 
