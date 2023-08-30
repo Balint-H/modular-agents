@@ -7,7 +7,6 @@ using static UnityEditor.PlayerSettings;
 using System.Drawing;
 using Color = UnityEngine.Color;
 using System;
-using UnityEditor.Formats.Fbx.Exporter;
 
 namespace Mujoco.Extensions
 {
