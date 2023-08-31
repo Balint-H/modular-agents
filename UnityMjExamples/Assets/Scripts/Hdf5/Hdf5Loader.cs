@@ -9,6 +9,7 @@ using UnityEditor;
 using System.Linq;
 using Mujoco;
 using Mujoco.Extensions;
+using Unity.Burst.Intrinsics;
 
 public class Hdf5Loader : MonoBehaviour
 {
@@ -24,42 +25,110 @@ public class Hdf5Loader : MonoBehaviour
     [SerializeField]
     MjFreeJoint root;
 
-    Dictionary<string, Dictionary<string, float[][]>> datasets;
+    public IReadOnlyList<CmuMotionData> motionFiles;
 
-    // Start is called before the first frame update
-    private void Start()
+    public class CmuMotionData
     {
-        datasets = new Dictionary<string, Dictionary<string, float[][]>>();
+        readonly public string prefix;
+        Dictionary<string, double[][]> fields;
 
-        long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
-        foreach(var prefix in prefixes)
+        private int length;
+
+        public IEnumerable<string> Keys => fields.Keys;
+
+        public CmuMotionData(long fileId, string prefix, IEnumerable<string> fieldNames)
         {
-            foreach(var field in fields)
+            this.prefix = prefix;
+            fields = new Dictionary<string, double[][]>();
+            length = 0;
+            foreach(var fieldName in fieldNames) 
             {
-                long dataSetId = H5D.open(fileId, prefix+field);
+                var hdf5view = new DataFrameFieldView(fileId, prefix + fieldName);
+                fields[fieldName] = hdf5view.GetArray();
+                var fieldSeries = Transpose(fields[fieldName]).Select(f => f.ToArray()).ToArray();
+                var oneField = fieldSeries[0];
+                var newLength = fields[fieldName].Length;
+                if (length != 0 && length != newLength) 
+                {
+                    Debug.LogError($"Inconsistent field lengths in dataset {prefix}!");
+                }
+                length = newLength;
+            }
+        }
+
+        private static IEnumerable<IEnumerable<T>> Transpose<T>( IEnumerable<IEnumerable<T>> list)
+        {
+            return
+                //generate the list of top-level indices of transposed list
+                Enumerable.Range(0, list.First().Count())
+                //selects elements at list[y][x] for each x, for each y
+                .Select(x => list.Select(y => y.ElementAt(x)));
+        }
+
+        public double[][] this[string field]
+        {
+            get => fields[field];
+        }
+
+        public double[] Qpos(int timeIdx)
+        {
+            return fields["position"][timeIdx].Concat(fields["quaternion"][timeIdx])
+                                              .Concat(fields["joints"][timeIdx])
+                                              .ToArray();
+        }
+
+        private struct DataFrameFieldView
+        {
+            readonly long fileId;
+            readonly string datasetPath;
+            readonly ulong width;
+            readonly ulong length;
+            readonly bool isEmpty;
+
+
+            public DataFrameFieldView(long fileId, string datasetPath)
+            {
+                long dataSetId = H5D.open(fileId, datasetPath);
+                this.fileId = fileId;
+                this.datasetPath = datasetPath;
                 long dspace = H5D.get_space(dataSetId);
                 int ndims = H5S.get_simple_extent_ndims(dspace);
 
+                isEmpty = false;
                 if (ndims != 2)
                 {
                     if (ndims == -1)
                     {
-                        Debug.LogWarning($"Dataset not found ({prefix + field})! Skipping dataset.");
-                        continue;
+                        Debug.LogWarning($"Dataset not found ({datasetPath})! Skipping dataset.");
                     }
-                    Debug.LogWarning($"Non-2D field read ({prefix+field})! Skipping dataset.");
-                    continue;
+                    Debug.LogWarning($"Non-2D field read ({datasetPath})! Skipping dataset.");
+                    isEmpty = true;
                 }
 
                 ulong[] dims = new ulong[ndims];
                 H5S.get_simple_extent_dims(dspace, dims, null);
-                double[,] arr = new double[dims[0], dims[1]];
 
-                long typeId = H5D.get_type(dataSetId);
+                width = dims[0];
+                length = dims[1];
+
+                H5D.close(dataSetId);
+            }
+
+           
+            public double[][] GetArray()
+            {
+                if (isEmpty)
+                {
+                    return new double[0][];
+                }
+                long fieldId = H5D.open(fileId, datasetPath);
+                double[,] arr = new double[width, length];
+
+                long typeId = H5D.get_type(fieldId);
                 GCHandle gch = GCHandle.Alloc(arr, GCHandleType.Pinned);
                 try
                 {
-                    H5D.read(dataSetId, typeId, H5S.ALL, H5S.ALL, H5P.DEFAULT,
+                    H5D.read(fieldId, typeId, H5S.ALL, H5S.ALL, H5P.DEFAULT,
                              gch.AddrOfPinnedObject());
                 }
                 finally
@@ -67,30 +136,72 @@ public class Hdf5Loader : MonoBehaviour
                     gch.Free();
                 }
 
-                float[][] floatArr = new float[dims[1]][];
 
-                for (int i=0; (ulong)i <  dims[1]; i++)
+                double[][] arrOut = new double[length][];
+                for (int i = 0; (ulong)i < length; i++)
                 {
-                    floatArr[i] = new float[dims[0]];
-                    for (int j=0; (ulong)j < dims[0]; j++)
+                    arrOut[i] = new double[width];
+                    for (int j = 0; (ulong)j < width; j++)
                     {
-                        floatArr[i][j] = (float)arr[j, i];
+                        arrOut[i][j] = arr[j, i];
                     }
                 }
-
-                var hmm = arr.Cast<float[,]>();
-                if(!datasets.ContainsKey(prefix))
-                {
-                    datasets.Add(prefix, new Dictionary<string, float[][]>());
-                }
-                datasets[prefix].Add(field, floatArr);
-                H5D.close(dataSetId);
+                H5D.close(fieldId);
+                return arrOut;
             }
+
+            public double[] this[int idx]
+            {
+                
+                get
+                {
+                    if (isEmpty) return new double[0];
+                    long fieldId =H5D.open(fileId, datasetPath);
+                    double[] arr = new double[width];
+
+                    // Define the hyperslab to select a single row
+                    ulong[] start = { (ulong) idx, 0 }; // rowNumber is the row you want to read
+                    ulong[] count = { 1, width }; // numberOfColumns is the width of your dataset
+
+                    long rowSpace = H5S.create_simple(2, count, null);
+                    long dataSpace = H5D.get_space(fieldId);
+                    H5S.select_hyperslab(dataSpace, H5S.seloper_t.SET, start, null, count, null);
+
+                    long typeId = H5D.get_type(fieldId);
+
+                    GCHandle gch = GCHandle.Alloc(arr, GCHandleType.Pinned);
+                    try
+                    {
+                        H5D.read(fieldId, typeId, rowSpace, dataSpace, H5P.DEFAULT,
+                                    gch.AddrOfPinnedObject());
+                    }
+                    finally
+                    {
+                        gch.Free();
+                    }
+                    return arr;
+                }
+            }
+            
+        }
+    }
+
+    // Start is called before the first frame update
+    private void Start()
+    {
+        var motionFiles = new List<CmuMotionData>();
+
+        long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
+        foreach(var prefix in prefixes)
+        {
+            motionFiles.Add(new CmuMotionData(fileId, prefix, fields));
         }
         H5F.close(fileId);
-        foreach(var kv in datasets)
+
+        this.motionFiles = motionFiles;
+        foreach(var mf in this.motionFiles)
         {
-            Debug.Log(kv.Key + ":" + kv.Value.Count +"; "+ kv.Value[fields[0]].Length +", "+ kv.Value[fields[0]][0].Length);
+            Debug.Log(mf.prefix + ":" + mf.Keys.Count() +"; "+ mf[fields[0]].Length +", "+ mf[fields[0]][0].Length);
         }
         MjState.ExecuteAfterMjStart(SetMjState);
         MjScene.Instance.ctrlCallback += (_, _) => SetMjState();
@@ -100,13 +211,13 @@ public class Hdf5Loader : MonoBehaviour
     private unsafe  void SetMjState()
     {
         
-        var frame = datasets[prefixes[^1]][fields[0]][0];
+        var frame = motionFiles[2].Qpos((int)(Time.fixedTime/Time.fixedDeltaTime));
         for (int i=0; i<frame.Length; i++)
         {
             MjScene.Instance.Data ->qpos[i] = frame[i];
         }
 
-        frame = datasets[prefixes[^1]][fields[1]][0];
+        frame = motionFiles[2].Qpos(0);
         for (int i = 0; i < frame.Length; i++)
         {
             MjScene.Instance.Data->qvel[i] = frame[i];
