@@ -16,11 +16,13 @@ public class Hdf5Loader : MonoBehaviour
     [SerializeField]
     string filePath;
 
-    [SerializeField]
     List<string> prefixes;
 
     [SerializeField]
-    List<string> fields;
+    TextAsset subsetJson;
+
+    [SerializeField]
+    List<string> fields = new List<string> { "position", "quaternion", "joints", "velocity", "angular_velocity", "joints_velocity"};
 
     [SerializeField]
     MjFreeJoint root;
@@ -30,7 +32,7 @@ public class Hdf5Loader : MonoBehaviour
     public class CmuMotionData
     {
         readonly public string prefix;
-        Dictionary<string, double[][]> fields;
+        Dictionary<string, float[][]> fields;
 
         private int length;
 
@@ -39,7 +41,7 @@ public class Hdf5Loader : MonoBehaviour
         public CmuMotionData(long fileId, string prefix, IEnumerable<string> fieldNames)
         {
             this.prefix = prefix;
-            fields = new Dictionary<string, double[][]>();
+            fields = new Dictionary<string, float[][]>();
             length = 0;
             foreach(var fieldName in fieldNames) 
             {
@@ -65,15 +67,22 @@ public class Hdf5Loader : MonoBehaviour
                 .Select(x => list.Select(y => y.ElementAt(x)));
         }
 
-        public double[][] this[string field]
+        public float[][] this[string field]
         {
             get => fields[field];
         }
 
-        public double[] Qpos(int timeIdx)
+        public float[] Qpos(int timeIdx)
         {
             return fields["position"][timeIdx].Concat(fields["quaternion"][timeIdx])
                                               .Concat(fields["joints"][timeIdx])
+                                              .ToArray();
+        }
+
+        public float[] Qvel(int timeIdx)
+        {
+            return fields["velocity"][timeIdx].Concat(fields["angular_velocity"][timeIdx])
+                                              .Concat(fields["joints_velocity"][timeIdx])
                                               .ToArray();
         }
 
@@ -115,14 +124,14 @@ public class Hdf5Loader : MonoBehaviour
             }
 
            
-            public double[][] GetArray()
+            public float[][] GetArray()
             {
                 if (isEmpty)
                 {
-                    return new double[0][];
+                    return new float[0][];
                 }
                 long fieldId = H5D.open(fileId, datasetPath);
-                double[,] arr = new double[width, length];
+                float[,] arr = new float[width, length];
 
                 long typeId = H5D.get_type(fieldId);
                 GCHandle gch = GCHandle.Alloc(arr, GCHandleType.Pinned);
@@ -137,10 +146,10 @@ public class Hdf5Loader : MonoBehaviour
                 }
 
 
-                double[][] arrOut = new double[length][];
+                float[][] arrOut = new float[length][];
                 for (int i = 0; (ulong)i < length; i++)
                 {
-                    arrOut[i] = new double[width];
+                    arrOut[i] = new float[width];
                     for (int j = 0; (ulong)j < width; j++)
                     {
                         arrOut[i][j] = arr[j, i];
@@ -189,6 +198,10 @@ public class Hdf5Loader : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        var subsetNames = JsonUtility.FromJson<DataSubsetNameCollection>(subsetJson.text).subset;
+
+        prefixes = subsetNames.Select(n => $"{n}/walkers/walker_0/").ToList();
+
         var motionFiles = new List<CmuMotionData>();
 
         long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
@@ -204,7 +217,7 @@ public class Hdf5Loader : MonoBehaviour
             Debug.Log(mf.prefix + ":" + mf.Keys.Count() +"; "+ mf[fields[0]].Length +", "+ mf[fields[0]][0].Length);
         }
         MjState.ExecuteAfterMjStart(SetMjState);
-        MjScene.Instance.ctrlCallback += (_, _) => SetMjState();
+        MjScene.Instance.postUpdateEvent += (_, _) => SetMjState();
         
     }
 
@@ -217,10 +230,14 @@ public class Hdf5Loader : MonoBehaviour
             MjScene.Instance.Data ->qpos[i] = frame[i];
         }
 
-        frame = motionFiles[2].Qpos(0);
-        for (int i = 0; i < frame.Length; i++)
+        for (int i = 0; i < MjScene.Instance.Model->nv; i++)
         {
-            MjScene.Instance.Data->qvel[i] = frame[i];
+            MjScene.Instance.Data->qvel[i] = 0;
+        }
+
+        for (int i = 0; i < MjScene.Instance.Model->nv; i++)
+        {
+            MjScene.Instance.Data->qacc[i] = 0;
         }
     }
 
@@ -256,6 +273,12 @@ public class Hdf5Loader : MonoBehaviour
 
         // Close the file
         H5F.close(fileId);
+    }
+
+    [Serializable]
+    internal class DataSubsetNameCollection
+    {
+        public List<string> subset;
     }
 }
 
