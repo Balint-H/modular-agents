@@ -35,6 +35,7 @@ public class Hdf5Loader : MonoBehaviour
         Dictionary<string, float[][]> fields;
 
         private int length;
+        public int Length => length;
 
         public IEnumerable<string> Keys => fields.Keys;
 
@@ -77,6 +78,28 @@ public class Hdf5Loader : MonoBehaviour
             return fields["position"][timeIdx].Concat(fields["quaternion"][timeIdx])
                                               .Concat(fields["joints"][timeIdx])
                                               .ToArray();
+        }
+
+        public Matrix4x4 RootUnityTransform(int timeIdx)
+        {
+            var mjQuatArr = fields["quaternion"][timeIdx];
+            var quat = new Quaternion(mjQuatArr[1], mjQuatArr[3], mjQuatArr[2], -mjQuatArr[0]);
+
+            var mjPosArr = fields["position"][timeIdx];
+            var pos = new Vector3(mjPosArr[0], mjPosArr[2], mjPosArr[1]);
+
+            return Matrix4x4.TRS(pos, quat, Vector3.one);
+        }
+
+        public Matrix4x4 RootMjTransform(int timeIdx)
+        {
+            var mjQuatArr = fields["quaternion"][timeIdx];
+            var quat = new Quaternion(mjQuatArr[1], mjQuatArr[2], mjQuatArr[3], mjQuatArr[0]);
+
+            var mjPosArr = fields["position"][timeIdx];
+            var pos = new Vector3(mjPosArr[0], mjPosArr[1], mjPosArr[2]);
+
+            return Matrix4x4.TRS(pos, quat, Vector3.one);
         }
 
         public float[] Qvel(int timeIdx)
@@ -221,23 +244,35 @@ public class Hdf5Loader : MonoBehaviour
         
     }
 
-    private unsafe  void SetMjState()
+    private unsafe void SetMjState()
     {
-        
-        var frame = motionFiles[2].Qpos((int)(Time.fixedTime/Time.fixedDeltaTime));
+        int timeIdx = (int)(Time.fixedTime / Time.fixedDeltaTime);
+        int fileIdx = 0;
+
+        while(timeIdx >= motionFiles[fileIdx].Length)
+        {
+            timeIdx -= motionFiles[fileIdx].Length;
+            fileIdx++;
+            if (fileIdx >= motionFiles.Count) return;
+        }
+
+        var frame = motionFiles[fileIdx].Qpos(timeIdx);
         for (int i=0; i<frame.Length; i++)
         {
-            MjScene.Instance.Data ->qpos[i] = frame[i];
+            MjScene.Instance.Data ->qpos[root.QposAddress + i] = frame[i];
         }
 
-        for (int i = 0; i < MjScene.Instance.Model->nv; i++)
+        var vFrame = motionFiles[fileIdx].Qvel(timeIdx);
+        int nV = vFrame.Length;
+
+        for (int i = 0; i < nV; i++)
         {
-            MjScene.Instance.Data->qvel[i] = 0;
+            MjScene.Instance.Data->qvel[root.DofAddress + i] = vFrame[i];
         }
 
-        for (int i = 0; i < MjScene.Instance.Model->nv; i++)
+        for (int i = 0; i < nV; i++)
         {
-            MjScene.Instance.Data->qacc[i] = 0;
+            MjScene.Instance.Data->qacc[root.DofAddress + i] = 0;
         }
     }
 
