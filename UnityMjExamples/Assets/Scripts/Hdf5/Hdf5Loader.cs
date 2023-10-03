@@ -9,6 +9,9 @@ using UnityEditor;
 using System.Linq;
 using Mujoco;
 using Mujoco.Extensions;
+using MathNet.Numerics.Interpolation;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics;
 using Unity.Burst.Intrinsics;
 
 public class Hdf5Loader : MonoBehaviour
@@ -39,7 +42,7 @@ public class Hdf5Loader : MonoBehaviour
 
         public IEnumerable<string> Keys => fields.Keys;
 
-        public CmuMotionData(long fileId, string prefix, IEnumerable<string> fieldNames)
+        public CmuMotionData(long fileId, string prefix, IEnumerable<string> fieldNames, double mocapDt=-1)
         {
             this.prefix = prefix;
             fields = new Dictionary<string, float[][]>();
@@ -47,9 +50,34 @@ public class Hdf5Loader : MonoBehaviour
             foreach(var fieldName in fieldNames) 
             {
                 var hdf5view = new DataFrameFieldView(fileId, prefix + fieldName);
-                fields[fieldName] = hdf5view.GetArray();
+                var data = hdf5view.GetArray();
+
+                if (mocapDt != -1)
+                {
+                    
+                    var dataMatrix = Matrix<float>.Build.DenseOfRowArrays(data);
+
+                    var mocapTime = Generate.LinearRange(0, mocapDt, dataMatrix.RowCount * mocapDt - 1e-8);
+                    var newTime = Generate.LinearRange(0, Time.fixedDeltaTime, dataMatrix.RowCount * mocapDt);
+
+                    var newData = new float[newTime.Length][];
+                    for (int t = 0; t < newTime.Length; t++)
+                    {
+                        newData[t] = new float[dataMatrix.ColumnCount];
+                    }
+                    for (int r=0; r< dataMatrix.ColumnCount; r++)
+                    {
+                        var interpolator = CubicSpline.InterpolateAkimaSorted(mocapTime, dataMatrix.Column(r).Select(x => (double)x).ToArray());
+                        for (int t=0; t<newTime.Length; t++)
+                        {
+                            newData[t][r] = (float) interpolator.Interpolate(newTime[t]);
+                        }
+                    }
+                    data = newData;
+                }
+
+                fields[fieldName] = data;
                 var fieldSeries = Transpose(fields[fieldName]).Select(f => f.ToArray()).ToArray();
-                var oneField = fieldSeries[0];
                 var newLength = fields[fieldName].Length;
                 if (length != 0 && length != newLength) 
                 {
@@ -221,16 +249,16 @@ public class Hdf5Loader : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        var subsetNames = JsonUtility.FromJson<DataSubsetNameCollection>(subsetJson.text).subset;
+        var subset = JsonUtility.FromJson<DataSubsetNameCollection>(subsetJson.text);
 
-        prefixes = subsetNames.Select(n => $"{n}/walkers/walker_0/").ToList();
+        prefixes = subset.names.Select(n => $"{n}/walkers/walker_0/").ToList();
 
         var motionFiles = new List<CmuMotionData>();
 
         long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
         foreach(var prefix in prefixes)
         {
-            motionFiles.Add(new CmuMotionData(fileId, prefix, fields));
+            motionFiles.Add(new CmuMotionData(fileId, prefix, fields, mocapDt:subset.mocap_dt));
         }
         H5F.close(fileId);
 
@@ -313,7 +341,8 @@ public class Hdf5Loader : MonoBehaviour
     [Serializable]
     internal class DataSubsetNameCollection
     {
-        public List<string> subset;
+        public List<string> names;
+        public float mocap_dt;
     }
 }
 
