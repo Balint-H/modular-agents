@@ -12,6 +12,8 @@ namespace ModularAgents.DeepMimic
 {
     public class MjDeepMimicObservations : DeepMimicObservations
     {
+        [SerializeField]
+        protected Animator animator;
 
         protected override IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection)
         {
@@ -26,6 +28,11 @@ namespace ModularAgents.DeepMimic
         {
             root = rootTransform.GetIKinematic();
             observedKinematics = FilterTransforms(rootTransform.GetComponentsInChildren<Transform>()).Select(x => x.GetIKinematic() ).ToList();
+        }
+
+        protected override float GetPhase()
+        {
+            return animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
         }
     }
 

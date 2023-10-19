@@ -500,6 +500,8 @@ namespace Mujoco.Extensions
             }
         }
 
+        
+
         public static int DofSum(this IEnumerable<MjBaseJoint> joints) => joints.Sum(j => j.DofCount());
 
         public static float GetVolume(this MjGeom geom)

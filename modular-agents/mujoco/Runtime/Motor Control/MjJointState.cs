@@ -5,6 +5,7 @@ using System.Linq;
 using Mujoco;
 using static Mujoco.Extensions.MjState;
 using MathNet.Numerics.LinearAlgebra;
+using System;
 
 namespace ModularAgents.MotorControl
 {
@@ -12,27 +13,22 @@ namespace ModularAgents.MotorControl
     {
         readonly MjHingeJoint hinge;
         readonly MjScene mjScene;
-        readonly HingeState reference;
+        readonly IMjJointState reference;
         readonly int[] dofAddresses;
         readonly int[] posAddresses;
 
-        public HingeState(MjHingeJoint hinge, MjHingeJoint reference)
+        public HingeState(MjHingeJoint hinge, IMjJointState reference)
         {
             this.hinge = hinge;
             mjScene = MjScene.Instance;
-            this.reference = new HingeState(reference);
+            this.reference = reference;
             dofAddresses = new[] { hinge.DofAddress };
             posAddresses = new[] { hinge.QposAddress };
         }
 
-        public HingeState(MjHingeJoint hinge)
-        {
-            this.hinge = hinge;
-            mjScene = MjScene.Instance;
-            this.reference = new ZeroHingeState();
-            dofAddresses = new[] { hinge.DofAddress };
-            posAddresses = new[] { hinge.QposAddress };
-        }
+        public HingeState(MjHingeJoint hinge, MjHingeJoint reference) : this(hinge, new HingeState(reference)) { }
+
+        public HingeState(MjHingeJoint hinge) : this(hinge, new ZeroHingeState()) { }
 
         protected HingeState()
         {
@@ -113,29 +109,22 @@ namespace ModularAgents.MotorControl
     public class BallState : IJointState, IMjJointState
     {
         protected readonly MjBallJoint ball;
-        readonly BallState reference;
+        readonly IMjJointState reference;
         readonly MjScene mjScene;
         readonly protected int[] dofAddresses;
         readonly protected int[] posAddresses;
 
-        public BallState(MjBallJoint ball, MjBallJoint refJoint)
+        public BallState(MjBallJoint ball, MjBallJoint refJoint) : this(ball, new BallState(refJoint)) { }
+        public BallState(MjBallJoint ball, IMjJointState refJointState)
         {
             this.ball = ball;
             mjScene = MjScene.Instance;
             dofAddresses = new[] { ball.DofAddress, ball.DofAddress + 1, ball.DofAddress + 2 };
             posAddresses = new[] { ball.QposAddress, ball.QposAddress + 1, ball.QposAddress + 2, ball.QposAddress + 3 };
-            reference = new BallState(refJoint);
+            reference = refJointState;
         }
 
-        public BallState(MjBallJoint ball)
-        {
-            this.ball = ball;
-            mjScene = MjScene.Instance;
-            dofAddresses = new[] { ball.DofAddress, ball.DofAddress + 1, ball.DofAddress + 2 };
-            posAddresses = new[] { ball.QposAddress, ball.QposAddress + 1, ball.QposAddress + 2, ball.QposAddress + 3 };
-            reference = new ZeroBallState();
-
-        }
+        public BallState(MjBallJoint ball): this(ball, new ZeroBallState()) { }
 
         protected BallState(int[] dofAddresses, int[] posAddresses)
         {
@@ -328,6 +317,24 @@ namespace ModularAgents.MotorControl
             }
         }
 
+        public static IMjJointState GetJointState(MjBaseJoint joint, IMjJointState reference)
+        {
+            switch (joint)
+            {
+                case MjHingeJoint hinge:
+                    return new HingeState(hinge, reference);
+
+                case MjBallJoint ball:
+                    return new BallState(ball, reference);
+
+                default:
+                    throw new System.NotImplementedException("Joint type not implemented yet");
+
+            }
+        }
+
+
+
         public static IMjJointState GetZeroJointStateLike(MjBaseJoint joint)
         {
             switch (joint)
@@ -351,10 +358,22 @@ namespace ModularAgents.MotorControl
         {
             return GetJointState(go.transform);
         }
-        
+
         public static IMjJointState GetJointState(Transform transform)
         {
-            return transform.GetComponent<MjActuator>() ? GetJointState(transform.GetComponent<MjActuator>()) : GetJointState(transform.GetComponent<MjBaseJoint>());
+            if (transform.GetComponent<MjActuator>())
+            {
+                return GetJointState(transform.GetComponent<MjActuator>());
+            }
+            else if (transform.GetComponent<MjBaseJoint>())
+            {
+                return GetJointState(transform.GetComponent<MjBaseJoint>());
+            }
+            else if(transform.GetComponent<MjMocapJointStateComponent>())
+            {
+                return transform.GetComponent<MjMocapJointStateComponent>().GetIJointState();
+            }
+            throw new NotImplementedException($"No component on transform {transform.name} can be interpreted as a JointState.");
         }
 
         public static IMjJointState GetJointState(MjActuator act)
