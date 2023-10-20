@@ -28,11 +28,13 @@ public class Hdf5LoaderEditor : Editor
     {
         var bodyView = new GameObject("Mocap_"+mjBody.name).AddComponent<MjMocapBodyKinematicsComponent>();
         bodyView.transform.parent = parentTransform;
+        bodyView.transform.SetPositionAndRotation(mjBody.transform.position, mjBody.transform.rotation);
         bodyView.PairedBody = mjBody;
         bodyView.DataLoader = dataLoader;
         foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
         {
             var jointView = new GameObject("Mocap_"+joint.name).AddComponent<MjMocapJointStateComponent>();
+            jointView.transform.SetPositionAndRotation(joint.transform.position, joint.transform.rotation);
             jointView.transform.parent = bodyView.transform;
             jointView.PairedJoint = joint;
             jointView.DataLoader = dataLoader;

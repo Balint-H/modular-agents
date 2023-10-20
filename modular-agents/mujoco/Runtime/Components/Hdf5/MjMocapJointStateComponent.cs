@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UIElements;
 
 public class MjMocapJointStateComponent : MonoBehaviour
 {
@@ -145,8 +146,9 @@ public class MocapJointState : IMjJointState
         var parentBodyInData = gameObject.transform.GetComponentInParent<MjMocapBodyKinematicsComponent>();
         if (!parentBodyInData) return;
         var parentBodyKinematics = parentBodyInData.GetIKinematic();
-        
-        var jointCartesianPosition = parentBodyKinematics.TransformMatrix.MultiplyPoint3x4(pairedJoint.transform.localPosition);
+
+        var parentFrame = Matrix4x4.TRS(parentBodyKinematics.Position, parentBodyKinematics.Rotation, Vector3.one);
+        var jointCartesianPosition = parentFrame.MultiplyPoint3x4(pairedJoint.transform.localPosition);
         var jointFrameQuaternion = parentBodyKinematics.Rotation * pairedJoint.transform.localRotation; 
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(jointCartesianPosition, 0.005f);
