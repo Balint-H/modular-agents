@@ -736,6 +736,7 @@ namespace Mujoco.Extensions
         /// </summary>
         public unsafe static void ExecuteAfterMjStart(Action action)
         {
+            if (!Application.isPlaying) return;
             if (!MjScene.InstanceExists || MjScene.Instance.Data == null)
             {
                 MjScene.Instance.postInitEvent += (_, _) => action?.Invoke();
