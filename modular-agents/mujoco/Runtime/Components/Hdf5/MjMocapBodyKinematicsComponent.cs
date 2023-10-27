@@ -11,8 +11,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UIElements;
+using ModularAgents.Kinematic.Mujoco;
 
-public class MjMocapBodyKinematicsComponent : MonoBehaviour
+public class MjMocapBodyKinematicsComponent : MonoBehaviour, IKinematicProvider
 {
     [SerializeField]
     Hdf5Loader dataLoader;
@@ -27,7 +28,7 @@ public class MjMocapBodyKinematicsComponent : MonoBehaviour
     private MocapBodyKinematics bodyKinematics;
 
 
-    public MocapBodyKinematics GetIKinematic()
+    public IKinematic GetIKinematic()
     {
         if (bodyKinematics == null) bodyKinematics = pairedBody.IsRoot()? new RootBodyKinematics(this) : new MocapBodyKinematics(this);
         return bodyKinematics;
@@ -36,13 +37,13 @@ public class MjMocapBodyKinematicsComponent : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         if (!Application.isPlaying) return;
-        GetIKinematic().Draw();
+        ((MocapBodyKinematics) GetIKinematic()).Draw();
     }
 }
 
 public class MocapBodyKinematics : IKinematic
 {
-    MjBody pairedBody;
+    protected MjBody pairedBody;
     protected MjMocapBodyKinematicsComponent component;
     Hdf5Loader dataLoader;
 
@@ -79,7 +80,7 @@ public class MocapBodyKinematics : IKinematic
 
         mass = pairedBody.GetMass();
         inertiaLocalPos = pairedBody.GetLocalCenterOfMass();
-        inertiaRelMatrix = pairedBody.GetLocalCenterOfMassMatrix();
+        inertiaRelMatrix = pairedBody.GetInertiaToBodyMatrix();
     }
 
     protected static Vector3 UnityVectorFromMjArray(float[] arr)
@@ -89,10 +90,11 @@ public class MocapBodyKinematics : IKinematic
 
     protected static Quaternion UnityQuaternionFromMjArray(float[] arr)
     {
-        return new Quaternion(x: arr[1], y: arr[3], arr[2], w:-arr[0]);
+        return new Quaternion(x: arr[1], y: arr[3], z:arr[2], w:-arr[0]);
     }
 
-    public virtual Vector3 Velocity => UnityVectorFromMjArray(CurClip.BodyVel(bodyIdInData, CurFrame));
+    private Vector3 FrameVelocity => UnityVectorFromMjArray(CurClip.BodyVel(bodyIdInData, CurFrame));
+    public virtual Vector3 Velocity => MjState.CenterOfMassVelocity(pairedBody, FrameVelocity, Rotation, AngularVelocity);
 
     public virtual Vector3 AngularVelocity => UnityVectorFromMjArray(CurClip.BodyAngularVel(bodyIdInData, CurFrame));
     public float Mass => mass;
@@ -124,7 +126,7 @@ public class MocapBodyKinematics : IKinematic
 
     public GameObject gameObject => component.gameObject;
 
-    public Vector3 Forward => Rotation * Vector3.forward;
+    public virtual Vector3 Forward => Rotation * Vector3.forward;
 
     public Vector3 GetPointVelocity(Vector3 worldPoint)
     {
@@ -146,7 +148,7 @@ public class MocapBodyKinematics : IKinematic
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(CenterOfMass, 0.01f);
         Gizmos.color = Color.blue;
-        Gizmos.DrawRay(Position, Forward*0.015f);
+        Gizmos.DrawRay(Position, Rotation*Vector3.forward*0.015f);
         Gizmos.color = Color.green;
         Gizmos.DrawRay(Position, Rotation * Vector3.up*0.015f);
         Gizmos.color = Color.red;
@@ -163,7 +165,10 @@ public class RootBodyKinematics: MocapBodyKinematics
     {
     }
 
-    public override Vector3 Velocity => UnityVectorFromMjArray(CurClip.RootVel(CurFrame));
+    private Vector3 FrameVelocity => UnityVectorFromMjArray(CurClip.RootVel(CurFrame));
+    public override Vector3 Velocity => MjState.CenterOfMassVelocity(pairedBody, FrameVelocity, Rotation, AngularVelocity);
+
+    public override Vector3 Forward => Rotation*Vector3.up;
 
     public override Vector3 AngularVelocity => UnityVectorFromMjArray(CurClip.RootPos(CurFrame));
 

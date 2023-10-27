@@ -57,8 +57,8 @@ public class Hdf5Loader : MonoBehaviour
         prefixes = subset.names.Select(n => $"{n}/walkers/walker_0/").ToList();
         
         var motionFiles = new List<CmuMotionData>();
-
-        long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
+        var fullPath = System.IO.Path.Combine(Application.dataPath, filePath);
+        long fileId = H5F.open(fullPath, H5F.ACC_RDONLY);
         foreach(var prefix in prefixes)
         {
             motionFiles.Add(new CmuMotionData(fileId, prefix, fields, mocapDt:subset.mocap_dt));
@@ -114,7 +114,8 @@ public class Hdf5Loader : MonoBehaviour
 
     public void PrintDatasets()
     {
-        long fileId = H5F.open(filePath, H5F.ACC_RDONLY);
+        var fullPath = System.IO.Path.Combine(Application.dataPath, filePath);
+        long fileId = H5F.open(fullPath, H5F.ACC_RDONLY);
         H5O.iterate_t iterateCallback = (long loc_id, IntPtr namePtr, ref H5O.info_t info, IntPtr op_data) =>
         {
             byte[] nameBytes = new byte[2048]; // Adjust the size accordingly
@@ -152,14 +153,19 @@ public class Hdf5Loader : MonoBehaviour
         if(CurFrameIndexInClip >= motionFiles[CurClipIdx].Length)
         {
             CurFrameIndexInClip = 0;
+            ClipEndedEvent?.Invoke(this, new MocapPlaybackEventArgs(CurClipIdx, motionFiles[CurClipIdx].Length));
             CurClipIdx++;
-            ClipEndedEvent?.Invoke(this, new MocapPlaybackEventArgs(CurClipIdx-1, motionFiles[CurClipIdx-1].Length));
         }
         if(CurClipIdx >= motionFiles.Count)
         {
             CurClipIdx = 0;
             ClipsRanOutEvent?.Invoke(this, new MocapPlaybackEventArgs(motionFiles.Count-1, motionFiles[motionFiles.Count - 1].Length));
         }
+    }
+
+    public void ResetToRandomFrameInRange(int maxFrame)
+    {
+        CurFrameIndexInClip = UnityEngine.Random.Range(0, maxFrame);
     }
 
     [Serializable]
@@ -186,7 +192,7 @@ public class Hdf5Loader : MonoBehaviour
         {
             this.prefix = prefix;
             dt = mocapDt > -1? (float)mocapDt : Time.fixedDeltaTime;
-            fs = 1 / dt;
+            fs = 1 / Time.fixedDeltaTime;
             fields = new Dictionary<string, float[][]>();
             length = 0;
             foreach (var fieldName in fieldNames)
@@ -246,8 +252,8 @@ public class Hdf5Loader : MonoBehaviour
         public float[] Qpos(int timeIdx)
         {
             return fields["position"][timeIdx].Concat(fields["quaternion"][timeIdx])
-                                              .Concat(fields["joints"][timeIdx])
-                                              .ToArray();
+                                                  .Concat(fields["joints"][timeIdx])
+                                                  .ToArray();
         }
 
         public float[] BodyPos(int bodyId, int timeIdx)
@@ -292,10 +298,10 @@ public class Hdf5Loader : MonoBehaviour
 
         public Matrix4x4 RootUnityTransform(int timeIdx)
         {
-            var mjQuatArr = fields["quaternion"][timeIdx];
+            var mjQuatArr = RootRot(timeIdx);
             var quat = new Quaternion(mjQuatArr[1], mjQuatArr[3], mjQuatArr[2], -mjQuatArr[0]);
 
-            var mjPosArr = fields["position"][timeIdx];
+            var mjPosArr = RootPos(timeIdx);
             var pos = new Vector3(mjPosArr[0], mjPosArr[2], mjPosArr[1]);
 
             return Matrix4x4.TRS(pos, quat, Vector3.one);
@@ -303,10 +309,10 @@ public class Hdf5Loader : MonoBehaviour
 
         public Matrix4x4 RootMjTransform(int timeIdx)
         {
-            var mjQuatArr = fields["quaternion"][timeIdx];
+            var mjQuatArr = RootRot(timeIdx);
             var quat = new Quaternion(mjQuatArr[1], mjQuatArr[2], mjQuatArr[3], mjQuatArr[0]);
 
-            var mjPosArr = fields["position"][timeIdx];
+            var mjPosArr = RootPos(timeIdx);
             var pos = new Vector3(mjPosArr[0], mjPosArr[1], mjPosArr[2]);
 
             return Matrix4x4.TRS(pos, quat, Vector3.one);
@@ -315,8 +321,8 @@ public class Hdf5Loader : MonoBehaviour
         public float[] Qvel(int timeIdx)
         {
             return fields["velocity"][timeIdx].Concat(fields["angular_velocity"][timeIdx])
-                                              .Concat(fields["joints_velocity"][timeIdx])
-                                              .ToArray();
+                                                  .Concat(fields["joints_velocity"][timeIdx])
+                                                  .ToArray();
         }
 
         private struct DataFrameFieldView

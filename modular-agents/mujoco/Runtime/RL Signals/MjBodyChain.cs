@@ -93,7 +93,7 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             mass = mjBody.GetMass();
             inertiaLocalPos = mjBody.GetLocalCenterOfMass();
-            inertiaRelMatrix = mjBody.GetLocalCenterOfMassMatrix();
+            inertiaRelMatrix = mjBody.GetInertiaToBodyMatrix();
         }
 
         public Vector3 Velocity => mjBody.GlobalVelocity();
@@ -102,7 +102,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public float Mass => mass;
 
-        public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);
+        public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);  // TODO: Replace using Data->xipos
 
         public Vector3 Position => mjBody.GetPosition();
 

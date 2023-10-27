@@ -99,6 +99,21 @@ namespace ModularAgents.DeepMimic
         }
         public Transform KinRoot => kinRoot;
         public Transform SimRoot => simRoot;
+
+        private void OnDrawGizmosSelected()
+        {
+            if (!Application.isPlaying) return;
+            foreach((var simK, var kinK) in simChain.Zip(kinChain, Tuple.Create))
+            {
+                var targetRot = kinK.LocalRotation * Quaternion.Inverse(simK.LocalRotation) * simK.Rotation;
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+            }
+        }
     }
 
 }
