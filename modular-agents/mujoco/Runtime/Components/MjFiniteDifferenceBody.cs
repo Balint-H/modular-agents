@@ -16,6 +16,7 @@ namespace ModularAgents.Kinematic.Mujoco
     {
         [SerializeField]
         MjBody pairedBody;
+        public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
         IKinematic pairedKinematics;
 
 

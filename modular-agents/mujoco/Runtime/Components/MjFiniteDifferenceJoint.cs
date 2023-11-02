@@ -13,6 +13,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
     [SerializeField]
     MjBaseJoint pairedJoint;
 
+    public MjBaseJoint PairedJoint { get=> pairedJoint; set => pairedJoint = value; }
+
     IMjJointState jointState;
 
     public IMjJointState GetJointState()

@@ -1,11 +1,9 @@
 using JetBrains.Annotations;
-using MathNet.Numerics.Statistics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Mujoco.Extensions
@@ -29,7 +27,7 @@ namespace Mujoco.Extensions
         /// For this reason we assume that if there are multiple joints in a body, then they are coincident.
         /// This is closer to the way animation rigs are structured, and helps getting the correct axes and magnitude of scaling necessary.
         /// </summary>
-        internal class ScalingSegment
+        public class ScalingSegment
         {
             readonly MjBaseJoint startJoint;
 
@@ -109,7 +107,7 @@ namespace Mujoco.Extensions
                             results.Add(alignments.Max());
                         }
                     }
-                    return (float) results.Mean();
+                    return (float) results.Sum()/results.Count;
                 }
             }
 
@@ -379,7 +377,7 @@ namespace Mujoco.Extensions
                 alignments.AddRange(orthogonalAlginments);
                 results.Add(alignments.Max());
             }
-            return (float)results.Mean();
+            return (float)results.Sum() / results.Count;
         }
 
         /// <summary>
@@ -407,7 +405,7 @@ namespace Mujoco.Extensions
         /// <summary>
         /// Iterate over all components that use this body as their MJCF parent directly (e.g. MjGeom, MjInertial, MjBaseJoint, and child MjBaseBody).
         /// </summary>
-        internal static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
+        public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
         {
             foreach(var childComponent in body.GetComponentsInChildren<T>())
             {

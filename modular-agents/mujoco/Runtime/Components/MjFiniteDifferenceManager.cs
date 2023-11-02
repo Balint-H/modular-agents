@@ -10,8 +10,11 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
     [SerializeField]
     MjFreeJoint pairedRootJoint;
 
+    public MjFreeJoint Root => pairedRootJoint;
+
     [SerializeField]
     Animator animator;
+    public Animator Animator => animator;
 
     IFiniteDifferenceComponent[] managedComponents;
 
