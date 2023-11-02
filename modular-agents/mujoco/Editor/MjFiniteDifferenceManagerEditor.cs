@@ -50,10 +50,10 @@ public class MjFiniteDifferenceManagerEditor : Editor
         finiteDifferenceBody.PairedBody = mjBody;
         foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
         {
-            var jointView = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
-            jointView.transform.SetPositionAndRotation(joint.transform.position, joint.transform.rotation);
-            jointView.transform.parent = finiteDifferenceBody.transform;
-            jointView.PairedJoint = joint;
+            var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
+            finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
+            finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
+            finiteDifferenceJoint.PairedJoint = joint;
         }
         foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
         {
