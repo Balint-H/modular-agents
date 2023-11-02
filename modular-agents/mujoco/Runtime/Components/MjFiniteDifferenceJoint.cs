@@ -85,6 +85,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         public double[] Velocities => throw new System.NotImplementedException();  // TODO 
 
         public double[] Positions => throw new System.NotImplementedException();  // TODO
+        //check into MjEngineTool.MjQuaternion for conversion
 
         public double[] PositionErrors => throw new System.NotImplementedException();  // TODO (Positions for hinge, quat error from identity for ball)
 

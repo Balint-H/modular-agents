@@ -1,0 +1,1 @@
+mlagents-learn config/trainWalk2Target.yaml --run-id=run3057-Walk2FlagLinuxV3-v1 --env=envs/Walk2FlagLinuxV3/UnityModularAgents --num-envs=8 --no-graphics 
