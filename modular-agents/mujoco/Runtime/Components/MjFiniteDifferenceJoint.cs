@@ -119,7 +119,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         double[] getLocalRotation()
         {
 
-            Quaternion temp = new Quaternion(LocalRotation.x, 0, 0, 1).normalized;
+            Quaternion temp = new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
             return new double[3] { Mathf.Asin( 2* temp.x), 0, 0 };
 
         }
@@ -190,9 +190,26 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         public double[] Accelerations => throw new System.NotImplementedException();
 
-        public double[] Velocities => throw new System.NotImplementedException();
+       
+        public double[] Velocities => getLocalAngularVelocity();
+        public double[] Positions => getLocalRotation();
 
-        public double[] Positions => throw new System.NotImplementedException();
+
+
+        double[] getLocalAngularVelocity()
+        {
+            return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
+
+        }
+
+        double[] getLocalRotation()
+        {
+
+
+            return new double[3] { Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
+
+        }
+
 
         public double[] PositionErrors => throw new System.NotImplementedException();
 

@@ -21,6 +21,10 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
     MjFiniteDifferenceBody[] managedComponents;
 
     //Transform tracked;
+    
+    [SerializeField]
+    MjBody pupeteeredRootJoint4Debug;
+
 
     public override EventHandler Handler => (_, _) => Step();
 
@@ -32,7 +36,17 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
        foreach (MjFiniteDifferenceBody comp in managedComponents)
             comp.GetIKinematic();
 
-      //tracked = gameObject.transform.GetComponentsInChildren<Transform>().First(x => x.name.Equals("lclaviclerz"));
+        //tracked = gameObject.transform.GetComponentsInChildren<Transform>().First(x => x.name.Equals("lclaviclerz"));
+
+
+       List<MjBody> bodies = pupeteeredRootJoint4Debug.GetComponentsInChildren<MjBody>().ToList();
+        foreach (MjFiniteDifferenceBody mjfb in managedComponents) { 
+            MjBody pupetBody = bodies.First(x => x.name.Equals("K_"+mjfb.name));
+            mjfb.PupeteeredBody = pupetBody;
+        }
+
+
+
 
     }
 

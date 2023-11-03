@@ -16,6 +16,13 @@ namespace ModularAgents.Kinematic.Mujoco
     {
         [SerializeField]
         MjBody pairedBody;
+
+        [SerializeField]
+        MjBody pupeteeredJoint4Debug;
+
+
+        public MjBody PupeteeredBody {  set => pupeteeredJoint4Debug = value; }
+
         public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
         IKinematic pairedKinematics = null;
 
@@ -36,6 +43,12 @@ namespace ModularAgents.Kinematic.Mujoco
 
         FiniteDifferenceBodyKinematics kinematics;
 
+        public static
+        Vector3 offset4debug = new Vector3(0.02f, 0.0f, 0.0f);
+
+
+
+
         private void Awake()
         {
             Step();
@@ -50,6 +63,9 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             fs = 1 / Time.fixedDeltaTime;
             pairedKinematics = pairedBody.transform.GetIKinematic();
+
+
+
         }
 
         public void Step()
@@ -81,14 +97,34 @@ namespace ModularAgents.Kinematic.Mujoco
             Gizmos.DrawRay(Position, Rotation * Vector3.up * 0.015f);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(Position, Rotation * Vector3.right * 0.015f);
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawRay(Position, Velocity * 0.05f);
+           // Gizmos.color = Color.cyan;
+           // Gizmos.DrawRay(Position, Velocity * 0.05f);
 
 
-            if(pairedKinematics != null) { 
+            if(pairedKinematics != null) {
+
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawRay(pairedKinematics.Position, Velocity * 0.05f);
+
+
                 Gizmos.color = Color.black;
-                Gizmos.DrawRay(pairedKinematics.Position, pairedKinematics.Velocity * 0.05f);
+
+
+                Gizmos.DrawRay(pairedKinematics.Position - offset4debug, pairedKinematics.Velocity * 0.05f);
                 //Gizmos.DrawRay(Position, pairedKinematics.Velocity * 0.05f);
+
+
+
+
+                if(pupeteeredJoint4Debug != null)
+                {
+                    Gizmos.color = Color.blue;
+                    IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
+                    Gizmos.DrawRay(pairedKinematics.Position + offset4debug, pupetKin.Velocity * 0.05f);
+
+                }
+
+
             }
 
         }
