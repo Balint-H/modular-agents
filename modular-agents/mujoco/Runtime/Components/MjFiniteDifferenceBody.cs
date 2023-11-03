@@ -17,7 +17,7 @@ namespace ModularAgents.Kinematic.Mujoco
         [SerializeField]
         MjBody pairedBody;
         public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
-        IKinematic pairedKinematics;
+        IKinematic pairedKinematics = null;
 
 
         Vector3 prevPosition;
@@ -64,6 +64,36 @@ namespace ModularAgents.Kinematic.Mujoco
             return kinematics;
         }
 
+        private void OnDrawGizmosSelected()
+        {
+            if (!Application.isPlaying) return;
+            //((MocapBodyKinematics)GetIKinematic()).Draw();
+            Draw();
+        }
+
+        public void Draw()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(kinematics.CenterOfMass, 0.01f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(Position, Rotation * Vector3.forward * 0.015f);
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(Position, Rotation * Vector3.up * 0.015f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(Position, Rotation * Vector3.right * 0.015f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawRay(Position, Velocity * 0.05f);
+
+
+            if(pairedKinematics != null) { 
+                Gizmos.color = Color.black;
+                Gizmos.DrawRay(pairedKinematics.Position, pairedKinematics.Velocity * 0.05f);
+                //Gizmos.DrawRay(Position, pairedKinematics.Velocity * 0.05f);
+            }
+
+        }
+
+
         private class FiniteDifferenceBodyKinematics : IKinematic
         {
             MjFiniteDifferenceBody component;
@@ -73,12 +103,29 @@ namespace ModularAgents.Kinematic.Mujoco
             IKinematic parentKinematics;
             bool isRoot;
 
-            public FiniteDifferenceBodyKinematics(MjFiniteDifferenceBody comoponent) 
+            public FiniteDifferenceBodyKinematics(MjFiniteDifferenceBody component) 
             { 
-                this.component = comoponent;
-                var parent = component.GetComponentInParent<MjFiniteDifferenceBody>();
-                if (parent) parentKinematics = parent.GetIKinematic();
+                this.component = component;
+
+
+                //var parent = this.component.GetComponentInParent<MjFiniteDifferenceBody>(); //this gives itself, not necessarily its parent
+
+               var parentTransform = this.component.transform.parent;
+
+                var parent = parentTransform.GetComponent<MjFiniteDifferenceBody>();
+
                 isRoot = !parent;
+
+                //if (parent) parentKinematics = parent.GetIKinematic(); //this creates an endless loop
+
+                if (!isRoot)
+                {
+                    if (parent.kinematics == null)
+                        Debug.Log("the kinematics of " + parent.name + " have not been set, this is a problem for: " + this.Name);
+                    else
+                        parentKinematics = parent.kinematics;                    //this should slove the previous loop problem
+
+                }
                 MjState.ExecuteAfterMjStart(MjInitialize);
             }
 
