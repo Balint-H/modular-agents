@@ -50,25 +50,28 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
 
     }
 
+
+    
     public void Step()
     {
         // We store the old state.
-        foreach (var component in managedComponents)
+       /* foreach (var component in managedComponents)
         {
             component.Step();
         }    
-         
+         */
+
        // tracked.GetComponent<MjFiniteDifferenceJoint>().checkLocalAxisPos();
         
         // Get the new state.
-        animator.Update(Time.fixedDeltaTime);
+      //  animator.Update(Time.fixedDeltaTime);
     }
-
+    /*
     public void FixedUpdate()
     {
         Step();
     }
-
+    */
 
 
 
