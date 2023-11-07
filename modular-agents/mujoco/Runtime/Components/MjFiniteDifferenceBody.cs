@@ -36,7 +36,8 @@ namespace ModularAgents.Kinematic.Mujoco
         private float fs;
 
         private Vector3 Velocity => (Position - prevPosition)*fs;
-        private Vector3 AngularVelocity => Utils.QuaternionError(Rotation, prevRotation)*fs;
+        //private Vector3 AngularVelocity => Utils.QuaternionError(Rotation, prevRotation)*fs;
+        private Vector3 AngularVelocity => Utils.QuaternionError4(Rotation, prevRotation) * fs;
 
         [SerializeField]
         private Vector3 localForward = Vector3.forward;
@@ -112,13 +113,13 @@ namespace ModularAgents.Kinematic.Mujoco
 
                 Gizmos.color = Color.cyan;
                 //Gizmos.DrawRay(pairedKinematics.Position, Velocity * 0.05f);
-                Gizmos.DrawRay(Position, Velocity * 0.2f);
+                Gizmos.DrawRay(Position, AngularVelocity * 0.2f);
 
                 Gizmos.color = Color.black;
 
 
                 //Gizmos.DrawRay(pairedKinematics.Position - offset4debug, pairedKinematics.Velocity * 0.05f);
-                Gizmos.DrawRay(Position - offset4debug, pairedKinematics.Velocity * 0.2f);
+                Gizmos.DrawRay(Position - offset4debug, pairedKinematics.AngularVelocity * 0.2f);
                 //Gizmos.DrawRay(Position, pairedKinematics.Velocity * 0.05f);
 
 
@@ -129,7 +130,7 @@ namespace ModularAgents.Kinematic.Mujoco
                     Gizmos.color = Color.blue;
                     IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                     //Gizmos.DrawRay(pairedKinematics.Position + offset4debug, pupetKin.Velocity * 0.05f);
-                    Gizmos.DrawRay(Position + offset4debug, pupetKin.Velocity * 0.2f);
+                    Gizmos.DrawRay(Position + offset4debug, pupetKin.AngularVelocity * 0.2f);
 
                 }
 
