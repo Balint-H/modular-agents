@@ -145,9 +145,6 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
         {
             fs = 1 / Time.fixedDeltaTime;
             pairedKinematics = pairedBody.transform.GetIKinematic();
-
-
-
         }
 
 
@@ -226,17 +223,20 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
 
                 Gizmos.color = Color.grey;
 
-                Gizmos.DrawRay(Position , LocalAngularVelocity * 0.2f);
+                var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+
+                Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(LocalAngularVelocity)) * 0.2f);
 
 
 
                 if (pupeteeredJoint4Debug != null)
                 {
                     Gizmos.color = Color.blue;
+                    
                     IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                     //Gizmos.DrawRay(pairedKinematics.Position + offset4debug, pupetKin.Velocity * 0.05f);
                     //Gizmos.DrawRay(Position + offset4debug, pupetKin.AngularVelocity * 0.2f);
-                    Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+                    Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
 
                     //MjEngineTool.
@@ -302,24 +302,11 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
                 this.component = component;
 
 
-                //var parent = this.component.GetComponentInParent<MjFiniteDifferenceBody>(); //this gives itself, not necessarily its parent
-
-               var parentTransform = this.component.transform.parent;
-
-                var parent = parentTransform.GetComponent<MjFiniteDifferenceBody>();
+                var parent = this.component.transform.parent.GetComponentInParent<MjFiniteDifferenceBody>();  //Need to call at parent as GetComponentInParent is inclusive of the start transform.
 
                 isRoot = !parent;
+                if (parent) parentKinematics = parent.GetIKinematic();  //This doesn't create an endless loop as there's an exit condition.
 
-                //if (parent) parentKinematics = parent.GetIKinematic(); //this creates an endless loop
-
-                if (!isRoot)
-                {
-                    if (parent.kinematics == null)
-                        Debug.Log("the kinematics of " + parent.name + " have not been set, this is a problem for: " + this.Name);
-                    else
-                        parentKinematics = parent.kinematics;                    //this should slove the previous loop problem
-
-                }
                 MjState.ExecuteAfterMjStart(MjInitialize);
             }
 
