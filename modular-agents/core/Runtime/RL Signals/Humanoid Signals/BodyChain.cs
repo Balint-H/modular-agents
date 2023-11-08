@@ -106,7 +106,14 @@ namespace ModularAgents.Kinematic
 
         public Vector3 Position { get; }
 
+        /// <summary>
+        /// Cartesian linear velocity, defined in the parent frame.
+        /// </summary>
         public Vector3 LocalVelocity { get; }
+
+        /// <summary>
+        /// Cartesian angular velocity, defined in the parent frame.
+        /// </summary>
         public Vector3 LocalAngularVelocity { get; }
 
         public Vector3 GetPointVelocity(Vector3 worldPoint);
