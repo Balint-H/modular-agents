@@ -30,14 +30,106 @@ namespace ModularAgents.Kinematic.Mujoco
         Vector3 prevPosition;
         Quaternion prevRotation;
 
+
+        Quaternion prevLocalRotation  = Quaternion.identity;
+
+        Quaternion prevPupeteeredLocalRotation = Quaternion.identity;
+        Quaternion pupeteeredLocalRotation = Quaternion.identity;
+
         private Vector3 Position => transform.position;
         private Quaternion Rotation => transform.rotation;
+        private Quaternion LocalRotation => transform.localRotation;
+
+
+
 
         private float fs;
 
         private Vector3 Velocity => (Position - prevPosition)*fs;
         //private Vector3 AngularVelocity => Utils.QuaternionError(Rotation, prevRotation)*fs;
-        private Vector3 AngularVelocity => Utils.QuaternionError4(Rotation, prevRotation) * fs;
+        private Vector3 AngularVelocity => Utils.QuaternionError2(Rotation, prevRotation) * fs;
+
+
+
+
+
+
+        //  public Vector3 LocalAngularVelocity => isRoot ? AngularVelocity : AngularVelocity - parentKinematics.AngularVelocity;
+
+        // private Vector3 LocalAngularVelocity =>   Utils.QuaternionError2(transform.localRotation, prevLocalRotation) * fs;
+        private Vector3 LocalAngularVelocity => QuaternionLocalVel();
+
+
+
+        Vector3 QuaternionLocalVelTest1()
+        {
+
+            //from here: https://mariogc.com/post/angular-velocity-quaternions/
+            return new Vector3(
+             2 * fs * (prevLocalRotation.w * LocalRotation.x - prevLocalRotation.x * LocalRotation.w - prevLocalRotation.y * LocalRotation.z + prevLocalRotation.z * LocalRotation.y ),
+             2 * fs * (prevLocalRotation.w * LocalRotation.y + prevLocalRotation.x * LocalRotation.z - prevLocalRotation.y * LocalRotation.w - prevLocalRotation.z * LocalRotation.x ),
+             2 * fs * (prevLocalRotation.w * LocalRotation.z - prevLocalRotation.x * LocalRotation.y + prevLocalRotation.y * LocalRotation.x - prevLocalRotation.z * LocalRotation.w )
+            );
+
+        }
+
+        //https://github.com/google-deepmind/mujoco/blob/deb14dc081c956997d2398cff367168219ce9939/src/engine/engine_util_spatial.c#L236
+
+        /*
+        
+        // Subtract quaternions, express as 3D velocity: qb*quat(res) = qa.
+
+void mju_subQuat(mjtNum res[3], const mjtNum qa[4], const mjtNum qb[4]) {
+  // qdif = neg(qb)*qa
+  mjtNum qneg[4], qdif[4];
+  mju_negQuat(qneg, qb);
+  mju_mulQuat(qdif, qneg, qa);
+
+  // convert to 3D velocity
+  mju_quat2Vel(res, qdif, 1);
+}
+
+        
+// convert quaternion (corresponding to orientation difference) to 3D velocity
+void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
+  mjtNum axis[3] = {quat[1], quat[2], quat[3]};
+  mjtNum sin_a_2 = mju_normalize3(axis);
+  mjtNum speed = 2 * mju_atan2(sin_a_2, quat[0]);
+
+  // when axis-angle is larger than pi, rotation is in the opposite direction
+  if (speed>mjPI) {
+    speed -= 2*mjPI;
+  }
+  speed /= dt;
+
+  mju_scl3(res, axis, speed);
+}
+
+         */
+
+        Vector3 QuaternionLocalVel()
+        {
+            //Quaternion negLocRot = new Quaternion( - LocalRotation.x, -LocalRotation.y, -LocalRotation.z, -LocalRotation.w);
+
+            //Quaternion qdif = Quaternion.Inverse(LocalRotation) * prevLocalRotation;
+            //Quaternion qdif = LocalRotation * Quaternion.Inverse(prevLocalRotation);
+            Quaternion qdif = Quaternion.Inverse(prevLocalRotation) * LocalRotation;
+
+            Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
+
+            float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * fs;
+
+            return speed * axis.normalized;
+            //return  axis;
+
+
+
+
+        }
+
+
+
+
 
         [SerializeField]
         private Vector3 localForward = Vector3.forward;
@@ -45,7 +137,7 @@ namespace ModularAgents.Kinematic.Mujoco
         FiniteDifferenceBodyKinematics kinematics;
 
         public static
-        Vector3 offset4debug = new Vector3(0.01f, 0.0f, 0.0f);
+        Vector3 offset4debug = new Vector3(0.05f, 0.0f, 0.0f);
 
 
 
@@ -80,9 +172,18 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             prevPosition = transform.position;
             prevRotation = transform.rotation;
-        }
 
-        public IKinematic GetIKinematic()
+            prevLocalRotation = transform.localRotation;
+
+
+            prevPupeteeredLocalRotation = pupeteeredLocalRotation;
+            pupeteeredLocalRotation = pupeteeredJoint4Debug.transform.GetIKinematic().LocalRotation ;
+
+    
+
+    }
+
+    public IKinematic GetIKinematic()
         {
             if(kinematics == null) kinematics = new FiniteDifferenceBodyKinematics(this);
             return kinematics;
@@ -92,6 +193,9 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             if (!Application.isPlaying) return;
             //((MocapBodyKinematics)GetIKinematic()).Draw();
+
+            Draw2();
+
             Draw();
         }
 
@@ -109,19 +213,28 @@ namespace ModularAgents.Kinematic.Mujoco
            // Gizmos.DrawRay(Position, Velocity * 0.05f);
 
 
-            if(pairedKinematics != null) {
+            //if(pairedKinematics != null) 
+            {
 
                 Gizmos.color = Color.cyan;
                 //Gizmos.DrawRay(pairedKinematics.Position, Velocity * 0.05f);
-                Gizmos.DrawRay(Position, AngularVelocity * 0.2f);
+                //Gizmos.DrawRay(Position, LocalAngularVelocity * 0.2f);
 
-                Gizmos.color = Color.black;
+                //Gizmos.DrawRay(Position + offset4debug, MjEngineTool.UnityVector3(AngularVelocity) * 0.2f);
+                //Gizmos.DrawRay(Position + offset4debug, AngularVelocity * 0.2f);
 
+              
+                
+
+               // Gizmos.DrawRay(Position, MjEngineTool.UnityVector3( LocalAngularVelocity) * 0.2f);
 
                 //Gizmos.DrawRay(pairedKinematics.Position - offset4debug, pairedKinematics.Velocity * 0.05f);
-                Gizmos.DrawRay(Position - offset4debug, pairedKinematics.AngularVelocity * 0.2f);
+                //Gizmos.DrawRay(Position - offset4debug, pairedKinematics.AngularVelocity * 0.2f);
                 //Gizmos.DrawRay(Position, pairedKinematics.Velocity * 0.05f);
 
+                Gizmos.color = Color.grey;
+
+                Gizmos.DrawRay(Position , LocalAngularVelocity * 0.2f);
 
 
 
@@ -130,7 +243,17 @@ namespace ModularAgents.Kinematic.Mujoco
                     Gizmos.color = Color.blue;
                     IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                     //Gizmos.DrawRay(pairedKinematics.Position + offset4debug, pupetKin.Velocity * 0.05f);
-                    Gizmos.DrawRay(Position + offset4debug, pupetKin.AngularVelocity * 0.2f);
+                    //Gizmos.DrawRay(Position + offset4debug, pupetKin.AngularVelocity * 0.2f);
+                    Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+
+
+                    //MjEngineTool.
+                    //lets calculate an angular velocity using a similar method, but using mujoco:
+
+                    //        public Quaternion QLocalRotation => isRoot ? Rotation : Quaternion.Inverse(MjState.GlobalRotation(parentBody)) * Rotation;
+
+
+
 
                 }
 
@@ -138,6 +261,39 @@ namespace ModularAgents.Kinematic.Mujoco
             }
 
         }
+
+
+        public void Draw2()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(Position, LocalRotation * Vector3.forward * 0.15f);
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(Position, LocalRotation * Vector3.up * 0.15f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(Position, LocalRotation * Vector3.right * 0.15f);
+     
+
+            if (pupeteeredJoint4Debug != null)
+            {
+                IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawRay(Position + offset4debug, pupetKin.LocalRotation * Vector3.forward * 0.15f);
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawRay(Position + offset4debug, pupetKin.LocalRotation * Vector3.up * 0.15f);
+                Gizmos.color = Color.grey;
+                Gizmos.DrawRay(Position + offset4debug, pupetKin.LocalRotation * Vector3.right * 0.15f);
+
+
+
+            }
+
+        }
+
+
+
+
 
 
         private class FiniteDifferenceBodyKinematics : IKinematic
