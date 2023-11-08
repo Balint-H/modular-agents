@@ -176,8 +176,8 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
             prevLocalRotation = transform.localRotation;
 
 
-            prevPupeteeredLocalRotation = pupeteeredLocalRotation;
-            pupeteeredLocalRotation = pupeteeredJoint4Debug.transform.GetIKinematic().LocalRotation ;
+           // prevPupeteeredLocalRotation = pupeteeredLocalRotation;
+          //  pupeteeredLocalRotation = pupeteeredJoint4Debug.transform.GetIKinematic().LocalRotation ;
 
     
 
@@ -194,7 +194,7 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
             if (!Application.isPlaying) return;
             //((MocapBodyKinematics)GetIKinematic()).Draw();
 
-            Draw2();
+           // Draw2();
 
             Draw();
         }
