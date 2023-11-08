@@ -249,33 +249,52 @@ namespace Mujoco.Extensions
             return -Vector3.Cross(globalComPositionVector, angularVelocity) + frameVelocity;
         }
 
-        public static unsafe Vector3 GlobalVelocity(this MjBaseBody body, MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY)
+        /// <summary>
+        /// Get the linear velocityof a body in cartesian space.
+        /// </summary>
+        /// <param name="fromCenterOfMass"> If true, the velocity corresponds to the body's center of mass (i.e., the velocity that can be used to calculate momentum, or kinetic energy).
+        /// This may be different from the body frame's velocity (the case when it's false) if the body has angular velocity.</param>
+        /// <param name="inBodyFrame">If true, the returned velocity will be represented in the body's own reference frame. Note that this is not local velocity in the kinematic tree 
+        /// sense, this value is independent from the parent body's kinematics.</param>
+        public static unsafe Vector3 GlobalVelocity(this MjBaseBody body, bool fromCenterOfMass = false, bool inBodyFrame=false)
         {
             MujocoLib.mjModel_* Model = mjScene.Model;
             MujocoLib.mjData_* Data = mjScene.Data;
+
+            MujocoLib.mjtObj objType = fromCenterOfMass? MujocoLib.mjtObj.mjOBJ_BODY : MujocoLib.mjtObj.mjOBJ_XBODY;
+
             Vector3 bodyVel = Vector3.zero;
             double[] mjBodyVel = new double[6];
             fixed (double* res = mjBodyVel)
             {
                 MujocoLib.mj_objectVelocity(
-                    Model, Data, (int)objType, body.MujocoId, res, 0);
+                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame? 0 : 1);
                 // linear velocity is in the last 3 entries
                 bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
             }
             return bodyVel;
         }
 
-        public static unsafe Vector3 LocalVelocity(this MjBody body, MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY)
+        /// <summary>
+        /// Get the linear velocityof a body in cartesian space.
+        /// </summary>
+        /// <param name="inBodyFrame">If true, the returned velocity will be represented in the body's own reference frame. Note that this is not local velocity in the kinematic tree 
+        /// sense, this value is independent from the parent body's kinematics.</param>
+        public static unsafe Vector3 GlobalAngularVelocity(this MjBaseBody body, bool inBodyFrame = false)
         {
             MujocoLib.mjModel_* Model = mjScene.Model;
             MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyVel = Vector3.one;
+
+            MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY;
+
+            Vector3 bodyVel = Vector3.zero;
             double[] mjBodyVel = new double[6];
             fixed (double* res = mjBodyVel)
             {
                 MujocoLib.mj_objectVelocity(
-                    Model, Data, (int)objType, body.MujocoId, res, 1);
-                bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
+                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame ? 0 : 1);
+                // angular velocity is in the first 3 entries
+                bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
             }
             return bodyVel;
         }
@@ -325,36 +344,7 @@ namespace Mujoco.Extensions
         }
 
 
-        public static unsafe Vector3 GlobalAngularVelocity(this MjBody body)
-        {
-            MujocoLib.mjModel_* Model = mjScene.Model;
-            MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyAngVel = Vector3.zero;
-            double[] mjBodyAngVel = new double[6];
-            fixed (double* res = mjBodyAngVel)
-            {
-                MujocoLib.mj_objectVelocity(
-                    Model, mjScene.Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 0);
-                bodyAngVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
-            }
-            return bodyAngVel;
-        }
 
-
-        public static unsafe Vector3 LocalAngularVelocity(this MjBody body)
-        {
-            MujocoLib.mjModel_* Model = mjScene.Model;
-            MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyAngVel = Vector3.one;
-            double[] mjBodyAngVel = new double[6];
-            fixed (double* res = mjBodyAngVel)
-            {
-                MujocoLib.mj_objectVelocity(
-                    mjScene.Model, Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 1);
-                bodyAngVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
-            }
-            return bodyAngVel;
-        }
 
         public static unsafe float GetAcceleration(this MjActuator act)
         {

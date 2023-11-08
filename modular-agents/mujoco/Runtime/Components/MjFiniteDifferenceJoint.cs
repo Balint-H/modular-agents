@@ -28,7 +28,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         //I'm not sure we need to do anything here; it might be enough to step the body kinematics, then the joint components can remain largely stateless views into the body information.
     }
 
-    public void checkLocalAxisPos()
+    public void CheckLocalAxisPos()
     {
         Quaternion q = MjEngineTool.MjQuaternion(gameObject.transform.rotation);
 
@@ -107,27 +107,27 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         //  public double[] Velocities => throw new System.NotImplementedException();  // TODO 
 
-        public double[] Velocities => getLocalAngularVelocity();
+        public double[] Velocities => GetLocalAngularVelocity();
 
 
-        double[] getLocalAngularVelocity()
+        double[] GetLocalAngularVelocity()
         {
            return  new double[3] { LocalAngularVelocity.x, 0, 0 };
 
         }
 
-        double[] getLocalRotation()
+        double[] GetLocalRotation()
         {
 
             Quaternion temp = new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
             return new double[3] { Mathf.Asin( 2* temp.x), 0, 0 };
 
         }
-
+        
 
         //public double[] Positions => throw new System.NotImplementedException();   // TODO
 
-        public double[] Positions => getLocalRotation();
+        public double[] Positions => GetLocalRotation();
 
 
         //check into MjEngineTool.MjQuaternion for conversion
@@ -135,7 +135,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
       
 
         //   double[] getLocalRotations()
-       public  void checkLocalRotations()
+       public  void CheckLocalRotations()
         {
             Quaternion q = MjEngineTool.MjQuaternion(gameObject.transform.rotation);
 

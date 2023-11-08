@@ -135,8 +135,8 @@ namespace ModularAgents.Kinematic.Mujoco
         public GameObject gameObject { get => mjBody.gameObject; }
         public MjBody ParentBody { get => parentBody; }
 
-        public Vector3 LocalVelocity => MjState.LocalVelocity(mjBody);
+        public Vector3 LocalVelocity => isRoot? mjBody.GlobalVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalVelocity() - parentBody.GlobalVelocity());
 
-        public Vector3 LocalAngularVelocity => MjState.LocalAngularVelocity(mjBody);
+        public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
     }
 }
