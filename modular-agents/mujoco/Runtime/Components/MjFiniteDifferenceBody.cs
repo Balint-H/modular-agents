@@ -32,6 +32,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
 
         Quaternion prevLocalRotation  = Quaternion.identity;
+        Quaternion currentLocalRotation = Quaternion.identity;
 
         Quaternion prevPupeteeredLocalRotation = Quaternion.identity;
         Quaternion pupeteeredLocalRotation = Quaternion.identity;
@@ -60,18 +61,6 @@ namespace ModularAgents.Kinematic.Mujoco
         private Vector3 LocalAngularVelocity => QuaternionLocalVel();
 
 
-
-        Vector3 QuaternionLocalVelTest1()
-        {
-
-            //from here: https://mariogc.com/post/angular-velocity-quaternions/
-            return new Vector3(
-             2 * fs * (prevLocalRotation.w * LocalRotation.x - prevLocalRotation.x * LocalRotation.w - prevLocalRotation.y * LocalRotation.z + prevLocalRotation.z * LocalRotation.y ),
-             2 * fs * (prevLocalRotation.w * LocalRotation.y + prevLocalRotation.x * LocalRotation.z - prevLocalRotation.y * LocalRotation.w - prevLocalRotation.z * LocalRotation.x ),
-             2 * fs * (prevLocalRotation.w * LocalRotation.z - prevLocalRotation.x * LocalRotation.y + prevLocalRotation.y * LocalRotation.x - prevLocalRotation.z * LocalRotation.w )
-            );
-
-        }
 
         //https://github.com/google-deepmind/mujoco/blob/deb14dc081c956997d2398cff367168219ce9939/src/engine/engine_util_spatial.c#L236
 
@@ -113,7 +102,7 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
 
             //Quaternion qdif = Quaternion.Inverse(LocalRotation) * prevLocalRotation;
             //Quaternion qdif = LocalRotation * Quaternion.Inverse(prevLocalRotation);
-            Quaternion qdif = Quaternion.Inverse(prevLocalRotation) * LocalRotation;
+            Quaternion qdif = Quaternion.Inverse(prevLocalRotation) * currentLocalRotation;
 
             Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
 
@@ -173,7 +162,10 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
             prevPosition = transform.position;
             prevRotation = transform.rotation;
 
-            prevLocalRotation = transform.localRotation;
+            prevLocalRotation = currentLocalRotation;
+            currentLocalRotation = LocalRotation;
+
+
 
 
            // prevPupeteeredLocalRotation = pupeteeredLocalRotation;
