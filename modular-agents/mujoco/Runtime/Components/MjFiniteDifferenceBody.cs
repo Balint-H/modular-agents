@@ -5,6 +5,7 @@ using Mujoco;
 using ModularAgents.MotorControl.CircularBuffer;
 using System.Linq;
 using Mujoco.Extensions;
+using System;
 
 namespace ModularAgents.Kinematic.Mujoco
 {
@@ -14,15 +15,10 @@ namespace ModularAgents.Kinematic.Mujoco
 
     public class MjFiniteDifferenceBody : MonoBehaviour, IKinematicProvider, IFiniteDifferenceComponent
     {
-        [SerializeField]
-        MjBody pairedBody;
+       // [SerializeField]
+       // MjBody pairedBody;
 
-        [SerializeField]
-        MjBody pupeteeredJoint4Debug;
-
-        public MjBody PupeteeredBody {  set => pupeteeredJoint4Debug = value; }
-
-        public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
+      //  public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
    
         Vector3 prevPosition;
         Quaternion prevRotation;
@@ -110,8 +106,8 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public void Draw()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
+            //Gizmos.color = Color.yellow;
+            //Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(Position, Rotation * Vector3.forward * 0.015f);
             Gizmos.color = Color.green;
@@ -122,13 +118,20 @@ namespace ModularAgents.Kinematic.Mujoco
 
             Gizmos.color = Color.grey;
 
-            var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+            MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
+            if (pupeteeredJoint4Debug)
+            {
+                var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
 
-            Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
+                Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
+
+
+
+            }
 
 
             Gizmos.color = Color.black;
-            Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
+            Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
 
 
             if (pupeteeredJoint4Debug != null)
@@ -158,8 +161,8 @@ namespace ModularAgents.Kinematic.Mujoco
             Gizmos.DrawRay(Position, LocalRotation * Vector3.up * 0.15f);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(Position, LocalRotation * Vector3.right * 0.15f);
-     
 
+            MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
             if (pupeteeredJoint4Debug != null)
             {
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
@@ -169,8 +172,6 @@ namespace ModularAgents.Kinematic.Mujoco
                 Gizmos.DrawRay(Position + offset4debug, pupetKin.LocalRotation * Vector3.up * 0.15f);
                 Gizmos.color = Color.grey;
                 Gizmos.DrawRay(Position + offset4debug, pupetKin.LocalRotation * Vector3.right * 0.15f);
-
-
 
             }
 
@@ -182,9 +183,9 @@ namespace ModularAgents.Kinematic.Mujoco
         private class FiniteDifferenceBodyKinematics : IKinematic
         {
             MjFiniteDifferenceBody component;
-            float mass;
-            Vector3 inertiaLocalPos;
-            Matrix4x4 inertiaRelMatrix;
+            //float mass;
+            //Vector3 inertiaLocalPos;
+            //Matrix4x4 inertiaRelMatrix;
             IKinematic parentKinematics;
             bool isRoot;
 
@@ -203,9 +204,9 @@ namespace ModularAgents.Kinematic.Mujoco
 
             private void MjInitialize()
             {
-                mass = component.pairedBody.GetMass();
-                inertiaLocalPos = component.pairedBody.GetLocalCenterOfMass();
-                inertiaRelMatrix = component.pairedBody.GetInertiaToBodyMatrix();
+              //  mass = component.pairedBody.GetMass();
+              //  inertiaLocalPos = component.pairedBody.GetLocalCenterOfMass();
+              //  inertiaRelMatrix = component.pairedBody.GetInertiaToBodyMatrix();
             }
             public Vector3 Velocity => component.Velocity;
 
@@ -213,18 +214,28 @@ namespace ModularAgents.Kinematic.Mujoco
 
             public Vector3 LocalAngularVelocity => component.LocalAngularVelocity;
 
-            public float Mass => mass;
+            //public float Mass => mass;
 
+            public float Mass => throw new NotImplementedException();
+
+            /*
             public Vector3 CenterOfMass => Matrix4x4.TRS(Position,
                                                  Rotation,
                                                  Vector3.one).MultiplyPoint3x4(inertiaLocalPos);
+            */
 
+            public Vector3 CenterOfMass => throw new NotImplementedException();
+            
+            /*
             public Matrix4x4 TransformMatrix => Matrix4x4.TRS(Position,
                                                               Rotation,
                                                               Vector3.one) * inertiaRelMatrix;
+            */
+            public Matrix4x4 TransformMatrix => throw new NotImplementedException();
 
-            public int index => -component.pairedBody.MujocoId;
 
+            // public int index => -component.pairedBody.MujocoId;
+            public int index => throw new NotImplementedException();
             public Quaternion Rotation => component.Rotation;
 
             public Quaternion LocalRotation => component.LocalRotation;

@@ -47,7 +47,8 @@ public class MjFiniteDifferenceManagerEditor : Editor
             return;
         }
         var finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
-        finiteDifferenceBody.PairedBody = mjBody;
+        //finiteDifferenceBody.PairedBody = mjBody;
+
         foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
         {
             var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
