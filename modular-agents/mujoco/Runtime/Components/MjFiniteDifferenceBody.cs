@@ -124,7 +124,7 @@ namespace ModularAgents.Kinematic.Mujoco
             Gizmos.DrawRay(Position, Rotation * Vector3.right * 0.015f);
 
 
-            Gizmos.color = Color.grey;
+
 
             MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
             if (pupeteeredJoint4Debug)
@@ -134,7 +134,8 @@ namespace ModularAgents.Kinematic.Mujoco
                 var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
 
 
-            //    Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
+                Gizmos.color = Color.grey;
+                Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
 
 
 
@@ -148,7 +149,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
 
             Gizmos.color = Color.black;
-          //  Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
+            Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
 
 
             if (pupeteeredJoint4Debug != null)
@@ -158,15 +159,15 @@ namespace ModularAgents.Kinematic.Mujoco
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                 //Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
-               // Gizmos.color = Color.cyan;
-               // Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+               
+                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
 
                 
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawRay(Position, pupetKin.AngularVelocity * 0.2f);
+                Gizmos.DrawRay(Position, pupetKin.AngularVelocity * 0.1f);
 
                 Gizmos.color = Color.red;
-                Gizmos.DrawRay(Position, AngularVelocity * 0.2f);
+                Gizmos.DrawRay(Position + 0.005f * Vector3.up, AngularVelocity * 0.1f);
 
 
 
