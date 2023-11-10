@@ -21,8 +21,8 @@ namespace ModularAgents.Kinematic.Mujoco
       //  public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
    
         Vector3 prevPosition;
-        Quaternion prevRotation;
-
+        Quaternion prevRotation = Quaternion.identity;
+        Quaternion currentRotation = Quaternion.identity;
 
         Quaternion prevLocalRotation  = Quaternion.identity;
         Quaternion currentLocalRotation = Quaternion.identity;
@@ -38,7 +38,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         private Vector3 Velocity => (Position - prevPosition)*fs;
         
-        private Vector3 AngularVelocity => Utils.RotationVel(Rotation, prevRotation, fs);
+        private Vector3 AngularVelocity => Utils.RotationVel(currentRotation, prevRotation, fs);
 
         //we express it in its parent's coordinates:
         private Vector3 LocalAngularVelocity => transform.parent.rotation *  Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs); 
@@ -81,7 +81,9 @@ namespace ModularAgents.Kinematic.Mujoco
         public void Step()
         {
             prevPosition = transform.position;
-            prevRotation = transform.rotation;
+
+            prevRotation = currentRotation;
+            currentRotation = transform.rotation;
 
             prevLocalRotation = currentLocalRotation;
             currentLocalRotation = LocalRotation;
@@ -99,12 +101,12 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             if (!Application.isPlaying) return;
         
-           // Draw2();
+           // DrawLocalRotations();
 
-            Draw();
+            DrawLocalAngularVelocities();
         }
 
-        public void Draw()
+        public void DrawLocalAngularVelocities()
         {
             //Gizmos.color = Color.yellow;
             //Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
@@ -114,17 +116,26 @@ namespace ModularAgents.Kinematic.Mujoco
             Gizmos.DrawRay(Position, Rotation * Vector3.up * 0.015f);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(Position, Rotation * Vector3.right * 0.015f);
-  
+
 
             Gizmos.color = Color.grey;
 
             MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
             if (pupeteeredJoint4Debug)
             {
-                var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+                // var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+
+                var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
+
 
                 Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
 
+
+
+
+              //  Gizmos.color = Color.white;
+              //  Quaternion temp = parent.GlobalRotation();
+              //  Gizmos.DrawRay(Position + 0.015f * Vector3.up, (!parent ? LocalAngularVelocity : temp * Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity * 0.2f )  );
 
 
             }
@@ -143,18 +154,44 @@ namespace ModularAgents.Kinematic.Mujoco
                // Gizmos.color = Color.cyan;
                 Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
 
+
+
+                DebugValuesFor("lhumerus");
+                DebugValuesFor("lowerback");
+
+
+
             }
 
 
-          
+
+
+        }
+
+        public void DebugValuesFor(string targetname)
+        {
+
+            if (name.Contains(targetname))
+            {
+                MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
+                IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
+               // Debug.Log( targetname +"s:          AngVel: " + AngularVelocity + "  pupet: " + pupetKin.AngularVelocity);
+                Debug.Log(targetname + ":     localAngVel: " + LocalAngularVelocity + "  pupet: " + pupetKin.LocalAngularVelocity);
+                // Debug.Log(":     localRot: " + LocalRotation + "  pupet: " + pupetKin.LocalRotation);
+                //  var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
+                //  Debug.Log(" Dad localRot: " + transform.parent.localRotation + "  pupet: dad " + parent.transform.GetIKinematic().LocalRotation +" is: " + parent.transform.GetIKinematic().Name);
+                //  Debug.Log(" Dad globlRot: " + transform.parent.rotation + "  pupet: dad " + parent.GlobalRotation() + " is: " + parent.name);
+            }
+
 
         }
 
 
-        public void Draw2()
+
+        public void DrawLocalRotations()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
+          //  Gizmos.color = Color.yellow;
+          //  Gizmos.DrawWireSphere(GetIKinematic().CenterOfMass, 0.01f);
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(Position, LocalRotation * Vector3.forward * 0.15f);
             Gizmos.color = Color.green;
