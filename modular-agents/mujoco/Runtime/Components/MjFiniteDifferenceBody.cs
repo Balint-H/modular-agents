@@ -134,7 +134,7 @@ namespace ModularAgents.Kinematic.Mujoco
                 var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
 
 
-                Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
+            //    Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
 
 
 
@@ -148,17 +148,25 @@ namespace ModularAgents.Kinematic.Mujoco
 
 
             Gizmos.color = Color.black;
-            Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
+          //  Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
 
 
             if (pupeteeredJoint4Debug != null)
             {
+      
                 Gizmos.color = Color.blue;                    
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                 //Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
                // Gizmos.color = Color.cyan;
-                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+               // Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+
+                
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawRay(Position, pupetKin.AngularVelocity * 0.2f);
+
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(Position, AngularVelocity * 0.2f);
 
 
 
@@ -181,14 +189,14 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
-                Debug.Log( targetname +":          AngVel: " + AngularVelocity + "  pupet: " + pupetKin.AngularVelocity);
+                Debug.Log( targetname +":          AngVel: " + AngularVelocity + "  pupet: " + pupeteeredJoint4Debug.GlobalAngularVelocity() + "pupetKin:" + pupetKin.AngularVelocity);
                 Debug.Log(targetname + ":     localAngVel: " + LocalAngularVelocity + "  pupet: " + pupetKin.LocalAngularVelocity );
                 // Debug.Log(":     localRot: " + LocalRotation + "  pupet: " + pupetKin.LocalRotation);
                 //  var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
                 //  Debug.Log(" Dad localRot: " + transform.parent.localRotation + "  pupet: dad " + parent.transform.GetIKinematic().LocalRotation +" is: " + parent.transform.GetIKinematic().Name);
                 //  Debug.Log(" Dad globlRot: " + transform.parent.rotation + "  pupet: dad " + parent.GlobalRotation() + " is: " + parent.name);
 
-                Debug.Log(targetname + ":     globalVel: " + Velocity + "  pupet: " + pupeteeredJoint4Debug.GlobalVelocity()   + "pupetKin: " + pupetKin.Velocity);
+               // Debug.Log(targetname + ":     globalVel: " + Velocity + "  pupet: " + pupeteeredJoint4Debug.GlobalVelocity()   + "pupetKin: " + pupetKin.Velocity);
 
 
             }
