@@ -236,8 +236,9 @@ public static class Utils
         if (sampling_rate == -1)
             sampling_rate = 1.0f / Time.fixedDeltaTime;
 
-        Quaternion qdif = Quaternion.Inverse(previous) * current;
-        Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
+            //  Quaternion qdif = Quaternion.Inverse(previous) * current;
+            Quaternion qdif = current * Quaternion.Inverse(previous) ;
+            Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
         float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * sampling_rate;
         return speed * axis.normalized;
     }
