@@ -21,6 +21,10 @@ namespace ModularAgents.Kinematic.Mujoco
       //  public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
    
         Vector3 prevPosition;
+
+        Vector3 currentPosition;
+
+
         Quaternion prevRotation = Quaternion.identity;
         Quaternion currentRotation = Quaternion.identity;
 
@@ -36,8 +40,9 @@ namespace ModularAgents.Kinematic.Mujoco
 
         private float fs;
 
-        private Vector3 Velocity => (Position - prevPosition)*fs;
-        
+        //  private Vector3 Velocity => (Position - prevPosition)*fs;
+        private Vector3 Velocity => (currentPosition - prevPosition) * fs;
+
         private Vector3 AngularVelocity => Utils.RotationVel(currentRotation, prevRotation, fs);
 
         //we express it in its parent's coordinates:
@@ -80,7 +85,8 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public void Step()
         {
-            prevPosition = transform.position;
+            prevPosition = currentPosition;
+            currentPosition = transform.position;
 
             prevRotation = currentRotation;
             currentRotation = transform.rotation;
@@ -159,7 +165,7 @@ namespace ModularAgents.Kinematic.Mujoco
                 DebugValuesFor("lhumerus");
                 DebugValuesFor("lowerback");
 
-
+                DebugValuesFor("rtibia");
 
             }
 
@@ -175,12 +181,16 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
-               // Debug.Log( targetname +"s:          AngVel: " + AngularVelocity + "  pupet: " + pupetKin.AngularVelocity);
-                Debug.Log(targetname + ":     localAngVel: " + LocalAngularVelocity + "  pupet: " + pupetKin.LocalAngularVelocity);
+                Debug.Log( targetname +":          AngVel: " + AngularVelocity + "  pupet: " + pupetKin.AngularVelocity);
+                Debug.Log(targetname + ":     localAngVel: " + LocalAngularVelocity + "  pupet: " + pupetKin.LocalAngularVelocity );
                 // Debug.Log(":     localRot: " + LocalRotation + "  pupet: " + pupetKin.LocalRotation);
                 //  var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
                 //  Debug.Log(" Dad localRot: " + transform.parent.localRotation + "  pupet: dad " + parent.transform.GetIKinematic().LocalRotation +" is: " + parent.transform.GetIKinematic().Name);
                 //  Debug.Log(" Dad globlRot: " + transform.parent.rotation + "  pupet: dad " + parent.GlobalRotation() + " is: " + parent.name);
+
+                Debug.Log(targetname + ":     globalVel: " + Velocity + "  pupet: " + pupeteeredJoint4Debug.GlobalVelocity()   + "pupetKin: " + pupetKin.Velocity);
+
+
             }
 
 

@@ -100,6 +100,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public Vector3 AngularVelocity => mjBody.GlobalAngularVelocity();
 
+
         public float Mass => mass;
 
         public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);  // TODO: Replace using Data->xipos
@@ -138,8 +139,10 @@ namespace ModularAgents.Kinematic.Mujoco
         public Vector3 LocalVelocity => isRoot? mjBody.GlobalVelocity() : mjBody.GlobalVelocity() - parentBody.GlobalVelocity();
 
         // public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
-        
-        //notice this is in the parent's coordinate axis:
-        public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+        //notice we want this in the parent's coordinate axis, we can simply remove the inverse matrix:
+       public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+
+
+
     }
 }

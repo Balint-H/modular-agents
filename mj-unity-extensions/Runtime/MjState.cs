@@ -268,7 +268,7 @@ namespace Mujoco.Extensions
             fixed (double* res = mjBodyVel)
             {
                 MujocoLib.mj_objectVelocity(
-                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame? 0 : 1);
+                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame? 0 : 0);
                 // linear velocity is in the last 3 entries
                 bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
             }
