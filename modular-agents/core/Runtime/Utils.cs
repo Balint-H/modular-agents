@@ -229,47 +229,26 @@ public static class Utils
     }
 
 
-    public static Vector3 QuaternionError(Quaternion cur, Quaternion des)
+
+    public static Vector3 RotationVel(Quaternion previous, Quaternion current, float sampling_rate = -1)
     {
-        Quaternion err = Quaternion.Inverse(cur)*des;
-        err.ToAngleAxis(out float angle, out Vector3 axis);
-        return axis*angle ;
+
+        if (sampling_rate == -1)
+            sampling_rate = 1.0f / Time.fixedDeltaTime;
+
+        Quaternion qdif = Quaternion.Inverse(previous) * current;
+        Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
+        float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * sampling_rate;
+        return speed * axis.normalized;
     }
 
 
-
-    public static Vector3 QuaternionError2(Quaternion cur, Quaternion des)
+        public static Vector3 QuaternionError(Quaternion cur, Quaternion des)
     {
         Quaternion err = Quaternion.Inverse(cur) * des;
         err.ToAngleAxis(out float angle, out Vector3 axis);
         return - axis * (angle * Mathf.Deg2Rad);
     }
-
-
-
-        public static Vector3 QuaternionError3(Quaternion cur, Quaternion des)
-        {
-
-            double[] current = new double[4] { cur.w, cur.x, cur.y, cur.z };
-            double[] desdes = new double[4] { des.w, des.x, des.y, des.z };
-            double[] res=QuaternionError(current, desdes);
-            return new Vector3(  - (float) res[0], - (float)res[1], - (float)res[2]);
-            
-            
-        }
-
-
-
-        public static Vector3 QuaternionError4(Quaternion cur, Quaternion des)
-        {
-
-            double[] current = new double[4] { - cur.w, cur.x, cur.z, cur.y };
-            double[] desdes = new double[4] { - des.w, des.x, des.z, des.y };
-            double[] res = QuaternionError(current, desdes);
-            return new  Vector3( (float)res[0], (float)res[1], (float)res[2]);
-
-
-        }
 
 
 

@@ -20,22 +20,16 @@ namespace ModularAgents.Kinematic.Mujoco
         [SerializeField]
         MjBody pupeteeredJoint4Debug;
 
-
         public MjBody PupeteeredBody {  set => pupeteeredJoint4Debug = value; }
 
         public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
-        IKinematic pairedKinematics = null;
-
-
+   
         Vector3 prevPosition;
         Quaternion prevRotation;
 
 
         Quaternion prevLocalRotation  = Quaternion.identity;
         Quaternion currentLocalRotation = Quaternion.identity;
-
-        Quaternion prevPupeteeredLocalRotation = Quaternion.identity;
-        Quaternion pupeteeredLocalRotation = Quaternion.identity;
 
         private Vector3 Position => transform.position;
         private Quaternion Rotation => transform.rotation;
@@ -47,77 +41,11 @@ namespace ModularAgents.Kinematic.Mujoco
         private float fs;
 
         private Vector3 Velocity => (Position - prevPosition)*fs;
-        //private Vector3 AngularVelocity => Utils.QuaternionError(Rotation, prevRotation)*fs;
-        private Vector3 AngularVelocity => Utils.QuaternionError2(Rotation, prevRotation) * fs;
-
-
-
-
-
-
-        //  public Vector3 LocalAngularVelocity => isRoot ? AngularVelocity : AngularVelocity - parentKinematics.AngularVelocity;
-
-        // private Vector3 LocalAngularVelocity =>   Utils.QuaternionError2(transform.localRotation, prevLocalRotation) * fs;
-        private Vector3 LocalAngularVelocity => QuaternionLocalVel();
-
-
-
-        //https://github.com/google-deepmind/mujoco/blob/deb14dc081c956997d2398cff367168219ce9939/src/engine/engine_util_spatial.c#L236
-
-        /*
         
-        // Subtract quaternions, express as 3D velocity: qb*quat(res) = qa.
+        private Vector3 AngularVelocity => Utils.RotationVel(Rotation, prevRotation, fs);
+        private Vector3 LocalAngularVelocity => Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs); //QuaternionLocalVel();
 
-void mju_subQuat(mjtNum res[3], const mjtNum qa[4], const mjtNum qb[4]) {
-  // qdif = neg(qb)*qa
-  mjtNum qneg[4], qdif[4];
-  mju_negQuat(qneg, qb);
-  mju_mulQuat(qdif, qneg, qa);
-
-  // convert to 3D velocity
-  mju_quat2Vel(res, qdif, 1);
-}
-
-        
-// convert quaternion (corresponding to orientation difference) to 3D velocity
-void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
-  mjtNum axis[3] = {quat[1], quat[2], quat[3]};
-  mjtNum sin_a_2 = mju_normalize3(axis);
-  mjtNum speed = 2 * mju_atan2(sin_a_2, quat[0]);
-
-  // when axis-angle is larger than pi, rotation is in the opposite direction
-  if (speed>mjPI) {
-    speed -= 2*mjPI;
-  }
-  speed /= dt;
-
-  mju_scl3(res, axis, speed);
-}
-
-         */
-
-        Vector3 QuaternionLocalVel()
-        {
-            //Quaternion negLocRot = new Quaternion( - LocalRotation.x, -LocalRotation.y, -LocalRotation.z, -LocalRotation.w);
-
-            //Quaternion qdif = Quaternion.Inverse(LocalRotation) * prevLocalRotation;
-            //Quaternion qdif = LocalRotation * Quaternion.Inverse(prevLocalRotation);
-            Quaternion qdif = Quaternion.Inverse(prevLocalRotation) * currentLocalRotation;
-
-            Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
-
-            float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * fs;
-
-            return speed * axis.normalized;
-            //return  axis;
-
-
-
-
-        }
-
-
-
+     
 
 
         [SerializeField]
@@ -144,7 +72,7 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
         private void MjInitialize()
         {
             fs = 1 / Time.fixedDeltaTime;
-            pairedKinematics = pairedBody.transform.GetIKinematic();
+        
         }
 
 
@@ -161,13 +89,6 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
 
             prevLocalRotation = currentLocalRotation;
             currentLocalRotation = LocalRotation;
-
-
-
-
-           // prevPupeteeredLocalRotation = pupeteeredLocalRotation;
-          //  pupeteeredLocalRotation = pupeteeredJoint4Debug.transform.GetIKinematic().LocalRotation ;
-
     
 
     }
@@ -181,8 +102,7 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
         private void OnDrawGizmosSelected()
         {
             if (!Application.isPlaying) return;
-            //((MocapBodyKinematics)GetIKinematic()).Draw();
-
+        
            // Draw2();
 
             Draw();
@@ -198,59 +118,32 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
             Gizmos.DrawRay(Position, Rotation * Vector3.up * 0.015f);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(Position, Rotation * Vector3.right * 0.015f);
-           // Gizmos.color = Color.cyan;
-           // Gizmos.DrawRay(Position, Velocity * 0.05f);
+  
+
+            Gizmos.color = Color.grey;
+
+            var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+
+            Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(LocalAngularVelocity)) * 0.2f);
 
 
-            //if(pairedKinematics != null) 
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
+
+
+            if (pupeteeredJoint4Debug != null)
             {
+                Gizmos.color = Color.blue;                    
+                IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
+                Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
                 Gizmos.color = Color.cyan;
-                //Gizmos.DrawRay(pairedKinematics.Position, Velocity * 0.05f);
-                //Gizmos.DrawRay(Position, LocalAngularVelocity * 0.2f);
-
-                //Gizmos.DrawRay(Position + offset4debug, MjEngineTool.UnityVector3(AngularVelocity) * 0.2f);
-                //Gizmos.DrawRay(Position + offset4debug, AngularVelocity * 0.2f);
-
-              
-                
-
-               // Gizmos.DrawRay(Position, MjEngineTool.UnityVector3( LocalAngularVelocity) * 0.2f);
-
-                //Gizmos.DrawRay(pairedKinematics.Position - offset4debug, pairedKinematics.Velocity * 0.05f);
-                //Gizmos.DrawRay(Position - offset4debug, pairedKinematics.AngularVelocity * 0.2f);
-                //Gizmos.DrawRay(Position, pairedKinematics.Velocity * 0.05f);
-
-                Gizmos.color = Color.grey;
-
-                var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
-
-                Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(LocalAngularVelocity)) * 0.2f);
-
-
-
-                if (pupeteeredJoint4Debug != null)
-                {
-                    Gizmos.color = Color.blue;
-                    
-                    IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
-                    //Gizmos.DrawRay(pairedKinematics.Position + offset4debug, pupetKin.Velocity * 0.05f);
-                    //Gizmos.DrawRay(Position + offset4debug, pupetKin.AngularVelocity * 0.2f);
-                    Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
-
-
-                    //MjEngineTool.
-                    //lets calculate an angular velocity using a similar method, but using mujoco:
-
-                    //        public Quaternion QLocalRotation => isRoot ? Rotation : Quaternion.Inverse(MjState.GlobalRotation(parentBody)) * Rotation;
-
-
-
-
-                }
-
+                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
 
             }
+
+
+          
 
         }
 
@@ -282,8 +175,6 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
             }
 
         }
-
-
 
 
 
@@ -320,6 +211,8 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
 
             public Vector3 AngularVelocity => component.AngularVelocity;
 
+            public Vector3 LocalAngularVelocity => component.LocalAngularVelocity;
+
             public float Mass => mass;
 
             public Vector3 CenterOfMass => Matrix4x4.TRS(Position,
@@ -334,13 +227,13 @@ void mju_quat2Vel(mjtNum res[3], const mjtNum quat[4], mjtNum dt) {
 
             public Quaternion Rotation => component.Rotation;
 
-            public Quaternion LocalRotation => isRoot? Rotation : Quaternion.Inverse(parentKinematics.Rotation) * Rotation;
+            public Quaternion LocalRotation => component.LocalRotation;
 
             public Vector3 Position => component.Position;
 
             public Vector3 LocalVelocity => isRoot? Velocity : Velocity - parentKinematics.Velocity;
 
-            public Vector3 LocalAngularVelocity => isRoot ? AngularVelocity : AngularVelocity - parentKinematics.AngularVelocity;
+        
 
             public string Name => component.name;
 
