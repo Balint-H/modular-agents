@@ -43,9 +43,9 @@ namespace ModularAgents.Kinematic.Mujoco
         private Vector3 Velocity => (Position - prevPosition)*fs;
         
         private Vector3 AngularVelocity => Utils.RotationVel(Rotation, prevRotation, fs);
-        private Vector3 LocalAngularVelocity => Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs); //QuaternionLocalVel();
 
-     
+        //we express it in its parent's coordinates:
+        private Vector3 LocalAngularVelocity => transform.parent.rotation *  Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs); 
 
 
         [SerializeField]
@@ -124,21 +124,21 @@ namespace ModularAgents.Kinematic.Mujoco
 
             var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
 
-            Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(LocalAngularVelocity)) * 0.2f);
+            Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
 
 
-           // Gizmos.color = Color.black;
-           // Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
 
 
             if (pupeteeredJoint4Debug != null)
             {
                 Gizmos.color = Color.blue;                    
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
-                Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
+                //Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
                // Gizmos.color = Color.cyan;
-               // Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
 
             }
 

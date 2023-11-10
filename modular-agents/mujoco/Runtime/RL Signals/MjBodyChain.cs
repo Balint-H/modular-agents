@@ -137,6 +137,9 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public Vector3 LocalVelocity => isRoot? mjBody.GlobalVelocity() : mjBody.GlobalVelocity() - parentBody.GlobalVelocity();
 
-        public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+        // public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+        
+        //notice this is in the parent's coordinate axis:
+        public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
     }
 }
