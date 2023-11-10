@@ -36,17 +36,17 @@ namespace ModularAgents.Kinematic.Mujoco
         private Quaternion LocalRotation => transform.localRotation;
 
 
-
-
         private float fs;
-
-        //  private Vector3 Velocity => (Position - prevPosition)*fs;
         private Vector3 Velocity => (currentPosition - prevPosition) * fs;
 
         private Vector3 AngularVelocity => Utils.RotationVel(currentRotation, prevRotation, fs);
 
         //we express it in its parent's coordinates:
-        private Vector3 LocalAngularVelocity => transform.parent.rotation *  Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs); 
+        private Vector3 LocalAngularVelocity =>   Utils.RotationVel(currentLocalRotation, prevLocalRotation, fs);
+
+
+        // notice we want this in the parent's coordinate axis, if we want to visualise in global cartesian coordinates we can simply add the parents rotation:
+        //private Vector3 LocalAngularVelocityCartesianCoords => transform.parent.rotation * LocalAngularVelocity;
 
 
         [SerializeField]
@@ -126,41 +126,21 @@ namespace ModularAgents.Kinematic.Mujoco
 
 
 
+            
+
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(Position + 0.01f * Vector3.up, (transform.parent.rotation *LocalAngularVelocity * 0.2f));
+
             MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
-            if (pupeteeredJoint4Debug)
-            {
-                // var parent = pupeteeredJoint4Debug.GetComponentInParent<MjBody>();
+
+            if (pupeteeredJoint4Debug != null)
+            {      
+                Gizmos.color = Color.blue;                    
+                IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
 
                 var parent = pupeteeredJoint4Debug.transform.parent.GetComponent<MjBody>();
 
-
-                Gizmos.color = Color.grey;
-                Gizmos.DrawRay(Position + 0.005f * Vector3.up, (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity)) * 0.2f);
-
-
-
-
-              //  Gizmos.color = Color.white;
-              //  Quaternion temp = parent.GlobalRotation();
-              //  Gizmos.DrawRay(Position + 0.015f * Vector3.up, (!parent ? LocalAngularVelocity : temp * Quaternion.Inverse(transform.parent.rotation) * LocalAngularVelocity * 0.2f )  );
-
-
-            }
-
-
-            Gizmos.color = Color.black;
-            Gizmos.DrawRay(Position + 0.01f * Vector3.up,LocalAngularVelocity * 0.2f);
-
-
-            if (pupeteeredJoint4Debug != null)
-            {
-      
-                Gizmos.color = Color.blue;                    
-                IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
-                //Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
-
-               
-                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+                Gizmos.DrawRay(Position, parent.GetTransformMatrix().MultiplyVector(   pupetKin.LocalAngularVelocity )* 0.2f);
 
                 
                 Gizmos.color = Color.yellow;

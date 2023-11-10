@@ -138,9 +138,11 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public Vector3 LocalVelocity => isRoot? mjBody.GlobalVelocity() : mjBody.GlobalVelocity() - parentBody.GlobalVelocity();
 
-        // public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
-        //notice we want this in the parent's coordinate axis, we can simply remove the inverse matrix:
-       public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+         public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+       
+        
+        // notice we want this in the parent's coordinate axis, if we want to visualise in global cartesian coordinates we can simply remove the parents "rotation removal":
+       // public Vector3 LocalAngularVelocityCartesianCoords => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
 
 
 
