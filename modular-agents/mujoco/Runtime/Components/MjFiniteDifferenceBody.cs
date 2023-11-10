@@ -127,8 +127,8 @@ namespace ModularAgents.Kinematic.Mujoco
             Gizmos.DrawRay(Position+0.005f*Vector3.up , (!parent ? LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(LocalAngularVelocity)) * 0.2f);
 
 
-            Gizmos.color = Color.black;
-            Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
+           // Gizmos.color = Color.black;
+           // Gizmos.DrawRay(Position + 0.005f * Vector3.up,LocalAngularVelocity * 0.2f);
 
 
             if (pupeteeredJoint4Debug != null)
@@ -137,8 +137,8 @@ namespace ModularAgents.Kinematic.Mujoco
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                 Gizmos.DrawRay(Position, (!parent ? pupetKin.LocalAngularVelocity : parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity)) * 0.2f);
 
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
+               // Gizmos.color = Color.cyan;
+               // Gizmos.DrawRay(Position, pupetKin.LocalAngularVelocity * 0.2f);
 
             }
 
