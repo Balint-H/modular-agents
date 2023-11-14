@@ -275,23 +275,20 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         //public double[] Positions => MjEngineTool.MjVector3(transform) ;
 
 
-        public double[] Velocities => getLocalAngularVelocity();
+        public double[] Velocities => getVelocities();
         public double[] Positions => getLocalRotation();
 
 
-
-
-        double[] getLocalAngularVelocity()
+        double[] getVelocities()
         {
-            return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
-
+            return new double[6] { parentKinematics.Velocity.x, parentKinematics.Velocity.y, parentKinematics.Velocity.z,
+                                    LocalAngularVelocity.x,     LocalAngularVelocity.y,      LocalAngularVelocity.z };
         }
 
         double[] getLocalRotation()
         {
-
-
-            return new double[3] { Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
+            return new double[6] { parentKinematics.Position.x,      parentKinematics.Position.y,     parentKinematics.Position.z,
+                                    Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
 
         }
 
