@@ -7,7 +7,7 @@ using Mujoco;
 using Mujoco.Extensions;
 using System.Data;
 using ModularAgents.Kinematic;
-
+using ModularAgents.Kinematic.Mujoco;
 
 namespace ModularAgents.TrainingEvents 
 { 
@@ -34,13 +34,30 @@ namespace ModularAgents.TrainingEvents
             public void CopyKinematicsFrom(IKinematicReference reference, Vector3 offset)
             {
                 MjKinematicRig mjReference = reference as MjKinematicRig;
-                var sourceKinematics = MjState.GetMjKinematics(mjReference.KinematicRagdollRoot.GetComponent<MjBody>());
-            
+
+
+                (IEnumerable < double[]>, IEnumerable < double[]>) sourceKinematics;
+                (double[], double[]) rootKinematics;
+
+                if (mjReference != null)
+                {
+                    MjBody kinRagRoot = mjReference.KinematicRagdollRoot.GetComponent<MjBody>();
+                    sourceKinematics = MjState.GetMjKinematics(kinRagRoot);
+                    rootKinematics = MjState.GetRootKinematics(mjReference.KinematicRagdollRoot.GetComponent<MjBody>());
+
+                }
+                else //we are in a finite difference case:
+                {
+                    MjKinematicRigFD mjReferenceFD = reference as MjKinematicRigFD;
+                    sourceKinematics = mjReferenceFD.GetMjKinematics();
+                    rootKinematics = mjReferenceFD.GetRootKinematics();
+
+                }
 
                 if (offset != Vector3.zero)
                 {
-                    
-                    var rootKinematics = MjState.GetRootKinematics(mjReference.KinematicRagdollRoot.GetComponent<MjBody>());
+
+
                     var mjOffset =
                        (offset);
 
@@ -54,11 +71,13 @@ namespace ModularAgents.TrainingEvents
                     var sourcePositions = sourceKinematics.Item1.ToArray();
                     sourcePositions[index] = rootPos;
 
-                   sourceKinematics.Item1 = sourcePositions;
+                    sourceKinematics.Item1 = sourcePositions;
 
                 }
 
                 MjScene.Instance.SetMjKinematics(rootBody, sourceKinematics.Item1, sourceKinematics.Item2);
+
+
             }
 
             public void TeleportRoot(Vector3 position, Quaternion rotation)

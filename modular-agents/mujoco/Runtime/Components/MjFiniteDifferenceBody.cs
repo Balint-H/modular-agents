@@ -73,15 +73,29 @@ namespace ModularAgents.Kinematic.Mujoco
         private void MjInitialize()
         {
             fs = 1 / Time.fixedDeltaTime;
-        
+            AddMjFiniteDifferenceJoint();
         }
 
-
-        public void FixedUpdate()
+        public void AddMjFiniteDifferenceJoint()
         {
-            Step();
+            var fdjoint = gameObject.AddComponent<MjFiniteDifferenceJoint>();
+            foreach (Transform child in pairedBody.transform)
+            {
+                MjBaseJoint mjbj = child.GetComponent<MjBaseJoint>();
+                if (mjbj != null)
+                    fdjoint.PairedJoint = mjbj;
+            }
+
         }
 
+
+
+
+        /*   public void FixedUpdate()
+           {
+               Step();
+           }
+        */
 
         public void Step()
         {
@@ -259,7 +273,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
 
 
-        private class FiniteDifferenceBodyKinematics : IKinematic
+        public class FiniteDifferenceBodyKinematics : IKinematic
         {
             MjFiniteDifferenceBody component;
             float mass;
@@ -293,27 +307,19 @@ namespace ModularAgents.Kinematic.Mujoco
 
             public Vector3 LocalAngularVelocity => component.LocalAngularVelocity;
 
-            //public float Mass => mass;
+            public float Mass => mass;
 
-            public float Mass => throw new NotImplementedException();
-
-            
+         
             public Vector3 CenterOfMass => Matrix4x4.TRS(Position,
                                                  Rotation,
                                                  Vector3.one).MultiplyPoint3x4(inertiaLocalPos);
             
 
-           // public Vector3 CenterOfMass => throw new NotImplementedException();
-            
             
             public Matrix4x4 TransformMatrix => Matrix4x4.TRS(Position,
                                                               Rotation,
                                                               Vector3.one) * inertiaRelMatrix;
             
-            //public Matrix4x4 TransformMatrix => throw new NotImplementedException();
-
-
-            // public int index => -component.pairedBody.MujocoId;
             public int index => throw new NotImplementedException();
             public Quaternion Rotation => component.Rotation;
 

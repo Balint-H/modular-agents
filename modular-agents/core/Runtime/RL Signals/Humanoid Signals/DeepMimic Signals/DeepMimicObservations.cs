@@ -35,7 +35,7 @@ namespace ModularAgents.DeepMimic
             foreach (IKinematic k in observedKinematics)
             {
                 sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.Velocity));
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.AngularVelocity));         //shouldn't this be: sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.LocalAngularVelocity));
+                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.AngularVelocity));       
                 sensor.AddObservation(fDyn.WorldToCharacter(k.Position));
                 (var normal, var tangent) = k.TransformMatrix.ToNormalTangent();
                 sensor.AddObservation(fDyn.WorldDirectionToCharacter(normal));

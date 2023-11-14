@@ -6,6 +6,7 @@ using Mujoco;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent, IMjJointStateProvider
@@ -22,6 +23,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         if(jointState == null) jointState = FiniteDifferenceJointState.GetFiniteDifferenceJointState(this, pairedJoint);
         return jointState;
     }
+
+
 
     public void Step()
     {
@@ -258,7 +261,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         public double[] Accelerations => throw new System.NotImplementedException();
 
-        public double[] Velocities => throw new System.NotImplementedException();
+        //public double[] Velocities => throw new System.NotImplementedException();
         /*
         public override unsafe void OnSyncState(MujocoLib.mjData_* data)
         {
@@ -268,8 +271,30 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
                 MjEngineTool.MjQuaternionAtEntry(data->xquat, MujocoId));
         }*/
 
-        public double[] Positions => throw new System.NotImplementedException();
+        //public double[] Positions => throw new System.NotImplementedException();
         //public double[] Positions => MjEngineTool.MjVector3(transform) ;
+
+
+        public double[] Velocities => getLocalAngularVelocity();
+        public double[] Positions => getLocalRotation();
+
+
+
+
+        double[] getLocalAngularVelocity()
+        {
+            return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
+
+        }
+
+        double[] getLocalRotation()
+        {
+
+
+            return new double[3] { Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
+
+        }
+
 
         public double[] PositionErrors => throw new System.NotImplementedException();
 

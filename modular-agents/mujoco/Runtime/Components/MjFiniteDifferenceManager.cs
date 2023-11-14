@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class MjFiniteDifferenceManager : TrainingEventHandler
+public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
 {
     [SerializeField]
     MjFreeJoint pairedRootJoint;
@@ -23,7 +23,7 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
     //Transform tracked;
  
 
-    public override EventHandler Handler => (_, _) => Step();
+ //   public override EventHandler Handler => (_, _) => Step();
 
     private void Start()
     {
@@ -46,23 +46,23 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
     public void Step()
     {
         // We store the old state.
-       /* foreach (var component in managedComponents)
+       foreach (var component in managedComponents)
         {
             component.Step();
         }    
-         */
+         
 
        // tracked.GetComponent<MjFiniteDifferenceJoint>().checkLocalAxisPos();
         
         // Get the new state.
       //  animator.Update(Time.fixedDeltaTime);
     }
-    /*
+    
     public void FixedUpdate()
     {
         Step();
     }
-    */
+    
 
 
 
@@ -73,7 +73,7 @@ public class MjFiniteDifferenceManager : TrainingEventHandler
         var startTime = Mathf.Clamp01(normalizedTime - Time.fixedDeltaTime/stateInfo.length);
         animator.Play(stateInfo.fullPathHash, -1, startTime);
         animator.Update(0);
-        Step();
+     //   Step();
     }
 
 
