@@ -46,8 +46,16 @@ public class MjFiniteDifferenceManagerEditor : Editor
             Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody.");
             return;
         }
-        var finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
-        //finiteDifferenceBody.PairedBody = mjBody;
+
+        MjFiniteDifferenceBody finiteDifferenceBody = childTransforms.First().gameObject.GetComponent<MjFiniteDifferenceBody>();
+        if (finiteDifferenceBody == null)
+        {
+            finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
+
+        }
+
+
+        finiteDifferenceBody.PairedBody = mjBody;
 
         foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
         {
