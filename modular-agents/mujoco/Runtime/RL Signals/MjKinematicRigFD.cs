@@ -21,8 +21,7 @@ public class MjKinematicRigFD : MonoBehaviour, IKinematicReference
     [FormerlySerializedAs("ragdollRoot")]
     private Transform kinematicRagdollRoot;
 
-    [SerializeField]
-    private int targetId;
+  
 
     [SerializeField]
     private bool intializeAlone;
@@ -78,8 +77,8 @@ public class MjKinematicRigFD : MonoBehaviour, IKinematicReference
 
 
            //we assume that when we initialised the MjFiniteDifference we added a MjFiniteDifferenceJoint on each:
-            MjFiniteDifferenceJoint[] mjfdj = kinematicRagdollRoot.GetComponentsInChildren<MjFiniteDifferenceJoint>().ToArray();
-
+            MjFiniteDifferenceJoint[] mjfdj = kinematicRagdollRoot.GetComponentsInChildren<MjFiniteDifferenceJoint>().OrderBy(j => j.PairedJoint.name).ToArray();
+            
 
             return (mjfdj.Select(x => x.GetJointState().Positions), mjfdj.Select(x => x.GetJointState().Velocities));
 
@@ -87,8 +86,20 @@ public class MjKinematicRigFD : MonoBehaviour, IKinematicReference
 
         public (double[], double[]) GetRootKinematics()
         {
+            MjFiniteDifferenceJoint rootJoint = null;
 
-            var rootJoint = KinematicRagdollRoot.GetComponent<MjFiniteDifferenceJoint>();
+            foreach(Transform child in KinematicRagdollRoot) {
+                 var test= child.GetComponent<MjFiniteDifferenceJoint>();
+                if (test != null) { 
+                    rootJoint = test; 
+                    break; }
+
+            }
+            if (rootJoint == null)
+            {
+                Debug.LogError("did not find the root joint associated with: " + name);
+
+            }
             return (rootJoint.GetJointState().Positions, rootJoint.GetJointState().Velocities);
 
         }
@@ -125,12 +136,7 @@ public class MjKinematicRigFD : MonoBehaviour, IKinematicReference
        // Quaternion rotLag = bodies[0].GlobalRotation() * Quaternion.Inverse(riggedTransforms[0].rotation);
         TrackKinematics();
 
-        if (targetId > -1)
-        {
-            MjState.TeleportMjRoot(targetId, position,  rotation);
-            return;
-        }
-
+    
        // MjState.TeleportMjRoot(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>(), position,  rotation);
     }
 
@@ -142,14 +148,7 @@ public class MjKinematicRigFD : MonoBehaviour, IKinematicReference
 
         TrackKinematics();
 
-        if (targetId > -1)
-        {
-            Debug.Log(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>().MujocoId);
-                // MjState.TeleportMjRoot(targetId, posLag + position, rotLag * riggedTransforms[0].rotation);
-                MjState.TeleportMjRoot(targetId, position,  refTransforms[0].rotation);
-                return;
-        }
-
+      
 
         MjState.TeleportMjRoot(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>(),  position,  refTransforms[0].rotation);
     }

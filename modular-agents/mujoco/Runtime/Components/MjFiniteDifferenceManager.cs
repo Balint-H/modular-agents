@@ -11,6 +11,10 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
     [SerializeField]
     MjFreeJoint pairedRootJoint;
 
+    [SerializeField]
+    public bool useInPupeteering;
+
+
     public MjFreeJoint Root => pairedRootJoint;
 
     [SerializeField]

@@ -20,7 +20,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     public IMjJointState GetJointState()
     {
-        if(jointState == null) jointState = FiniteDifferenceJointState.GetFiniteDifferenceJointState(this, pairedJoint);
+        if(jointState == null) 
+            jointState = FiniteDifferenceJointState.GetFiniteDifferenceJointState(this, pairedJoint);
         return jointState;
     }
 
@@ -110,27 +111,33 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         //  public double[] Velocities => throw new System.NotImplementedException();  // TODO 
 
-        public double[] Velocities => GetLocalAngularVelocity();
+        public double[] Velocities => GetJointAngularVelocity();
 
 
-        double[] GetLocalAngularVelocity()
+        double[] GetJointAngularVelocity()
         {
-           return  new double[3] { LocalAngularVelocity.x, 0, 0 };
+             //return new double[1] {  LocalAngularVelocity.x };
+
+            return new double[1] { (Quaternion.Inverse(hinge.transform.localRotation) * LocalAngularVelocity).x };
+
+
+
 
         }
 
-        double[] GetLocalRotation()
+        double[] GetJointLocalRotation()
         {
 
-            Quaternion temp = new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
-            return new double[3] { Mathf.Asin( 2* temp.x), 0, 0 };
+            Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) *  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
+            //Quaternion temp =  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
+            return new double[1] { 2 * Mathf.Asin(temp.x) };
 
         }
         
 
-        //public double[] Positions => throw new System.NotImplementedException();   // TODO
+    
 
-        public double[] Positions => GetLocalRotation();
+        public double[] Positions => GetJointLocalRotation();
 
 
         //check into MjEngineTool.MjQuaternion for conversion
@@ -194,22 +201,33 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         public double[] Accelerations => throw new System.NotImplementedException();
 
        
-        public double[] Velocities => getLocalAngularVelocity();
-        public double[] Positions => getLocalRotation();
+        public double[] Velocities => getJointAngularVelocity();
+        public double[] Positions => getJointLocalRotation();
 
 
 
-        double[] getLocalAngularVelocity()
+        double[] getJointAngularVelocity()
         {
-            return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
+            // return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
+            //in Mujoco:
+
+            Vector3 temp =  LocalAngularVelocity;
+
+            return new double[3] { temp.x, temp.z, temp.y };
 
         }
 
-        double[] getLocalRotation()
+        double[] getJointLocalRotation()
         {
 
+            //TODO: fix this, its wrong
+           
+            //Quaternion localJointRotation = gameObject.transform.rotation * LocalRotation;
+            Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
 
-            return new double[3] { Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
+
+            //in mujoco coordinates, this gives:
+            return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
 
         }
 
@@ -261,19 +279,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         public double[] Accelerations => throw new System.NotImplementedException();
 
-        //public double[] Velocities => throw new System.NotImplementedException();
-        /*
-        public override unsafe void OnSyncState(MujocoLib.mjData_* data)
-        {
-            transform.position = MjEngineTool.UnityVector3(
-                MjEngineTool.MjVector3AtEntry(data->xpos, MujocoId));
-            transform.rotation = MjEngineTool.UnityQuaternion(
-                MjEngineTool.MjQuaternionAtEntry(data->xquat, MujocoId));
-        }*/
-
-        //public double[] Positions => throw new System.NotImplementedException();
-        //public double[] Positions => MjEngineTool.MjVector3(transform) ;
-
+       
 
         public double[] Velocities => getVelocities();
         public double[] Positions => getLocalRotation();
@@ -281,14 +287,26 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         double[] getVelocities()
         {
-            return new double[6] { parentKinematics.Velocity.x, parentKinematics.Velocity.y, parentKinematics.Velocity.z,
-                                    LocalAngularVelocity.x,     LocalAngularVelocity.y,      LocalAngularVelocity.z };
+
+            //in unity coordinates:
+            //return new double[6] { parentKinematics.Velocity.x, parentKinematics.Velocity.y, parentKinematics.Velocity.z,
+            //                        LocalAngularVelocity.x,     LocalAngularVelocity.y,      LocalAngularVelocity.z };
+
+            //in Mujoco:
+            return new double[6] { parentKinematics.Velocity.x, parentKinematics.Velocity.z, parentKinematics.Velocity.y,
+                                    LocalAngularVelocity.x,     LocalAngularVelocity.z,      LocalAngularVelocity.y };
         }
 
         double[] getLocalRotation()
         {
-            return new double[6] { parentKinematics.Position.x,      parentKinematics.Position.y,     parentKinematics.Position.z,
-                                    Mathf.Asin(2 * LocalRotation.x), Mathf.Asin(2 * LocalRotation.y), Mathf.Asin(2 * LocalRotation.z) };
+
+            //in unity coordinates it would be:
+            //return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.y,     parentKinematics.Position.z,
+            //                        LocalRotation.x,                 LocalRotation.y,                 LocalRotation.z,                LocalRotation.w };//this is a global rotation due to IKinematic
+
+            //in Mujoco coordinates: (x,z,y) (-w, x,z,y)
+            return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.z,     parentKinematics.Position.y,
+                                    - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };//this is a global rotation due to IKinematic
 
         }
 

@@ -6,6 +6,7 @@ using Mujoco;
 using static Mujoco.Extensions.Scaling;
 using ModularAgents.Kinematic.Mujoco;
 using System.Linq;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 [CustomEditor(typeof(MjFiniteDifferenceManager))]
 public class MjFiniteDifferenceManagerEditor : Editor
@@ -25,7 +26,8 @@ public class MjFiniteDifferenceManagerEditor : Editor
         if (GUILayout.Button("Generate Finite Difference Components"))
         {
             MjFiniteDifferenceManager t = target as MjFiniteDifferenceManager;
-            RecursiveComponentCreation(t.Root.GetComponentInParent<MjBody>(), t.Animator.transform, prefix);
+            MjBody mjBody = t.Root.GetComponentInParent<MjBody>();
+            RecursiveComponentCreation(t,mjBody,  t.Animator.transform, prefix);
         }
 
         GUILayout.EndHorizontal();
@@ -33,9 +35,16 @@ public class MjFiniteDifferenceManagerEditor : Editor
 
     }
 
-    private void RecursiveComponentCreation(MjBody mjBody, Transform parentTransform, string prefix)
+    private void RecursiveComponentCreation(MjFiniteDifferenceManager tar,MjBody mjBody, Transform parentTransform, string prefix)
     {
-        var childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => prefix+t.name == mjBody.name);
+
+        List<Transform> childTransforms = new List<Transform>();
+        //this is supercustom for pupeteering case
+        if (tar.useInPupeteering)
+                childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
+        else
+            childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => prefix + t.name == mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
+
         if (childTransforms.Count() > 1)
         {
             Debug.LogWarning($"More than 1 match found for body {mjBody.name}: {string.Join(", ", childTransforms.Select(t => t.name))} Kinematic rig creation would likely fail.");
@@ -43,7 +52,7 @@ public class MjFiniteDifferenceManagerEditor : Editor
         }
         if (childTransforms.Count() < 1)
         {
-            Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody.");
+            Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody, being the ref:" + prefix );
             return;
         }
 
@@ -66,7 +75,7 @@ public class MjFiniteDifferenceManagerEditor : Editor
         }
         foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
         {
-            RecursiveComponentCreation(childBody, finiteDifferenceBody.transform, prefix);
+            RecursiveComponentCreation(tar,childBody, finiteDifferenceBody.transform, prefix);
         }
     }
 }

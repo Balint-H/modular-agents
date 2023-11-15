@@ -113,7 +113,7 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
             return;
         }
 
-        MjState.TeleportMjRoot(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>(), posLag + position, rotLag * rotation);
+      //  MjState.TeleportMjRoot(kinematicRagdollRoot.GetComponentInChildren<MjFreeJoint>(), posLag + position, rotLag * rotation);
     }
 
     public unsafe void TeleportRoot(Vector3 position)

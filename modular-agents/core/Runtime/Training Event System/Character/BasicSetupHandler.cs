@@ -84,16 +84,17 @@ public abstract class BasicSetupHandler : TrainingEventHandler
 		//Then we move the ragdoll as well, still in different joint orientations, but overlapping roots.
 		if (shouldResetPosition) kineticChainToReset.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
 
-        //We copy the rotations, velocities and angular velocities from the kinematic reference (which has the "same" pose as the animation).
-        kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
-    }
+            //We copy the rotations, velocities and angular velocities from the kinematic reference (which has the "same" pose as the animation).
+            //kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset,referenceAnimationRoot);
+            kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
+        }
 
 
 	//As I can see this handler to be extended to chains other then Articulationbody ones, here's a WIP interface
     public interface IResettable
     {
         public void TeleportRoot(Vector3 position, Quaternion rotation);
-        public void CopyKinematicsFrom(IKinematicReference reference, Vector3 offset);
+        public void CopyKinematicsFrom(IKinematicReference reference, Vector3 offset, Transform rootRef = null);
 
     }
 

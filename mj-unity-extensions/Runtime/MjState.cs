@@ -4,12 +4,15 @@ using UnityEngine;
 using System;
 using System.Linq;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 namespace Mujoco.Extensions
 {
     public static class MjState
     {
         static MjScene mjScene { get => MjScene.Instance; }
+
+      
 
         public static unsafe (IEnumerable<double[]>, IEnumerable<double[]>) GetMjKinematics(MjBody rootBody)
         {
@@ -431,13 +434,70 @@ namespace Mujoco.Extensions
             return (float)mjScene.Model->body_mass[bd.MujocoId];
         }
 
+
+        public static unsafe double[] GetQPos(this MjBaseJoint joint)
+        {
+            return Enumerable.Range(0, joint.PosCount()).Select(i => mjScene.Data->qpos[joint.QposAddress + i]).ToArray();
+        }
+
+
+
+        /*
         public static unsafe float[] GetQPos(this MjBaseJoint joint)
         {
             return Enumerable.Range(0, joint.PosCount()).Select(i => (float)mjScene.Data->qpos[joint.QposAddress + i]).ToArray();
         }
+        */
+
+
+
+        /*
+        public static unsafe double[] GetJointQPos(MjBaseJoint joint)
+        {
+            MujocoLib.mjModel_* Model = mjScene.Model;
+            MujocoLib.mjData_* Data = mjScene.Data;
+            double[] qpos;
+
+            switch (Model->jnt_type[joint.MujocoId])
+            {
+                default:
+                case (int)MujocoLib.mjtJoint.mjJNT_HINGE:
+                case (int)MujocoLib.mjtJoint.mjJNT_SLIDE:
+                    qpos = new double[] { Data->qpos[joint.QposAddress] };
+                    break;
+                case (int)MujocoLib.mjtJoint.mjJNT_BALL:
+                    qpos = new double[] { Data->qpos[joint.QposAddress],
+                                                     Data->qpos[joint.QposAddress+1],
+                                                     Data->qpos[joint.QposAddress+2],
+                                                     Data->qpos[joint.QposAddress+3]};
+                    break;
+
+                case (int)MujocoLib.mjtJoint.mjJNT_FREE:
+                    qpos = new double[] {
+                                                        Data->qpos[joint.QposAddress],
+                                                        Data->qpos[joint.QposAddress+1],
+                                                        Data->qpos[joint.QposAddress+2],
+                                                        Data->qpos[joint.QposAddress+3],
+                                                        Data->qpos[joint.QposAddress+4],
+                                                        Data->qpos[joint.QposAddress+5],
+                                                        Data->qpos[joint.QposAddress+6]};
+                    break;
+
+
+            }
+
+            return qpos;
+        }*/
+
+        /*
         public static unsafe float[] GetQVel(this MjBaseJoint joint)
         {
             return Enumerable.Range(0, joint.DofCount()).Select(i => (float)mjScene.Data->qvel[joint.DofAddress + i]).ToArray();
+        }*/
+
+        public static unsafe double[] GetQVel(this MjBaseJoint joint)
+        {
+            return Enumerable.Range(0, joint.DofCount()).Select(i => mjScene.Data->qvel[joint.DofAddress + i]).ToArray();
         }
 
 
