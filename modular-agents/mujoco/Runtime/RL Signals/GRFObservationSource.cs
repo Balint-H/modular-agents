@@ -106,7 +106,7 @@ namespace ModularAgents
             rootKinematics = rootBody.GetIKinematic();
         }
         
-        public void override OnAgentStart()
+        public override void OnAgentStart()
         {
         }
 
