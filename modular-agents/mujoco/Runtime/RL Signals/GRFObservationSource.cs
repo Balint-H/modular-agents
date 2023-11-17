@@ -105,6 +105,10 @@ namespace ModularAgents
         {
             rootKinematics = rootBody.GetIKinematic();
         }
+        
+        public void override OnAgentStart()
+        {
+        }
 
         private unsafe static IEnumerable<(MujocoLib.mjContact_, int id)> GetContacts(MujocoLib.mjData_* data)
         {
