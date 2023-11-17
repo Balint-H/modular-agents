@@ -29,7 +29,7 @@ namespace ModularAgents
         IKinematic rootKinematics;
 
 
-        private unsafe (Vector3, Vector3) GetMeanGRF()
+        public unsafe (Vector3, Vector3) GetMeanGRF()
         {
             var model = MjScene.Instance.Model;
             var data = MjScene.Instance.Data;
@@ -101,7 +101,7 @@ namespace ModularAgents
             sensor.AddObservation(simRef.WorldDirectionToCharacter(force)/forceScale);
         }
 
-        public override void OnAgentStart()
+        public void Awake()
         {
             rootKinematics = rootBody.GetIKinematic();
         }
