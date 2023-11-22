@@ -3,11 +3,13 @@ using ModularAgents.Kinematic;
 using ModularAgents.Kinematic.Mujoco;
 using ModularAgents.MotorControl;
 using Mujoco;
+using Mujoco.Extensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent, IMjJointStateProvider
 {
@@ -26,11 +28,140 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
     }
 
 
+    private void Start()
+    {
+        //CheckLocalAxisPos();
+    }
+
 
     public void Step()
     {
         //I'm not sure we need to do anything here; it might be enough to step the body kinematics, then the joint components can remain largely stateless views into the body information.
     }
+    private void OnDrawGizmosSelected()
+    
+    {
+
+        DrawLocalRotations();
+
+
+    }
+
+    public void Update()
+    {
+        CheckRotations2Draw();
+    }
+
+
+    public void DrawLocalRotations()
+    {
+        Gizmos.color = Color.blue;
+
+
+        if (pairedJoint != null)
+        {
+            double[] temp = GetJointState().Positions;
+
+
+            if (temp.Length == 4) //its a ball joint
+            { 
+
+                //the localRotation of the paired joint is:
+                //Quaternion FDLocalRotation = MjEngineTool.UnityQuaternion (new Quaternion((float) temp[0], (float) temp[1], (float) temp[2], (float) temp[3]));//the rotation of the parent
+
+                Quaternion FDLocalRotation = new Quaternion((float)temp[1], (float)temp[3], (float)temp[2], -(float)temp[0]);
+
+
+                Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.forward * 0.15f);
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.up * 0.15f);
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.right * 0.15f);
+
+                Vector3 offset4debug = new Vector3(0, 0, 0.0f);
+
+
+                /*
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.forward * 0.10f);
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.up * 0.10f);
+                Gizmos.color = Color.grey;
+                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.right * 0.10f);
+                */
+
+                if(pairedJoint != null)
+                {
+
+                    double[] temp2 = pairedJoint.GetQPos();
+
+                    Quaternion MjLocalRotation = new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0]);
+
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.forward * 0.10f);
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.up * 0.10f);
+                    Gizmos.color = Color.grey;
+                    Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.right * 0.10f);
+
+
+
+
+                }
+
+
+
+
+
+            }
+        }
+    }
+
+
+
+    public void CheckRotations2Draw()
+    {
+       
+
+
+        if (pairedJoint != null)
+        {
+            double[] temp = GetJointState().Positions;
+
+
+            if (temp.Length == 4) //its a ball joint
+            {
+
+                //the localRotation of the paired joint is:
+                Quaternion FDLocalRotation = new Quaternion((float)temp[1], (float)temp[3], (float)temp[2], -(float)temp[0]);//the rotation of the parent
+                
+                //Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.forward * 0.15f);
+                //Gizmos.color = Color.green;
+                //Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.up * 0.15f);
+                //Gizmos.color = Color.red;
+                //Gizmos.DrawRay(transform.position, FDLocalRotation * Vector3.right * 0.15f);
+
+                Vector3 offset4debug = new Vector3(0, 0, 0.0f);
+
+                Quaternion q2heck = transform.parent.localRotation;
+
+                //Gizmos.color = Color.cyan;
+                //Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.forward * 0.10f);
+                //Gizmos.color = Color.yellow;
+                //Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.up * 0.10f);
+                //Gizmos.color = Color.grey;
+                //Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.right * 0.10f);
+
+
+                double[] temp2 = pairedJoint.GetQPos();
+
+
+            }
+        }
+    }
+
+
+
 
     public void CheckLocalAxisPos()
     {
@@ -44,13 +175,20 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         Vector3 mjpos = MjEngineTool.MjVector3(gameObject.transform.position);
         //return new double[3] { mjpos.x, mjpos.y, mjpos.z };
 
-        Vector3 ax = ((MjHingeJoint)PairedJoint).RotationAxis;
 
+    
+
+        /*
+        var check = (MjHingeJoint)PairedJoint;
+        if (check != null)
+        {
+            Vector3 ax = ((MjHingeJoint)PairedJoint).RotationAxis;
+        }*/
 
             // Debug.Log(gameObject.name + " has up in unity: " + upUn + " up in mujoco: " + upMj + "  and local mj pos: " + mjpos + " rotation axis: " + ax);
 
        IMjJointState imj= GetJointState();
-       Debug.Log(gameObject.name + " has vels: " + imj.Velocities + " has LOCAL ROTATIONS: " + imj.Positions);
+       Debug.Log(imj.Name + "   " + gameObject.name   + " has vels: " + imj.Velocities +  " has LOCAL ROTATIONS: " + imj.Positions   );
     }
 
     private abstract class FiniteDifferenceJointState
@@ -128,8 +266,11 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         double[] GetJointLocalRotation()
         {
 
-            Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) *  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
-            //Quaternion temp =  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
+            //   Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) *  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
+            // Quaternion temp =  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
+            //Quaternion temp = new Quaternion(hinge.transform.localRotation.x, 0, 0, hinge.transform.localRotation.w).normalized;
+
+            Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation;
             return new double[1] { 2 * Mathf.Asin(temp.x) };
 
         }
@@ -211,8 +352,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
             // return new double[3] { LocalAngularVelocity.x, LocalAngularVelocity.y, LocalAngularVelocity.z };
             //in Mujoco:
 
-            Vector3 temp =  LocalAngularVelocity;
-
+            // Vector3 temp = Quaternion.Inverse(ball.transform.localRotation) * LocalAngularVelocity;
+            Vector3 temp = LocalAngularVelocity;
             return new double[3] { temp.x, temp.z, temp.y };
 
         }
@@ -221,10 +362,12 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         {
 
             //TODO: fix this, its wrong
-           
-            //Quaternion localJointRotation = gameObject.transform.rotation * LocalRotation;
-            Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
 
+            //Quaternion localJointRotation = gameObject.transform.rotation * LocalRotation;
+            //Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
+            //Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
+
+            Quaternion localJointRotation =  LocalRotation;
 
             //in mujoco coordinates, this gives:
             return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
