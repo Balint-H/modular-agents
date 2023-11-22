@@ -6,6 +6,7 @@ using Mujoco;
 using Mujoco.Extensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -20,8 +21,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     IMjJointState jointState;
 
-    Quaternion initialRotationBody = Quaternion.identity;
-    Quaternion initialRotationFD = Quaternion.identity;
+    protected Quaternion initialRotationBody = Quaternion.identity;
+    protected Quaternion initialRotationJoint = Quaternion.identity;
 
     public IMjJointState GetJointState()
     {
@@ -37,7 +38,11 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
 
         initialRotationBody =  pairedJoint.transform.parent.localRotation; //this seems to have fixed the lowerback
-        initialRotationFD = pairedJoint.transform.localRotation; ;
+
+
+        //initialRotationBody = Quaternion.Inverse (pairedJoint.transform.localRotation) *pairedJoint.transform.parent.rotation; //this seems to have fixed the lowerback
+
+          initialRotationJoint = pairedJoint.transform.localRotation;
         //initialRotationBody = pairedJoint.transform.localRotation * pairedJoint.transform.parent.localRotation ;
     }
 
@@ -57,7 +62,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     public void Update()
     {
-       // CheckRotations2Draw();
+        CheckRotations2Draw();
     }
 
 
@@ -89,23 +94,13 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
                 Vector3 offset4debug = new Vector3(0, 0, 0.0f);
 
 
-                /*
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.forward * 0.10f);
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.up * 0.10f);
-                Gizmos.color = Color.grey;
-                Gizmos.DrawRay(transform.position + offset4debug, transform.parent.localRotation * Vector3.right * 0.10f);
-                */
-
-                if(pairedJoint != null)
+                if(Application.isPlaying )
                 {
 
                     double[] temp2 = pairedJoint.GetQPos();
-                    // Quaternion dadsrotation = pairedJoint.transform.parent.rotation;
-                    Quaternion dadsrotation = initialRotationBody;
-                    Quaternion MjLocalRotation = new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0]) * initialRotationFD* dadsrotation;
-
+                                      
+                    Quaternion MjLocalRotation =  new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0])  ;
+                 
                     Gizmos.color = Color.cyan;
                     Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.forward * 0.10f);
                     Gizmos.color = Color.yellow;
@@ -362,7 +357,9 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
             //in Mujoco:
 
             // Vector3 temp = Quaternion.Inverse(ball.transform.localRotation) * LocalAngularVelocity;
-            Vector3 temp = LocalAngularVelocity;
+            
+
+            Vector3 temp = Quaternion.Inverse(component.initialRotationBody) * LocalAngularVelocity ;
             return new double[3] { temp.x, temp.z, temp.y };
 
         }
@@ -376,7 +373,23 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
             //Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
             //Quaternion localJointRotation = Quaternion.Inverse(ball.transform.localRotation) * LocalRotation;
 
-            Quaternion localJointRotation =  LocalRotation;
+
+            // double[] temp =((FiniteDifferenceJoint) this).GetJointState().Positions;
+
+
+            // Quaternion FDLocalRotation = new Quaternion((float)temp[1], (float)temp[3], (float)temp[2], -(float)temp[0]);
+
+
+
+
+
+            // return new double[4] {  - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };
+
+
+            Quaternion localJointRotation = parentKinematics.LocalRotation * Quaternion.Inverse(component.initialRotationBody); //the equivalent in MjBody: ball.transform.parent.GetIKinematic().LocalRotation;
+
+
+//            Quaternion localJointRotation =  LocalRotation;
 
             //in mujoco coordinates, this gives:
             return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
@@ -453,12 +466,14 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         {
 
             //in unity coordinates it would be:
-            //return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.y,     parentKinematics.Position.z,
-            //                        LocalRotation.x,                 LocalRotation.y,                 LocalRotation.z,                LocalRotation.w };//this is a global rotation due to IKinematic
-
+          
             //in Mujoco coordinates: (x,z,y) (-w, x,z,y)
             return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.z,     parentKinematics.Position.y,
                                     - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };//this is a global rotation due to IKinematic
+
+
+       
+
 
         }
 

@@ -21,12 +21,12 @@ public class DebugComparingValues : MonoBehaviour
     public double[] MjVelocities;
 
 
-    public Quaternion FDJointLocalRotation;
+    //public Quaternion FDJointLocalRotation;
 
-    // Start is called before the first frame update
+
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -39,8 +39,7 @@ public class DebugComparingValues : MonoBehaviour
         MjPositions  = MjState.GetQPos(MjJoint);
         MjVelocities = MjState.GetQVel(MjJoint);
 
-
-        FDJointLocalRotation = FDJoint.transform.localRotation;
+        //FDJointLocalRotation = FDJoint.transform.localRotation;
 
     }
 }

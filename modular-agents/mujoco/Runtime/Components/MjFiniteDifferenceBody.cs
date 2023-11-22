@@ -73,29 +73,10 @@ namespace ModularAgents.Kinematic.Mujoco
         private void MjInitialize()
         {
             fs = 1 / Time.fixedDeltaTime;
-            //AddMjFiniteDifferenceJoint();
-        }
-
-        /*
-        public void AddMjFiniteDifferenceJoint()
-        {
           
-            foreach (Transform child in pairedBody.transform)
-            {
-                MjBaseJoint mjbj = child.GetComponent<MjBaseJoint>();
-                if (mjbj != null)
-                {
-                    var fdjoint = gameObject.AddComponent<MjFiniteDifferenceJoint>();
-                    fdjoint.PairedJoint = mjbj;
-
-                }
-                   
-            }
-
         }
-        */
 
-
+      
 
         /*   public void FixedUpdate()
            {
