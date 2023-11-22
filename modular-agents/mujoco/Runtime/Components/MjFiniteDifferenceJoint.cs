@@ -20,6 +20,9 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     IMjJointState jointState;
 
+    Quaternion initialRotationBody = Quaternion.identity;
+    Quaternion initialRotationFD = Quaternion.identity;
+
     public IMjJointState GetJointState()
     {
         if(jointState == null) 
@@ -31,6 +34,11 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
     private void Start()
     {
         //CheckLocalAxisPos();
+
+
+        initialRotationBody =  pairedJoint.transform.parent.localRotation; //this seems to have fixed the lowerback
+        initialRotationFD = pairedJoint.transform.localRotation; ;
+        //initialRotationBody = pairedJoint.transform.localRotation * pairedJoint.transform.parent.localRotation ;
     }
 
 
@@ -49,7 +57,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     public void Update()
     {
-        CheckRotations2Draw();
+       // CheckRotations2Draw();
     }
 
 
@@ -94,8 +102,9 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
                 {
 
                     double[] temp2 = pairedJoint.GetQPos();
-
-                    Quaternion MjLocalRotation = new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0]);
+                    // Quaternion dadsrotation = pairedJoint.transform.parent.rotation;
+                    Quaternion dadsrotation = initialRotationBody;
+                    Quaternion MjLocalRotation = new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0]) * initialRotationFD* dadsrotation;
 
                     Gizmos.color = Color.cyan;
                     Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.forward * 0.10f);
