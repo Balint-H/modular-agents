@@ -27,6 +27,10 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
     protected Quaternion initialRotationBody = Quaternion.identity;
     protected Quaternion initialRotationJoint = Quaternion.identity;
 
+    protected Quaternion initialGlobalRotationBody = Quaternion.identity;
+    protected Quaternion initialGlobalRotationGranpa = Quaternion.identity;
+
+
     public IMjJointState GetJointState()
     {
         if(jointState == null) 
@@ -41,12 +45,19 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
 
         initialRotationBody =  pairedJoint.transform.parent.localRotation; //this seems to have fixed the lowerback
-        initialRotationJoint = pairedJoint.transform.localRotation;
+                                                                           // initialRotationJoint = pairedJoint.transform.localRotation;
 
-    }
+        initialRotationJoint = pairedJoint.transform.rotation;
+
+        initialGlobalRotationBody = pairedJoint.transform.parent.rotation;
+    initialGlobalRotationGranpa = pairedJoint.transform.parent.parent.rotation;
 
 
-    public void Step()
+
+}
+
+
+public void Step()
     {
         //I'm not sure we need to do anything here; it might be enough to step the body kinematics, then the joint components can remain largely stateless views into the body information.
     }
@@ -347,9 +358,16 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
             //  Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationJoint ) * parentKinematics.LocalRotation * Quaternion.Inverse(component.initialRotationBody) ; //the equivalent in MjBody: ball.transform.parent.GetIKinematic().LocalRotation;
 
+
+            //  initialRotationJoint = pairedJoint.transform.localRotation;
+
+
+
             Quaternion localJointRotation =  parentKinematics.LocalRotation * Quaternion.Inverse( component.initialRotationBody);            //works for all ball joints except the humerus:
 
-
+            //This attempt to include granpa's original orientation does not give better results htan the previous one
+           // Quaternion localJointRotation = parentKinematics.LocalRotation * Quaternion.Inverse( Quaternion.Inverse(component.initialGlobalRotationGranpa)* component.initialRotationJoint  );
+            
             //in mujoco coordinates, this gives:
             return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
 
