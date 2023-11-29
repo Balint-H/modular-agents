@@ -11,13 +11,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 {
 
 
-    public float anglePositionDifference = 0;
-    public Vector3 axisPositionDifference = Vector3.zero;
-
-
-
-
-    [SerializeField]
+  [SerializeField]
     MjBaseJoint pairedJoint;
 
     public MjBaseJoint PairedJoint { get=> pairedJoint; set => pairedJoint = value; }
@@ -27,9 +21,19 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
     protected Quaternion initialRotationBody = Quaternion.identity;
     protected Quaternion initialRotationJoint = Quaternion.identity;
 
-    protected Quaternion initialGlobalRotationBody = Quaternion.identity;
-    protected Quaternion initialGlobalRotationGranpa = Quaternion.identity;
+  
+ 
+    //TO DEBUG:
+    /*
+     
+    [Header("values to read:")]
 
+    public float anglePositionDifference = 0;
+    public Vector3 axisPositionDifference = Vector3.zero;
+
+    public Quaternion FDLocalRotation = Quaternion.identity;
+    public Quaternion PairedJointLocalRot = Quaternion.identity;
+    */
 
     public IMjJointState GetJointState()
     {
@@ -41,23 +45,27 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     private void Start()
     {
+      
+
+
+        MjState.ExecuteAfterMjStart(MjInitialize);
+
+
+
+    }
+
+    void MjInitialize()
+    {
         //CheckLocalAxisPos();
 
+        initialRotationBody = pairedJoint.transform.parent.localRotation; 
+      
 
-        initialRotationBody =  pairedJoint.transform.parent.localRotation; //this seems to have fixed the lowerback
-                                                                           // initialRotationJoint = pairedJoint.transform.localRotation;
-
-        initialRotationJoint = pairedJoint.transform.rotation;
-
-        initialGlobalRotationBody = pairedJoint.transform.parent.rotation;
-    initialGlobalRotationGranpa = pairedJoint.transform.parent.parent.rotation;
+    }
 
 
 
-}
-
-
-public void Step()
+    public void Step()
     {
         //I'm not sure we need to do anything here; it might be enough to step the body kinematics, then the joint components can remain largely stateless views into the body information.
     }
@@ -72,7 +80,11 @@ public void Step()
 
     public void Update()
     {
-      //  CheckRotations2Draw();
+
+
+       // if (name.Contains("lhumerus"))
+       //     CheckRotations2Draw();
+
     }
 
 
@@ -118,8 +130,6 @@ public void Step()
                     Gizmos.color = Color.grey;
                     Gizmos.DrawRay(transform.position + offset4debug, MjLocalRotation * Vector3.right * 0.10f);
 
-                    (Quaternion.Inverse(MjLocalRotation) * FDLocalRotation).ToAngleAxis( out anglePositionDifference, out axisPositionDifference);
-
    
 
 
@@ -133,8 +143,8 @@ public void Step()
         }
     }
 
-
-
+    //To Debug:
+    /*
     public void CheckRotations2Draw()
     {
        
@@ -148,23 +158,25 @@ public void Step()
             if (temp.Length == 4) //its a ball joint
             {
 
+    
                 //the localRotation of the paired joint is:
-                Quaternion FDLocalRotation = new Quaternion((float)temp[1], (float)temp[3], (float)temp[2], -(float)temp[0]);//the rotation of the parent
-                
-           
-                Vector3 offset4debug = new Vector3(0, 0, 0.0f);
 
-                Quaternion q2heck = transform.parent.localRotation;
-
-              
-
+                FDLocalRotation =  new Quaternion((float)temp[1], (float)temp[3], (float)temp[2], -(float)temp[0]);
                 double[] temp2 = pairedJoint.GetQPos();
+
+                PairedJointLocalRot = new Quaternion((float)temp2[1], (float)temp2[3], (float)temp2[2], -(float)temp2[0]);
+
+                Debug.Log("on joint " + name + " we have: " + FDLocalRotation + " and: " + PairedJointLocalRot);
+
+                //(Quaternion.Inverse(pairedJointLocalRot) * FDLocalRotation).ToAngleAxis(out anglePositionDifference, out axisPositionDifference);
+
+
 
 
             }
         }
     }
-
+    */
 
 
 
@@ -179,8 +191,6 @@ public void Step()
         //Vector3 test = LocalAngularVelocity;
         Vector3 mjpos = MjEngineTool.MjVector3(gameObject.transform.position);
       
-
-            // Debug.Log(gameObject.name + " has up in unity: " + upUn + " up in mujoco: " + upMj + "  and local mj pos: " + mjpos + " rotation axis: " + ax);
 
        IMjJointState imj= GetJointState();
        Debug.Log(imj.Name + "   " + gameObject.name   + " has vels: " + imj.Velocities +  " has LOCAL ROTATIONS: " + imj.Positions   );
@@ -242,8 +252,7 @@ public void Step()
 
         public double[] Accelerations => throw new System.NotImplementedException("Currently only first order joint states supported.");
 
-        //  public double[] Velocities => throw new System.NotImplementedException();  // TODO 
-
+     
         public double[] Velocities => GetJointAngularVelocity();
 
 
@@ -261,9 +270,7 @@ public void Step()
         double[] GetJointLocalRotation()
         {
 
-            //   Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) *  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
-            // Quaternion temp =  new Quaternion(LocalRotation.x, 0, 0, LocalRotation.w).normalized;
-            //Quaternion temp = new Quaternion(hinge.transform.localRotation.x, 0, 0, hinge.transform.localRotation.w).normalized;
+           
 
             Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation;
             return new double[1] { 2 * Mathf.Asin(temp.x) };
@@ -275,12 +282,6 @@ public void Step()
 
         public double[] Positions => GetJointLocalRotation();
 
-
-        //check into MjEngineTool.MjQuaternion for conversion
-
-      
-
-        //   double[] getLocalRotations()
        public  void CheckLocalRotations()
         {
             Quaternion q = MjEngineTool.MjQuaternion(gameObject.transform.rotation);
@@ -290,8 +291,7 @@ public void Step()
 
             Vector3 upUn = gameObject.transform.up;
             Vector3 test = LocalAngularVelocity;
-            //Vector3 mjpos = MjEngineTool.MjVector3(gameObject.transform.position);
-            //return new double[3] { mjpos.x, mjpos.y, mjpos.z };
+         
 
             Debug.Log(gameObject.name + " has up in unity: " + upUn + " up in mujoco: " + upMj + "  and local angle velocity: " + test);
 
@@ -337,37 +337,26 @@ public void Step()
         public double[] Accelerations => throw new System.NotImplementedException();
 
        
-        public double[] Velocities => getJointAngularVelocity();
-        public double[] Positions => getJointLocalRotation();
+        public double[] Velocities => GetJointAngularVelocity();
+        public double[] Positions => GetJointLocalRotation();
 
 
 
-        double[] getJointAngularVelocity()
+        double[] GetJointAngularVelocity()
         {
       
 
-            Vector3 temp = Quaternion.Inverse(component.initialRotationBody) * LocalAngularVelocity ;
+            Vector3 temp =  Quaternion.Inverse(component.initialRotationBody) * LocalAngularVelocity ;
             return new double[3] { temp.x, temp.z, temp.y };
 
         }
 
-        double[] getJointLocalRotation()
+        double[] GetJointLocalRotation()
         {
 
-            // Quaternion localJointRotation =  parentKinematics.LocalRotation * Quaternion.Inverse(component.initialRotationBody); //the equivalent in MjBody: ball.transform.parent.GetIKinematic().LocalRotation;
 
-            //  Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationJoint ) * parentKinematics.LocalRotation * Quaternion.Inverse(component.initialRotationBody) ; //the equivalent in MjBody: ball.transform.parent.GetIKinematic().LocalRotation;
+            Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationBody) * parentKinematics.LocalRotation ;          
 
-
-            //  initialRotationJoint = pairedJoint.transform.localRotation;
-
-
-
-            Quaternion localJointRotation =  parentKinematics.LocalRotation * Quaternion.Inverse( component.initialRotationBody);            //works for all ball joints except the humerus:
-
-            //This attempt to include granpa's original orientation does not give better results htan the previous one
-           // Quaternion localJointRotation = parentKinematics.LocalRotation * Quaternion.Inverse( Quaternion.Inverse(component.initialGlobalRotationGranpa)* component.initialRotationJoint  );
-            
             //in mujoco coordinates, this gives:
             return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
 
@@ -390,16 +379,7 @@ public void Step()
     }
 
 
-    /*
-      // Transform
-      transform.localPosition =
-          MjEngineTool.UnityVector3(mjcf.GetVector3Attribute("pos", defaultValue: Vector3.zero));
-      transform.localRotation = MjEngineTool.UnityQuaternion(
-          mjcf.GetQuaternionAttribute("quat", defaultValue: MjEngineTool.MjQuaternionIdentity));
-      GravityCompensation = mjcf.GetFloatAttribute("gravcomp", defaultValue: 0.0f); 
-     
-     */
-
+  
 
     private class FiniteDifferenceFreeJoint : FiniteDifferenceJointState, IMjJointState
     {
@@ -423,11 +403,11 @@ public void Step()
 
        
 
-        public double[] Velocities => getVelocities();
-        public double[] Positions => getLocalRotation();
+        public double[] Velocities => GetVelocities();
+        public double[] Positions => GetLocalRotation();
 
 
-        double[] getVelocities()
+        double[] GetVelocities()
         {
 
             //in unity coordinates:
@@ -439,18 +419,12 @@ public void Step()
                                     LocalAngularVelocity.x,     LocalAngularVelocity.z,      LocalAngularVelocity.y };
         }
 
-        double[] getLocalRotation()
+        double[] GetLocalRotation()
         {
 
-            //in unity coordinates it would be:
-          
             //in Mujoco coordinates: (x,z,y) (-w, x,z,y)
             return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.z,     parentKinematics.Position.y,
-                                    - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };//this is a global rotation due to IKinematic
-
-
-       
-
+                                    - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };//this is a global rotation, see in IKinematic
 
         }
 
