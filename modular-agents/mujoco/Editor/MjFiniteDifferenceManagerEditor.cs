@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using Mujoco;
-using static Mujoco.Extensions.Scaling;
+using Mujoco.Extensions;
 using ModularAgents.Kinematic.Mujoco;
 using System.Linq;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;

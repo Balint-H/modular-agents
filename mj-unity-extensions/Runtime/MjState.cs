@@ -278,6 +278,73 @@ namespace Mujoco.Extensions
             return bodyVel;
         }
 
+        public static IEnumerable<T> GetDepthFirstSubtreeComponents<T>(this MjBody mjBody) where T: MjComponent
+        {
+            foreach(var comp in mjBody.GetBodyChildComponents<T>().OrderBy(c => c.transform.GetSiblingIndex()))
+            {
+                yield return comp;
+            }
+
+            foreach(var child in mjBody.GetBodyChildComponents<MjBody>().OrderBy(mjb => mjb.transform.GetSiblingIndex()))
+            {
+                foreach(var chc in child.GetDepthFirstSubtreeComponents<T>())
+                {
+                    yield return chc;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The order of components in MuJoCo arrays is determined by the order they appear in the XML/hierarchy (so they may not necessarily be depth first, or breadth first).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="mjBody"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetTopDownOrderedComponents<T>(this MjBody mjBody) where T : MjComponent
+        {
+            foreach (var comp in mjBody.GetBodyChildComponents<MjComponent>().OrderBy(c => c.transform.GetSiblingIndex()))
+            {
+                switch (comp)
+                {
+                    case T t:
+                        yield return t; 
+                        break;
+                    case MjBody b:
+                        foreach (var chc in b.GetDepthFirstSubtreeComponents<T>())
+                        {
+                            yield return chc;
+                        }
+                        break;
+
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Get the first component of type T more proximally than the body it was called on. 
+        /// Not the same as GetComponentInParent or MjHierarchyTool.FindParentComponent, as this checks the child GameObjects of the parent MjBody
+        /// </summary>
+        internal static T GetFirstInParentBody<T>(this MjBaseBody body, bool recurseUp = true) where T : MjComponent
+        {
+            var parent = MjHierarchyTool.FindParentComponent<MjBaseBody>(body);
+            if (!parent) return null;
+            var parentComponent = parent.GetBodyChildComponents<T>().FirstOrDefault();  // ASSUMPTION 1
+            if (!parentComponent && recurseUp) return parent.GetFirstInParentBody<T>();
+            return parentComponent;
+        }
+
+        /// <summary>
+        /// Iterate over all components that use this body as their MJCF parent directly (e.g. MjGeom, MjInertial, MjBaseJoint, and child MjBaseBody).
+        /// </summary>
+        public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
+        {
+            foreach (var childComponent in body.GetComponentsInChildren<T>())
+            {
+                if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
+            }
+        }
+
         /// <summary>
         /// Get the linear velocityof a body in cartesian space.
         /// </summary>

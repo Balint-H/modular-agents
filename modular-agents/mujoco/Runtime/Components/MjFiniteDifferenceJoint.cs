@@ -236,7 +236,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
         {
-            axis = hinge.RotationAxis;
+            axis = hinge.transform.localRotation * Vector3.right;
             this.hinge = hinge;
         }
 
@@ -269,9 +269,6 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         double[] GetJointLocalRotation()
         {
-
-           
-
             Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation;
             return new double[1] { 2 * Mathf.Asin(temp.x) };
 
