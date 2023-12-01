@@ -300,9 +300,9 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
             // Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation; //this works with hte pupeteer but not for the pure FD case (because when resetting the hinge the orientaiton might not match??)
             Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
              return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
-           // return new double[1] {  Mathf.Asin(temp.x) };  //this seems to give more accurate results in the pose reset
+         
 
-           // return new double[1] { temp.x };
+
 
         }
         
