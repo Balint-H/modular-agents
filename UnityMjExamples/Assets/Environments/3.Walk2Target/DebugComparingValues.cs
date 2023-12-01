@@ -1,11 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Mujoco;
 using Mujoco.Extensions;
-using UnityEditor.UI;
-using ModularAgents.Kinematic.Mujoco;
-using ModularAgents.Kinematic;
 
 public class DebugComparingValues : MonoBehaviour
 {

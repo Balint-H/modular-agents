@@ -78,6 +78,33 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     }
 
+    public unsafe void Reset()
+    {
+        if (name.Contains("lclavicle"))
+            Debug.Log("lclavicle positions: " + "joint: " + name + "  " );
+
+
+        double[] ps = GetJointState().Positions;
+
+        if (name.Contains("lclavicle"))
+            Debug.Log("lclavicle positions: " +  "joint: " + name + "  " +  ps[0]);
+
+        for (int i = 0; i < ps.Length; i++)
+        {
+            MjScene.Instance.Data->qpos[pairedJoint.QposAddress + i] = ps[i];
+        }
+
+        double[] vs = GetJointState().Velocities;
+
+        for (int i = 0; i < vs.Length; i++)
+        {
+            MjScene.Instance.Data->qvel[pairedJoint.DofAddress + i] = vs[i];
+        }
+
+
+    }
+
+
     public void Update()
     {
 
@@ -237,6 +264,7 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
         {
             axis = hinge.transform.localRotation * Vector3.right;
+
             this.hinge = hinge;
         }
 
