@@ -258,12 +258,12 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     private class FiniteDifferenceHinge : FiniteDifferenceJointState, IMjJointState
     {
-        Vector3 axis;
+       // Vector3 axis;
         MjHingeJoint hinge;
 
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
         {
-            axis = hinge.transform.localRotation * Vector3.right;
+         //   axis = hinge.transform.localRotation * Vector3.right;
 
             this.hinge = hinge;
         }
@@ -288,8 +288,8 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
         {
              //return new double[1] {  LocalAngularVelocity.x };
 
-            return new double[1] { (Quaternion.Inverse(hinge.transform.localRotation) * LocalAngularVelocity).x };
-
+            //return new double[1] { (Quaternion.Inverse(hinge.transform.localRotation) * LocalAngularVelocity).x };
+            return new double[1] { (Quaternion.Inverse(component.transform.localRotation) * LocalAngularVelocity).x };
 
 
 
@@ -297,8 +297,12 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
         double[] GetJointLocalRotation()
         {
-            Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation;
-            return new double[1] { 2 * Mathf.Asin(temp.x) };
+            // Quaternion temp = Quaternion.Inverse(hinge.transform.localRotation) * LocalRotation; //this works with hte pupeteer but not for the pure FD case (because when resetting the hinge the orientaiton might not match??)
+            Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
+             return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+           // return new double[1] {  Mathf.Asin(temp.x) };  //this seems to give more accurate results in the pose reset
+
+           // return new double[1] { temp.x };
 
         }
         
