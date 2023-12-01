@@ -12,8 +12,8 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
     [SerializeField]
     MjFreeJoint pairedRootJoint;
 
-    [SerializeField]
-    public bool useInPupeteering;
+  //  [SerializeField]
+  //  public bool useInPupeteering;
 
     List<MjFiniteDifferenceJoint> orderedJoints;
 

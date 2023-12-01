@@ -40,9 +40,9 @@ public class MjFiniteDifferenceManagerEditor : Editor
 
         List<Transform> childTransforms = new List<Transform>();
         //this is supercustom for pupeteering case
-        if (tar.useInPupeteering)
-                childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
-        else
+        //if (tar.useInPupeteering)
+       //         childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
+       // else
             childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => prefix + t.name == mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
 
         if (childTransforms.Count() > 1)
