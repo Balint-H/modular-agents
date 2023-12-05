@@ -263,7 +263,7 @@ public static class Utils
                                 cur[0]*des[1] - cur[1]*des[0] - cur[2]*des[3] + cur[3]*des[2], /*w1x2 - x1w2 - y1z2 + z1y2*/
                                 cur[0]*des[2] + cur[1]*des[3] - cur[2]*des[0] - cur[3]*des[1], /*w1y2 + x1z2 - y1w2 - z1x2*/
                                 cur[0]*des[3] - cur[1]*des[2] + cur[2]*des[1] - cur[3]*des[0]};/*w1z2 - x1y2 + y1x2 - z1w2*/
-        if (err[0] >= 1) return new[] { 0.0, 0.0, 0.0 };
+        if ( Mathf.Abs( (float) err[0]) >= 1) return new[] { 0.0, 0.0, 0.0 };
         double angle = 2.0 * System.Math.Acos(err[0]);
         //if (angle == 0) return new[] { 0.0, 0.0, 0.0};
         double denom = System.Math.Sqrt(1 - err[0] * err[0]);
