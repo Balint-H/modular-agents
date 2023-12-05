@@ -247,15 +247,22 @@ namespace ModularAgents.MotorControl.Mujoco
 
         private unsafe void Awake()
         {
+            SetPreviousActions();
+        }
+
+        public void SetPreviousActions()
+        {
+
             if (agent)
             {
-               
+
                 if (smoothingObject)
                 {
                     prevActionSource = smoothingObject.GetComponent<IRememberPreviousActions>();
                     agent.OnBegin += (object sender, EventArgs e) => prevActionSource.SetPreviousActions(GetActionsFromState());
                 }
             }
+
         }
 
         /// <summary>

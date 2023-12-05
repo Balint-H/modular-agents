@@ -7,7 +7,8 @@ using System.Linq;
 using Mujoco.Extensions;
 using UnityEngine;
 
-public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
+
+public class MjFiniteDifferenceManager :MonoBehaviour
 {
     [SerializeField]
     MjFreeJoint pairedRootJoint;
@@ -16,7 +17,6 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
   //  public bool useInPupeteering;
 
     List<MjFiniteDifferenceJoint> orderedJoints;
-
 
     public MjFreeJoint Root => pairedRootJoint;
 
@@ -49,16 +49,20 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
     public unsafe void CopyStateToPairedTree()
     {
 
-        MjState.TeleportMjRoot(pairedRootJoint, animationRoot.transform.position, animationRoot.transform.rotation);
 
-      
+       
+        MjState.TeleportMjRoot(pairedRootJoint, animationRoot.transform.position, animationRoot.transform.rotation);
+    
+
         foreach (MjFiniteDifferenceJoint mfdj in orderedJoints)
         { 
             mfdj.Reset();
         
         }
-      
+    
+        ForwardKinematics();
 
+     
     }
 
     
