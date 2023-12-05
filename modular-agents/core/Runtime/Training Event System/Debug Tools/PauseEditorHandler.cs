@@ -11,10 +11,14 @@ public class PauseEditorHandler : TrainingEventHandler
 
 
     void PauseInEditor(object sender, EventArgs eventArgs)
-    { 
+    {
+
+#if UNITY_EDITOR
+
+
         EditorApplication.isPaused = true;
-    
-    
+#endif
+
     }
 
 
