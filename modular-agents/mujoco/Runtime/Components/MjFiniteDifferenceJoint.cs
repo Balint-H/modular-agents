@@ -80,14 +80,14 @@ public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent
 
     public unsafe void Reset()
     {
-        if (name.Contains("lclavicle"))
-            Debug.Log("lclavicle positions: " + "joint: " + name + "  " );
+       // if (name.Contains("lclavicle"))
+       //     Debug.Log("lclavicle positions: " + "joint: " + name + "  " );
 
 
         double[] ps = GetJointState().Positions;
 
-        if (name.Contains("lclavicle"))
-            Debug.Log("lclavicle positions: " +  "joint: " + name + "  " +  ps[0]);
+       // if (name.Contains("lclavicle"))
+       //     Debug.Log("lclavicle positions: " +  "joint: " + name + "  " +  ps[0]);
 
         for (int i = 0; i < ps.Length; i++)
         {

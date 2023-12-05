@@ -27,7 +27,6 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
     Animator animator;
     public Animator Animator => animator;
 
-    //IFiniteDifferenceComponent[] managedComponents;
     MjFiniteDifferenceBody[] managedComponents;
 
   
@@ -44,80 +43,45 @@ public class MjFiniteDifferenceManager :MonoBehaviour// : TrainingEventHandler
       
         
         
-        //tracked = gameObject.transform.GetComponentsInChildren<Transform>().First(x => x.name.Equals("lclaviclerz"));
+      
     }
-    /*
-    public double[] GetQPos()
-    {
-        return orderedJoints.SelectMany(fdj => fdj.GetJointState().Positions).ToArray();
-    }
-
-    public double[] GetQVel()
-    {
-        return orderedJoints.SelectMany(fdj => fdj.GetJointState().Velocities).ToArray();
-    }
-    */
 
     public unsafe void CopyStateToPairedTree()
     {
 
         MjState.TeleportMjRoot(pairedRootJoint, animationRoot.transform.position, animationRoot.transform.rotation);
 
-
+      
         foreach (MjFiniteDifferenceJoint mfdj in orderedJoints)
         { 
             mfdj.Reset();
         
         }
-
-        //MjScene.Instance.SyncUnityToMjState();
-
-        MjScene.Instance.RecreateScene();
-
-
-        /*
-
-        var qPos = GetQPos();
-        var qVel = GetQVel();
-
-        for (int i = 0; i < qPos.Length; i++)
-        {
-            MjScene.Instance.Data ->qpos[pairedRootJoint.QposAddress+i] = qPos[i];
-        }
-
-        for (int i = 0; i < qVel.Length; i++)
-        {
-            MjScene.Instance.Data ->qvel[pairedRootJoint.DofAddress+i] = qVel[i];
-        }
-        */
-        //  MjScene.Instance.RecreateScene();
-        //MjScene.Instance.SceneRecreationAtLateUpdateRequested = true;
+      
 
     }
 
     
     public void Step()
     {
-        // We store the old state.
+     
        foreach (var component in managedComponents)
         {
             component.Step();
-        }    
-         
+        }
 
-       // tracked.GetComponent<MjFiniteDifferenceJoint>().checkLocalAxisPos();
-        
-        // Get the new state.
-      //  animator.Update(Time.fixedDeltaTime);
     }
+
+    public unsafe void ForwardKinematics() 
+    {
+        MujocoLib.mj_forward(MjScene.Instance.Model, MjScene.Instance.Data);
+
+    }
+
     
     public unsafe void FixedUpdate()
     {
         Step();
-      /*  var fdKnee = orderedJoints.First(j => j.name.Contains("ltibia"));
-        var realKnee = fdKnee.PairedJoint as MjHingeJoint;
-        Debug.Log($"Knee FD state: {fdKnee.GetJointState().Positions[0]}, Real knee state: {MjScene.Instance.Data->qpos[realKnee.QposAddress]}");
-      */
     }
     
 
