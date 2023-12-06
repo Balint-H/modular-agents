@@ -311,10 +311,11 @@ namespace Mujoco
                 Quaternion hingeRot = (Quaternion.Inverse(fdh.component.transform.localRotation) * fdh.LocalRotation);
 
                 //the rotation that we are interested in corresponds to the X component:
-                return (new Quaternion(hingeRot.x, 0,0, hingeRot.w).normalized);
+                //return (new Quaternion(hingeRot.x, 0,0, hingeRot.w).normalized);
+                return hingeRot;
 
-    
-        }
+
+            }
 
             public int[] DofAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
 
@@ -349,36 +350,47 @@ namespace Mujoco
                     case 0:
                         Debug.LogWarning("Trying to get the location of a Hinge but the MjJoint" + component.transform.localRotation + " has no Hinger attached to it. This shouldnt be possible");
                         return new double[1] { 0.0 };
-                        break;
+                      
 
                     case 1:
-                        Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
-                        return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+                        {
+                            Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
+                            return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
 
-                        break;
+                        }
 
                     default: //tested only for 2 elements, the case with 3 hinges is not considered for now.
-                        Quaternion[] resultsToCheck = new Quaternion[siblings.Length];
+                        {
 
-                        resultsToCheck = siblings.Select(x =>  FiniteDifferenceHinge.GetHingeRotation(x, hinge) ).ToArray();
-                        Quaternion composedRot = resultsToCheck[1] * resultsToCheck[0];
+                            if (indexme == 0)
+                            {
+                                Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
+                                return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
+                            }
+                            else
+                            { 
+                            Quaternion[] resultsToCheck = new Quaternion[siblings.Length];
 
-                        Debug.Log("component:" + component.transform.name +  "Composed Rot: " + composedRot + "referenceRot: " + Quaternion.Inverse(component.transform.localRotation) * LocalRotation);
 
-                        Quaternion temp2 = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
-                        return new double[1] { 2 * Mathf.Asin(temp2.x) * Mathf.Sign(-temp2.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+                            resultsToCheck = siblings.Select(x => FiniteDifferenceHinge.GetHingeRotation(x, hinge)).ToArray();
+
+                                FiniteDifferenceHinge[] hinges = siblings.Select(x => new FiniteDifferenceHinge(x, hinge)).ToArray();
+
+                                Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * Quaternion.Inverse(hinges[0].component.transform.localRotation) * hinges[0].LocalRotation;
+
+                                //Quaternion composedRot = resultsToCheck[1] * resultsToCheck[0];
+
+                           // Debug.Log( "index: "+indexme+ " component:" + component.transform.name +   "referenceRot: " + Quaternion.Inverse(component.transform.localRotation) * LocalRotation);
+
+                            //Quaternion temp2 = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
+                            return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+
+                            }
+
+                        }
 
                 }
 
-
-                if (siblings.Length == 1)
-                {
-                  
-                }
-                else 
-                {
-                
-                }
 
 
 
