@@ -280,12 +280,12 @@ namespace Mujoco.Extensions
 
         public static IEnumerable<T> GetDepthFirstSubtreeComponents<T>(this MjBody mjBody) where T: MjComponent
         {
-            foreach(var comp in mjBody.GetBodyChildComponents<T>().OrderBy(c => c.transform.GetSiblingIndex()))
+            foreach(var comp in mjBody.GetBodyChildComponents<T>() )
             {
                 yield return comp;
             }
 
-            foreach(var child in mjBody.GetBodyChildComponents<MjBody>().OrderBy(mjb => mjb.transform.GetSiblingIndex()))
+            foreach(var child in mjBody.GetBodyChildComponents<MjBody>() )
             {
                 foreach(var chc in child.GetDepthFirstSubtreeComponents<T>())
                 {
@@ -302,7 +302,7 @@ namespace Mujoco.Extensions
         /// <returns></returns>
         public static IEnumerable<T> GetTopDownOrderedComponents<T>(this MjBody mjBody) where T : MjComponent
         {
-            foreach (var comp in mjBody.GetBodyChildComponents<MjComponent>().OrderBy(c => c.transform.GetSiblingIndex()))
+            foreach (var comp in mjBody.GetBodyChildComponents<MjComponent>() )
             {
                 switch (comp)
                 {
@@ -339,7 +339,7 @@ namespace Mujoco.Extensions
         /// </summary>
         public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
         {
-            foreach (var childComponent in body.GetComponentsInChildren<T>())
+            foreach (var childComponent in body.GetComponentsInChildren<T>().OrderBy(c => c.transform.GetSiblingIndex()))
             {
                 if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
             }
