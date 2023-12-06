@@ -21,8 +21,7 @@ public class MjFiniteDifferenceManager :MonoBehaviour
     public MjFreeJoint Root => pairedRootJoint;
 
     public MjFiniteDifferenceBody animationRoot;
-
-
+    [Header("To add the FD components in the hierarchy: ")]
     [SerializeField]
     Animator animator;
     public Animator Animator => animator;
@@ -90,7 +89,7 @@ public class MjFiniteDifferenceManager :MonoBehaviour
     
 
 
-
+    /*
     public void JumpToNormalizedTime(float normalizedTime)
     {
         
@@ -100,6 +99,6 @@ public class MjFiniteDifferenceManager :MonoBehaviour
         animator.Update(0);
      //   Step();
     }
-
+    */
 
 }

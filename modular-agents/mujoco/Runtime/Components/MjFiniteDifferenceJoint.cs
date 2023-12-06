@@ -367,6 +367,8 @@ namespace Mujoco
                                 Quaternion temp = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
                                 return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
                             }
+
+                           
                             else
                             { 
                             Quaternion[] resultsToCheck = new Quaternion[siblings.Length];
@@ -383,9 +385,11 @@ namespace Mujoco
                            // Debug.Log( "index: "+indexme+ " component:" + component.transform.name +   "referenceRot: " + Quaternion.Inverse(component.transform.localRotation) * LocalRotation);
 
                             //Quaternion temp2 = Quaternion.Inverse(component.transform.localRotation) * LocalRotation;
-                            return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+                              return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+                          
 
                             }
+
 
                         }
 
