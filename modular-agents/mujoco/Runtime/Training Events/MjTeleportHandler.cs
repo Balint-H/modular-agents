@@ -21,6 +21,9 @@ namespace ModularAgents.TrainingEvents
         Transform destination;
 
         [SerializeField]
+        float freeJointHeight;
+
+        [SerializeField]
         bool shouldZeroVelocityAndAcceleration;
 
         public override EventHandler Handler => (_, _) => Teleport();
@@ -30,7 +33,7 @@ namespace ModularAgents.TrainingEvents
             if (freeJointToTeleport != null)
             {
 
-                MjState.TeleportMjRoot(freeJointToTeleport, destination.position, destination.rotation);
+                MjState.TeleportMjRoot(freeJointToTeleport, destination.position + new Vector3(0,freeJointHeight,0), destination.rotation);
             }
             
             if(animatorToTeleport != null)
