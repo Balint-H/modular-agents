@@ -112,7 +112,7 @@ namespace ModularAgents
             rootKinematics = rootBody.GetIKinematic();
             if(updateOnPostStep)
             {
-              MjScene.Instance.postUpdateEvent += (_, _) => lastResults = GetMeanGRF();
+              MjScene.Instance.postUpdateEvent += (_, _) => lastPosAndVec = GetMeanGRF();
             }
         }
         
