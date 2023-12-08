@@ -24,6 +24,12 @@ namespace ModularAgents
 
         [SerializeField]
         bool weightedPostionAveraging = true;
+        
+        [SerializeField]
+        bool updateOnPostStep;
+        
+        // Only populated if updateOnPostStep is enabled
+        public (Vector3, Vector3) lastPosAndVec {get; private set;}
 
 
         IKinematic rootKinematics;
@@ -104,6 +110,10 @@ namespace ModularAgents
         public void Awake()
         {
             rootKinematics = rootBody.GetIKinematic();
+            if(updateOnPostStep)
+            {
+              MjScene.Instance.postUpdateEvent += (_, _) => lastResults = GetMeanGRF();
+            }
         }
         
         public override void OnAgentStart()
