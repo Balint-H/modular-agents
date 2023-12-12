@@ -97,13 +97,16 @@ using UnityEngine;
                 MjScene.Instance.Data->qvel[pairedJoint.DofAddress + i] = vs[i];
             }
 
+   
+            for (int i = 0; i < vs.Length; i++)
+            {
+                MjScene.Instance.Data->qfrc_applied[pairedJoint.DofAddress + i] = 0;
+            }
 
-        }
+    }
 
 
-
-
-        public void DrawLocalRotations()
+    public void DrawLocalRotations()
         {
             Gizmos.color = Color.blue;
 
