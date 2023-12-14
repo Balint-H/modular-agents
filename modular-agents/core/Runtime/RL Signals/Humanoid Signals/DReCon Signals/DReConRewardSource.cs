@@ -44,7 +44,7 @@ namespace ModularAgents.DReCon
    
         private float CalculateReward()
         {
-            Debug.Log(kinChain.Root.Name);
+           // Debug.Log(kinChain.Root.Name);
             ReferenceFrame fKin = new ReferenceFrame(kinChain.RootForward, kinChain.CenterOfMass);
             ReferenceFrame fSim = new ReferenceFrame(kinChain.RootForward, simChain.CenterOfMass); // Same orientation, different origin
 

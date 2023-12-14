@@ -23,8 +23,8 @@ namespace ModularAgents.DReCon
             AddColliders(kinematicTransform);
 
 
-            kinChain = new BoundingBoxChain(new MjBodyChain(kinematicTransform));
             simChain = new BoundingBoxChain(new MjBodyChain(simulationTransform));
+            kinChain = new BoundingBoxChain(new MjBodyChain(kinematicTransform));
 
             kinHead = kinematicHead.transform.GetIKinematic();
 
@@ -44,10 +44,12 @@ namespace ModularAgents.DReCon
                 CreateColliderForBody(body, body.transform);
             }
 
-            foreach (var dataView in rootTransform.GetComponentsInChildren<MjMocapBodyKinematicsComponent>())
+
+            foreach (var body in rootTransform.GetComponentsInChildren<MjFiniteDifferenceBody>())
             {
-                CreateColliderForBody(dataView.PairedBody, dataView.transform);
+                CreateColliderForBody(body, body.transform);
             }
+
         }
 
         void CreateColliderForBody(MjBody body, Transform parent)
@@ -68,6 +70,47 @@ namespace ModularAgents.DReCon
                                    Mathf.Sqrt((diagInertia[0] + diagInertia[2] - diagInertia[1]) / mass * 6.0f),
                                    Mathf.Sqrt((diagInertia[0] + diagInertia[1] - diagInertia[2]) / mass * 6.0f));
         }
+
+        void CreateColliderForBody(MjFiniteDifferenceBody body, Transform parent)
+        {   
+            //this function assumes the bounding boxes of the paired bodies are already set up
+
+            
+            if (!body.GetComponentInDirectChildren<MjFiniteDifferenceJoint>()  ) return;
+            var colObject = new GameObject();
+            colObject.transform.SetParent(parent.transform);
+            colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.GetIKinematic().CenterOfMass), body.transform.rotation );
+
+
+            /*
+                //this method gives NaNs             
+                var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
+                box.name = body.name + "_Unity_collider";
+
+
+
+                var diagInertia = body.GetIKinematic().Mass * body.GetIKinematic().Velocity;
+                var mass = body.GetIKinematic().Mass;
+
+                box.size = new Vector3(Mathf.Sqrt((diagInertia[1] + diagInertia[2] - diagInertia[0]) / mass * 6.0f),
+                                       Mathf.Sqrt((diagInertia[0] + diagInertia[2] - diagInertia[1]) / mass * 6.0f),
+                                       Mathf.Sqrt((diagInertia[0] + diagInertia[1] - diagInertia[2]) / mass * 6.0f));
+                */
+
+            BoxCollider pairedBodyBox = body.PairedBody.GetComponentInDirectChildren<BoxCollider>();
+            if (pairedBodyBox != null)
+            {
+                var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
+                box.name = body.name + "_Unity_collider";
+
+                box.size = pairedBodyBox.size;
+            }
+
+
+
+        }
+
+
 
         public void RemoveColliders(Transform rootTransform)
         {
