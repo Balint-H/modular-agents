@@ -41,10 +41,12 @@ public class MjFiniteDifferenceManagerEditor : Editor
         List<Transform> childTransforms = new List<Transform>();
         //this is supercustom for pupeteering case
         //if (tar.useInPupeteering)
-       //         childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
-       // else
-            childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => prefix + t.name == mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
+        //         childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
+        // else
+        
+        childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == prefix + mjBody.name).ToList();
 
+        
         if (childTransforms.Count() > 1)
         {
             Debug.LogWarning($"More than 1 match found for body {mjBody.name}: {string.Join(", ", childTransforms.Select(t => t.name))} Kinematic rig creation would likely fail.");
@@ -52,7 +54,7 @@ public class MjFiniteDifferenceManagerEditor : Editor
         }
         if (childTransforms.Count() < 1)
         {
-            Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody, being the ref:" + prefix );
+            Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody, being the ref:" + prefix + mjBody.name );
             return;
         }
 
