@@ -12,6 +12,9 @@ namespace ModularAgents.DReCon
 { 
     public class MjDReConRewardSource : DReConRewardSource
     {
+
+        string collidername = "_Unity_collider";
+
         unsafe public override void OnAgentStart()
         {
             MjState.ExecuteAfterMjStart(MjInitialize);
@@ -33,8 +36,8 @@ namespace ModularAgents.DReCon
             nBodies = kinChain.ColliderCount;
 
 
-            RemoveColliders(simulationTransform);
-            RemoveColliders(kinematicTransform);
+          //  RemoveColliders(simulationTransform);
+          //  RemoveColliders(kinematicTransform);
         }
 
         public void AddColliders(Transform rootTransform)
@@ -59,9 +62,9 @@ namespace ModularAgents.DReCon
             colObject.transform.SetParent(parent.transform);
             colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.GetLocalCenterOfMass()), body.transform.rotation * body.GetLocalCenterOfMassRotation());
 
-
             var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
-            box.name = body.name + "_Unity_collider";
+            //box.name = body.name + "_Unity_collider";
+            box.name = collidername;
 
             var diagInertia = body.GetInertia();
             var mass = body.GetMass();
@@ -79,7 +82,7 @@ namespace ModularAgents.DReCon
             if (!body.GetComponentInDirectChildren<MjFiniteDifferenceJoint>()  ) return;
             var colObject = new GameObject();
             colObject.transform.SetParent(parent.transform);
-            colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.GetIKinematic().CenterOfMass), body.transform.rotation );
+            colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.PairedBody.GetLocalCenterOfMass()), body.transform.rotation * body.PairedBody.GetLocalCenterOfMassRotation());
 
 
             /*
@@ -101,7 +104,8 @@ namespace ModularAgents.DReCon
             if (pairedBodyBox != null)
             {
                 var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
-                box.name = body.name + "_Unity_collider";
+                //box.name = body.name + "_Unity_collider";
+                box.name = collidername;
 
                 box.size = pairedBodyBox.size;
             }
@@ -114,6 +118,7 @@ namespace ModularAgents.DReCon
 
         public void RemoveColliders(Transform rootTransform)
         {
+            /*
             foreach (var geom in rootTransform.GetComponentsInChildren<MjGeom>())
             {
 
@@ -126,6 +131,19 @@ namespace ModularAgents.DReCon
                 Destroy(collider);
 
             }
+            */
+
+            foreach (var col in rootTransform.GetComponentsInChildren<BoxCollider>())
+            {
+
+                if ( col.name.Equals(collidername) )
+                {
+                    Destroy(col);
+                }
+
+            }
+
+
         }
 
     }

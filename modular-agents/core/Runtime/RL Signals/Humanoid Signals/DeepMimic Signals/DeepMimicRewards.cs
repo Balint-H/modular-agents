@@ -44,7 +44,7 @@ namespace ModularAgents.DeepMimic
             return 0.65f * PoseReward(kinChain, simChain) +
                     0.1f * VelocityReward(kinChain, simChain) +
                     0.15f * EndEffectorReward(kinEEs, simEEs, kinFrame, simFrame, useGlobalPositions) +
-                    0.1f * CetnerOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
+                    0.1f * CenterOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
         }
 
         private static float Sq(float a) => a * a;
@@ -72,7 +72,7 @@ namespace ModularAgents.DeepMimic
             return Mathf.Exp(-10 * positionLoss);
         }
 
-        private static float CetnerOfMassReward(BodyChain kinChain, BodyChain simChain, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
+        private static float CenterOfMassReward(BodyChain kinChain, BodyChain simChain, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
         {
             float comLoss = global ? (simChain.CenterOfMass - kinChain.CenterOfMass).sqrMagnitude :
                                      (simFrame.WorldToCharacter(simChain.CenterOfMass) - kinFrame.WorldToCharacter(kinChain.CenterOfMass)).sqrMagnitude;

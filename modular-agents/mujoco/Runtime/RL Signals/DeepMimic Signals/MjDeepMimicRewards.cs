@@ -17,10 +17,15 @@ namespace ModularAgents.DeepMimic
     {
         public override void OnAgentStart()
         {
-            kinChain = kinRoot.GetBodyChain();
+          
             simChain = simRoot.GetBodyChain();
-            kinEEs = kinEETransforms.Select(x => x.GetIKinematic()).ToList();
+            kinChain = kinRoot.GetBodyChain();
+
+
             simEEs = simEETransforms.Select(x => x.GetIKinematic()).ToList();
+            kinEEs = kinEETransforms.Select(x => x.GetIKinematic()).ToList();
+
+
         }
     }
 
