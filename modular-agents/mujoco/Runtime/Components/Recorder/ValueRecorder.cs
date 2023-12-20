@@ -15,6 +15,8 @@ namespace ModularAgentsRecorder
         [SerializeField]
         string fileName;
 
+        public bool storeTimeReference = false;
+
         public enum SaveFormat
         {
             CSV,
@@ -46,55 +48,71 @@ namespace ModularAgentsRecorder
             columns.Add(new List<float>());
         }
 
-        public void Record(float value, string colName)
+        void RecordValue(float value, string colName)
         {
+           
+
             int colIdx = columnNames.IndexOf(colName);
             if (colIdx == -1)
             {
                 AddColumn(colName);
                 colIdx = columnNames.Count - 1;
             }
-            Record(value, colIdx);
+
+            columns[colIdx].Add(value);
+            
         }
 
         public void Record(Vector3 vector, string colName)
         {
+            if (storeTimeReference)
+                RecordValue(Time.realtimeSinceStartup, "time");
+
 
             var values = vector.GetComponents();
             var colNames = new[] { "_x", "_y", "_z" }.Select(d => colName + d);
 
             foreach ((var val, var name) in values.Zip(colNames, Tuple.Create))
             {
-                Record(val, name);
+                RecordValue(val, name);
             }
         }
         
         public void Record(Vector2 vector, string colName)
         {
+            if (storeTimeReference)
+                RecordValue(Time.realtimeSinceStartup, "time");
 
             var values = new float[] {vector.x, vector.y };
             var colNames = new[] { "_x", "_y", "_z" }.Select(d => colName + d);
 
             foreach ((var val, var name) in values.Zip(colNames, Tuple.Create))
             {
-                Record(val, name);
+                RecordValue(val, name);
             }
         }
 
         public void Record(Quaternion quat, string colName)
         {
+            if (storeTimeReference)
+                RecordValue(Time.realtimeSinceStartup, "time");
 
             var values = new[] { quat.x, quat.y, quat.z, quat.w };
             var colNames = new[] { "_x", "_y", "_z", "_w" }.Select(d => colName + d);
+          
 
             foreach ((var val, var name) in values.Zip(colNames, Tuple.Create))
             {
-                Record(val, name);
+                RecordValue(val, name);
             }
         }
 
         public void Record(IEnumerable<float> values, string colName)
         {
+            if (storeTimeReference)
+                RecordValue(Time.realtimeSinceStartup, "time");
+
+
             int count = values.Count();
             IEnumerable<string> colNames;
             switch(count)
@@ -115,15 +133,20 @@ namespace ModularAgentsRecorder
                     colNames = new[] { colName };
                     break;
             }
+         
 
             foreach ((var val, var name) in values.Zip(colNames, Tuple.Create))
             {
-                Record(val, name);
+                RecordValue(val, name);
             }
         }
 
         public void Record(double[] values, string colName)
         {
+            if (storeTimeReference)
+                RecordValue(Time.realtimeSinceStartup, "time");
+
+
             int count = values.Count();
             IEnumerable<string> colNames;
             switch (count)
@@ -145,9 +168,11 @@ namespace ModularAgentsRecorder
                     break;
             }
 
+        
+
             foreach ((var val, var name) in values.Zip(colNames, Tuple.Create))
             {
-                Record((float) val, name);
+                RecordValue((float) val, name);
             }
 
 
@@ -157,11 +182,6 @@ namespace ModularAgentsRecorder
 
 
 
-
-        public void Record(float value, int colIdx)
-        {
-            columns[colIdx].Add(value);
-        }
 
         private void OnApplicationQuit()
         {
