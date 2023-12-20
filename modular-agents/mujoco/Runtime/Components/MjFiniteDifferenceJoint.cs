@@ -36,7 +36,21 @@ using UnityEngine;
         }
         */
 
-        public IMjJointState GetJointState()
+        public double[] QPos
+         {
+        get {return  GetJointState().Positions; }
+    
+         }
+
+        public double[] QVel
+        {
+            get { return GetJointState().Velocities; }
+
+        }
+
+
+
+    public IMjJointState GetJointState()
         {
             if (jointState == null)
                 jointState = FiniteDifferenceJointState.GetFiniteDifferenceJointState(this, pairedJoint);

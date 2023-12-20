@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEngine;
 using Mujoco;
 
-namespace GaitLab
+namespace ModularAgentsRecorder
 {
     public class QVelSampler : TrainingEventHandler
     {

@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Mujoco;
 using Mujoco.Extensions;
 
-namespace GaitLab
+namespace ModularAgentsRecorder
 {
     public class QPosSampler : TrainingEventHandler
     {

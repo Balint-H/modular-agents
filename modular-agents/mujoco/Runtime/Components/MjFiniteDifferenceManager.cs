@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class MjFiniteDifferenceManager :MonoBehaviour
 {
-    [SerializeField]
+   public
     MjFreeJoint pairedRootJoint;
 
   //  [SerializeField]

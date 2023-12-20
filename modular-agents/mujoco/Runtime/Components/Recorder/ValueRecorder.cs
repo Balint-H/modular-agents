@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using ModularAgents;
 
-namespace GaitLab
+namespace ModularAgentsRecorder
 {
     public class ValueRecorder : MonoBehaviour
     {
