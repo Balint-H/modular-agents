@@ -36,8 +36,8 @@ namespace ModularAgents.DReCon
             nBodies = kinChain.ColliderCount;
 
 
-          //  RemoveColliders(simulationTransform);
-          //  RemoveColliders(kinematicTransform);
+            RemoveColliders(simulationTransform);
+            RemoveColliders(kinematicTransform);
         }
 
         public void AddColliders(Transform rootTransform)
