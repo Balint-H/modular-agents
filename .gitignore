@@ -10,10 +10,11 @@
 /UnityMjExamples/Assets/Gizmos*
 /UnityMjExamples/Assets/Demonstrations*
 /UnityMjExamples/Assets/TrainedModelTests*
-
+/UnityMjExamples/Recordings
 /UnityMjExamples/Assets/ML-Agents
 /Training/env*
 
+/envs
 
 # Environemnt logfile
 *UnityMjExamples.log

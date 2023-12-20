@@ -428,9 +428,19 @@ public static class Utils
         return parent.GetComponents<T>();
     }
 
+    public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> list)
+    {
+            if (list.Count() > 0 )
+                return
+                    //generate the list of top-level indices of transposed list
+                    Enumerable.Range(0, list.First().Count())
+                    //selects elements at list[y][x] for each x, for each y
+                    .Select(x => list.Select(y => y.ElementAt(x)));
+            else
+                return list;
+    }
 
-
-}
+    }
 
 namespace MathNet.Numerics.LinearAlgebra
 {
