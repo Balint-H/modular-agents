@@ -36,7 +36,27 @@ public class MjFiniteDifferenceManager :MonoBehaviour
        foreach (MjFiniteDifferenceBody comp in managedComponents)
             comp.GetIKinematic();
        var fdJoints = GetComponentsInChildren<MjFiniteDifferenceJoint>();
-       orderedJoints = pairedRootJoint.GetComponentInParent<MjBody>().GetTopDownOrderedComponents<MjBaseJoint>().Select(j => fdJoints.First(fdj => fdj.PairedJoint == j)).ToList();
+        orderedJoints = pairedRootJoint.GetComponentInParent<MjBody>().GetTopDownOrderedComponents<MjBaseJoint>().Select(j => fdJoints.First(fdj => fdj.PairedJoint == j)).ToList();
+        
+
+        /*
+        List<MjBaseJoint> TEMPjoints = pairedRootJoint.GetComponentInParent<MjBody>().GetTopDownOrderedComponents<MjBaseJoint>().ToList();
+        foreach (var j in TEMPjoints)
+        {
+            MjFiniteDifferenceJoint fdj = fdJoints.First(fdj => fdj.PairedJoint == j);
+            if (fdj != null)
+            {
+                Debug.Log("about to add: " + j.name);
+                orderedJoints.Add(fdj);
+            }
+
+            else
+                Debug.Log("no finite differnece joint found for: " + j.name);
+        
+        }
+        */
+
+
 
 
         Debug.LogWarning("Set the option --timescale=1 when training a humanoid ragdoll from a reference based on Mujoco Finite Difference Bodies, \n" +
