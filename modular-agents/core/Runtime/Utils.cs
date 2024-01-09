@@ -430,6 +430,11 @@ public static class Utils
 
     public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> list)
     {
+            if (list == null)
+            {
+                Debug.LogWarning("you are asking for a list that is null");
+                return null;
+            }
             if (list.Count() > 0 )
                 return
                     //generate the list of top-level indices of transposed list
