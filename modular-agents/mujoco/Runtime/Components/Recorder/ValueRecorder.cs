@@ -15,7 +15,7 @@ namespace ModularAgentsRecorder
         [SerializeField]
         string fileName;
 
-        public bool storeTimeReference = false;
+      
 
         public enum SaveFormat
         {
@@ -65,9 +65,7 @@ namespace ModularAgentsRecorder
 
         public void Record(Vector3 vector, string colName)
         {
-            if (storeTimeReference)
-                RecordValue(Time.realtimeSinceStartup, "time");
-
+          
 
             var values = vector.GetComponents();
             var colNames = new[] { "_x", "_y", "_z" }.Select(d => colName + d);
@@ -80,8 +78,7 @@ namespace ModularAgentsRecorder
         
         public void Record(Vector2 vector, string colName)
         {
-            if (storeTimeReference)
-                RecordValue(Time.realtimeSinceStartup, "time");
+           
 
             var values = new float[] {vector.x, vector.y };
             var colNames = new[] { "_x", "_y", "_z" }.Select(d => colName + d);
@@ -94,9 +91,7 @@ namespace ModularAgentsRecorder
 
         public void Record(Quaternion quat, string colName)
         {
-            if (storeTimeReference)
-                RecordValue(Time.realtimeSinceStartup, "time");
-
+           
             var values = new[] { quat.x, quat.y, quat.z, quat.w };
             var colNames = new[] { "_x", "_y", "_z", "_w" }.Select(d => colName + d);
           
@@ -109,10 +104,7 @@ namespace ModularAgentsRecorder
 
         public void Record(IEnumerable<float> values, string colName)
         {
-            if (storeTimeReference)
-                RecordValue(Time.realtimeSinceStartup, "time");
-
-
+          
             int count = values.Count();
             IEnumerable<string> colNames;
             switch(count)
@@ -143,8 +135,7 @@ namespace ModularAgentsRecorder
 
         public void Record(double[] values, string colName)
         {
-            if (storeTimeReference)
-                RecordValue(Time.realtimeSinceStartup, "time");
+         
 
 
             int count = values.Count();
@@ -192,8 +183,8 @@ namespace ModularAgentsRecorder
                 case SaveFormat.CSV:
                     {
 
-                        Debug.Log("Movement data saved at: " + Path.Combine(Application.dataPath, fileName) + ".csv");
-                        File.WriteAllLines(Path.Combine(Application.dataPath, fileName)+".csv", Rows.Select(l => string.Join(",", l)).Prepend(Header));
+                        Debug.Log("Movement data saved at: " + Path.Combine(Application.persistentDataPath, fileName) + ".csv");
+                        File.WriteAllLines(Path.Combine(Application.persistentDataPath, fileName)+".csv", Rows.Select(l => string.Join(",", l)).Prepend(Header));
                         break;
 
 

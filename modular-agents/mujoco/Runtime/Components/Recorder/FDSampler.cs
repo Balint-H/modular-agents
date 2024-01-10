@@ -9,8 +9,9 @@ using ModularAgents.DeepMimic;
 using ModularAgents.Kinematic.Mujoco;
 
 namespace ModularAgentsRecorder
-{ 
-    public class FDSampler : TrainingEventHandler
+{
+    //public class FDSampler : TrainingEventHandler
+    public class FDSampler : MonoBehaviour
     {
         [Range(1, 10)]
         public int LoggingPeriod = 2;
@@ -20,14 +21,15 @@ namespace ModularAgentsRecorder
         {
             qpos,
             qvel,
-            all
+            all,
+            counter
         }
-
+      
 
         public DataToSave dataToSave = DataToSave.qpos;
 
 
-        public override EventHandler Handler => CollectDataFD;
+        //public override EventHandler Handler => CollectDataFD;
 
         [SerializeField]
         MjFiniteDifferenceManager FDManager;
@@ -49,43 +51,83 @@ namespace ModularAgentsRecorder
 
         List<MjFiniteDifferenceJoint> jointsFD = null;
         List<MjBaseJoint> jointsPupet = null;
-        
 
-
-        void CollectDataFD(object sender, EventArgs e)
+        private void FixedUpdate()
         {
-            loggingCounter++;
-            if(loggingCounter % LoggingPeriod == 0) 
+            CollectDataFD();
+        }
+
+        //  void CollectDataFD(object sender, EventArgs e)
+        void CollectDataFD()
+        {
+           
             {
           
-
-                if (jointsFD == null)
-                {
-                    GetJointOrderFD();
-
-                }
-
-
-                if (jointsPupet == null)
-                {
-                    GetJointOrderPupet();
-
-                }
 
 
 
                 switch (dataToSave)
                 {
                     case DataToSave.qvel:
-                        CollectVelocitiesFD(sender, e);
+
+
+                        if (jointsFD == null)
+                        {
+                            GetJointOrderFD();
+
+                        }
+
+
+                        if (jointsPupet == null)
+                        {
+                            GetJointOrderPupet();
+
+                        }
+
+
+                        CollectVelocitiesFD();
                         break;
 
                     case DataToSave.qpos:
-                        CollectPositionsFD(sender, e);
+
+                        if (jointsFD == null)
+                        {
+                            GetJointOrderFD();
+
+                        }
+
+
+                        if (jointsPupet == null)
+                        {
+                            GetJointOrderPupet();
+
+                        }
+
+
+                        CollectPositionsFD();
                         break;
 
                     case DataToSave.all:
-                        CollectAll(sender, e);
+
+
+                        if (jointsFD == null)
+                        {
+                            GetJointOrderFD();
+
+                        }
+
+
+                        if (jointsPupet == null)
+                        {
+                            GetJointOrderPupet();
+
+                        }
+
+
+                        CollectAll();
+                        break;
+                    case DataToSave.counter:
+                        CollectCounter();
                         break;
 
 
@@ -97,14 +139,30 @@ namespace ModularAgentsRecorder
 
         }
 
-        unsafe void CollectAll(object sender, EventArgs e)
+        int counti = 0;
+        void CollectCounter()
         {
-            CollectPositionsFD(sender, e);
+            recorder.Record(new double[] { counti }, "counter_" );
+            recorder.Record(new double[] { Time.fixedTimeAsDouble }, "time");
+            
+            counti++;
+        }
 
-            CollectVelocitiesFD(sender, e);
 
-            CollectPositionsPupet(sender, e);
-            CollectVelocitiesPupet(sender, e);
+        void CollectAll()
+        {
+            //if (storeTimeReference)
+            //    RecordValue(Time.fixedTime, "time");
+
+
+            CollectCounter();
+
+            CollectPositionsFD();
+
+            CollectVelocitiesFD();
+
+            CollectPositionsPupet();
+            CollectVelocitiesPupet();
             foreach (MjDeepMimicObservations mjobs in DMObs)
             {
                 mjobs.LogObservations(recorder);
@@ -124,7 +182,8 @@ namespace ModularAgentsRecorder
 
 
 
-        unsafe void CollectPositionsFD(object sender, EventArgs e)
+        //unsafe void CollectPositionsFD(object sender, EventArgs e)
+        void CollectPositionsFD()
         {
 
           
@@ -138,7 +197,8 @@ namespace ModularAgentsRecorder
         }
 
 
-        unsafe void CollectPositionsPupet(object sender, EventArgs e)
+        //unsafe void CollectPositionsPupet(object sender, EventArgs e)
+        void CollectPositionsPupet()
         {
 
 
@@ -154,7 +214,8 @@ namespace ModularAgentsRecorder
         }
 
 
-        unsafe void CollectVelocitiesFD(object sender, EventArgs e)
+        // unsafe void CollectVelocitiesFD(object sender, EventArgs e)
+        void CollectVelocitiesFD()
         {
 
 
@@ -167,7 +228,8 @@ namespace ModularAgentsRecorder
 
         }
 
-        unsafe void CollectVelocitiesPupet(object sender, EventArgs e)
+        //unsafe void CollectVelocitiesPupet(object sender, EventArgs e)
+        void CollectVelocitiesPupet()
         {
 
 
