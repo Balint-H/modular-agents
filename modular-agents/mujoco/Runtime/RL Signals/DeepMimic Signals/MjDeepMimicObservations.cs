@@ -17,10 +17,6 @@ namespace ModularAgents.DeepMimic
         [SerializeField]
         protected Animator animator;
 
-        [SerializeField]
-        ValueRecorder recorder;
-
-
         protected override IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection)
         {
             return transformCollection
@@ -44,7 +40,7 @@ namespace ModularAgents.DeepMimic
 
 
 
-        public override void FeedObservationsToSensor(VectorSensor sensor)
+        public void LogObservations(ValueRecorder recorder)
         {
 
             if (recorder != null) 
@@ -55,53 +51,67 @@ namespace ModularAgents.DeepMimic
                 {
                    
 
-                    recorder.Record(fDyn.WorldDirectionToCharacter(k.Velocity), k.Name+ "_velocity");
+                    recorder.Record(fDyn.WorldDirectionToCharacter(k.Velocity), name + "_" + k.Name+ "_velocity");
 
-                    recorder.Record(fDyn.WorldDirectionToCharacter(k.AngularVelocity), k.Name + "_angularVelocity");
-                    recorder.Record(fDyn.WorldToCharacter(k.Position), k.Name + "_position");
+                    recorder.Record(fDyn.WorldDirectionToCharacter(k.AngularVelocity), name + "_" + k.Name + "_angularVelocity");
+                    recorder.Record(fDyn.WorldToCharacter(k.Position), name + "_" +  k.Name + "_position");
 
 
                     (var normal, var tangent) = k.TransformMatrix.ToNormalTangent();
                     
-                    recorder.Record(fDyn.WorldDirectionToCharacter(normal), k.Name + "_normal");
-                    recorder.Record(fDyn.WorldDirectionToCharacter(tangent), k.Name + "_tangent");
+                    recorder.Record(fDyn.WorldDirectionToCharacter(normal), name + "_" + k.Name + "_normal");
+                    recorder.Record(fDyn.WorldDirectionToCharacter(tangent), name + "_" + k.Name + "_tangent");
 
                 }
                 if (usePhase)
                 {
                     float[] p = new float[1] { GetPhase() % 1 };
-                    recorder.Record(p,  "anim_phase");
+                    recorder.Record(p, name + "_" + "anim_phase");
                     
                 }
 
 
 
-
-
-
             }
 
 
-            base.FeedObservationsToSensor(sensor);
-
-            /*
-            ReferenceFrame fDyn = new ReferenceFrame(root.Forward, root.Position);
-
-            foreach (IKinematic k in observedKinematics)
-            {
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.Velocity));
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.AngularVelocity));
-                sensor.AddObservation(fDyn.WorldToCharacter(k.Position));
-                (var normal, var tangent) = k.TransformMatrix.ToNormalTangent();
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(normal));
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(tangent));
-            }
-            if (usePhase)
-            {
-                sensor.AddObservation(GetPhase() % 1);
-            }
-            */
+        
         }
+
+
+
+
+        public void LogObservationsSimpler(ValueRecorder recorder)
+        {
+
+            if (recorder != null)
+            {
+
+
+                foreach (IKinematic k in observedKinematics)
+                {
+                    recorder.Record(k.Velocity, "simpler_" +  name + "_" + k.Name + "_velocity");
+                    recorder.Record(k.AngularVelocity, "simpler_" + name + "_" + k.Name + "_angularVelocity");
+                    recorder.Record(k.Position, "simpler_" +  name + "_" + k.Name + "_position");
+                    recorder.Record(k.Rotation, "simpler_" +  name + "_" + k.Name + "_rotation");
+                    recorder.Record(k.LocalRotation, "simpler_" + name + "_" + k.Name + "_localRotation");
+
+                }
+                if (usePhase)
+                {
+                    float[] p = new float[1] { GetPhase() % 1 };
+                    recorder.Record(p, "simpler_" + name + "_" + "anim_phase");
+
+                }
+
+
+
+            }
+
+
+
+        }
+
 
 
 
