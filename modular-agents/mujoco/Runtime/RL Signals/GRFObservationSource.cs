@@ -24,12 +24,18 @@ namespace ModularAgents
 
         [SerializeField]
         bool weightedPostionAveraging = true;
+        
+        [SerializeField]
+        bool updateOnPostStep;
+        
+        // Only populated if updateOnPostStep is enabled
+        public (Vector3, Vector3) lastPosAndVec {get; private set;}
 
 
         IKinematic rootKinematics;
 
 
-        private unsafe (Vector3, Vector3) GetMeanGRF()
+        public unsafe (Vector3, Vector3) GetMeanGRF()
         {
             var model = MjScene.Instance.Model;
             var data = MjScene.Instance.Data;
@@ -101,9 +107,17 @@ namespace ModularAgents
             sensor.AddObservation(simRef.WorldDirectionToCharacter(force)/forceScale);
         }
 
-        public override void OnAgentStart()
+        public void Awake()
         {
             rootKinematics = rootBody.GetIKinematic();
+            if(updateOnPostStep)
+            {
+              MjScene.Instance.postUpdateEvent += (_, _) => lastPosAndVec = GetMeanGRF();
+            }
+        }
+        
+        public override void OnAgentStart()
+        {
         }
 
         private unsafe static IEnumerable<(MujocoLib.mjContact_, int id)> GetContacts(MujocoLib.mjData_* data)
