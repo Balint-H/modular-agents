@@ -85,7 +85,7 @@ The partial results suggest there is a problem in getting the right rewards. The
 
 ![2024-01-10-11-36-28-image.png](.\img\2024-01-10-11-36-28-image.png)
 
-WHERE DOES THIS PROBLEM COME FROM?
+WHERE DOES THIS PROBLEM COME FROM? unknown
 
 
 
@@ -95,8 +95,18 @@ To be able to compare the observations, I also create a build  from scene *5.Str
 (marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4025-WalkFD5-t1 --env=envs/WalkFD5/WalkFD --time-scale=1 
 ```
 
-To make extra sure the problem doesn't come from the FD rewards, I create another scene       ( *6.StraightWalk_DeepMimic_FDobs_pupetRewards.unity* ) where I use the FD observatoins, but the FD rewards. Specifically:
+To make extra sure the problem doesn't come from the FD rewards, I create another scene       ( *6.StraightWalk_DeepMimic_FDobs_pupetRewards.unity* ) where I use the FD observatoins, but the Pupet rewards. Specifically:
 
 ```powershell
 (marathon-envs) artanim@artanim-train-02:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml  --run-id=run4026-WalkFD6-t2   --time-scale=1 --env=envs/WalkFD6/WalkFD 
 ```
+
+![2024-01-10-12-00-01-image.png](.\img\2024-01-10-12-00-01-image.png)
+
+Above we have:
+
+-In green the training of Deep Mimic with the pupet
+
+-In grey, the training of Deep Mimic with the pupet, but using observations from FD calculations
+
+-In cyan training of Deep Mimic with the pupet, using observations BOTH from FD and the pupet (see the marginal increment)
