@@ -42,6 +42,10 @@ namespace ModularAgentsRecorder
         [SerializeField]
         MjDeepMimicObservations[] DMObs;
 
+        [SerializeField]
+        MjDeepMimicRewards[] DMRewards;
+
+
 
         List<MjFiniteDifferenceJoint> jointsFD = null;
         List<MjBaseJoint> jointsPupet = null;
@@ -108,6 +112,13 @@ namespace ModularAgentsRecorder
                 mjobs.LogObservationsSimpler(recorder);
 
             }
+
+            foreach (MjDeepMimicRewards mjobs in DMRewards)
+            {
+                mjobs.LogRewards(recorder);
+
+            }
+
 
         }
 

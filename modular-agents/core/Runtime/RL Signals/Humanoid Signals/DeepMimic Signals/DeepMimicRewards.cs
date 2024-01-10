@@ -30,7 +30,7 @@ namespace ModularAgents.DeepMimic
         protected IReadOnlyList<IKinematic> simEEs;
 
         [SerializeField]
-        bool useGlobalPositions = true;
+        protected bool useGlobalPositions = true;
 
 
         public override float Reward => CalculateRewards();
@@ -47,9 +47,13 @@ namespace ModularAgents.DeepMimic
                     0.1f * CenterOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
         }
 
+
+
+
+
         private static float Sq(float a) => a * a;
 
-        private static float PoseReward(BodyChain kinChain, BodyChain simChain)
+        protected static float PoseReward(BodyChain kinChain, BodyChain simChain)
         {
             float poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation, kin.LocalRotation) * Mathf.Deg2Rad)).Sum();
 
@@ -57,14 +61,14 @@ namespace ModularAgents.DeepMimic
 
         }
 
-        private static float VelocityReward(BodyChain kinChain, BodyChain simChain)
+        protected static float VelocityReward(BodyChain kinChain, BodyChain simChain)
         {
             float velocityLoss = simChain.Zip(kinChain, (sim, kin) => (sim.LocalAngularVelocity - kin.LocalAngularVelocity).sqrMagnitude).Sum();
 
             return Mathf.Exp(-0.1f * velocityLoss / kinChain.Count);
         }
 
-        private static float EndEffectorReward(IReadOnlyList<IKinematic> kinEEs, IReadOnlyList<IKinematic> simEEs, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
+        protected static float EndEffectorReward(IReadOnlyList<IKinematic> kinEEs, IReadOnlyList<IKinematic> simEEs, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
         {
             float positionLoss = global ? simEEs.Zip(kinEEs, (sim, kin) => (sim.Position - kin.Position).sqrMagnitude).Sum() :
                                           simEEs.Zip(kinEEs, (sim, kin) => (simFrame.WorldToCharacter(sim.Position) - kinFrame.WorldToCharacter(kin.Position)).sqrMagnitude).Sum();
@@ -72,7 +76,7 @@ namespace ModularAgents.DeepMimic
             return Mathf.Exp(-10 * positionLoss);
         }
 
-        private static float CenterOfMassReward(BodyChain kinChain, BodyChain simChain, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
+        protected static float CenterOfMassReward(BodyChain kinChain, BodyChain simChain, ReferenceFrame kinFrame, ReferenceFrame simFrame, bool global)
         {
             float comLoss = global ? (simChain.CenterOfMass - kinChain.CenterOfMass).sqrMagnitude :
                                      (simFrame.WorldToCharacter(simChain.CenterOfMass) - kinFrame.WorldToCharacter(kinChain.CenterOfMass)).sqrMagnitude;
