@@ -87,8 +87,6 @@ The partial results suggest there is a problem in getting the right rewards. The
 
 WHERE DOES THIS PROBLEM COME FROM? unknown
 
-
-
 To be able to compare the observations, I also create a build  from scene *5.StraightWalk_DeepMimic_BOTHobs.unity* and launch a training with instruction: 
 
 ```powershell
@@ -110,3 +108,49 @@ Above we have:
 -In grey, the training of Deep Mimic with the pupet, but using observations from FD calculations
 
 -In cyan training of Deep Mimic with the pupet, using observations BOTH from FD and the pupet (see the marginal increment)
+
+
+
+
+
+12.01.2024
+
+trying to understand why the rewards that we get from the finite differences do not work, I launch the following tests:
+
+
+
+WalkFD7:
+
+invert the localRotation of the ball joints
+
+Launch instruction:
+
+```
+(marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4027-WalkFD7-t1 --env=envs/WalkFD7/WalkFD --time-scale=1 
+
+```
+
+
+
+
+
+WalkFD8: 
+
+invert the localRotatoin of the ball joints and use the new decomposition for sibling hinge joints
+
+```shell
+(marathon-envs) artanim@artanim-train-02:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml  --run-id=run4026-WalkFD8-t1   --time-scale=1 --env=envs/WalkFD8/WalkFD 
+```
+
+
+
+WalkFD9:
+
+do not invert localRotation in ball joints and use hte new decomposition for sibling hinge joints
+
+
+
+```shell
+(marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4029-WalkFD9-t1 --env=envs/WalkFD9/WalkFD --time-scale=1
+
+```

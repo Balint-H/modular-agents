@@ -10,22 +10,32 @@ namespace ModularAgentsRecorder
 {
     public class ValueRecorder : MonoBehaviour
     {
+        public enum shouldSaveData
+        { 
+            assetsfolder = 0,
+            permanentpath = 1,
+            no_saving = -1
+        
+        }
+
+
         [SerializeField]
-        bool shouldSave;
+        shouldSaveData saveIn ;
         [SerializeField]
         string fileName;
 
       
-
+        /*
         public enum SaveFormat
         {
             CSV,
             JSON
         }
+        */
 
         public EventHandler OnExport;
 
-        public SaveFormat format = SaveFormat.CSV;
+        //public SaveFormat format = SaveFormat.CSV;
 
         public string Header => string.Join(",", columnNames);
 
@@ -176,8 +186,9 @@ namespace ModularAgentsRecorder
 
         private void OnApplicationQuit()
         {
-            if (!shouldSave) return;
+           // if (!shouldSave) return;
 
+            /*
             switch (format)
             {
                 case SaveFormat.CSV:
@@ -191,7 +202,36 @@ namespace ModularAgentsRecorder
                     }
                 case SaveFormat.JSON:
                     throw new NotImplementedException();
+            }*/
+
+
+            switch (saveIn)
+            {
+                case shouldSaveData.assetsfolder :
+                    {
+
+                        Debug.Log("Movement data saved at: " + Path.Combine(Application.dataPath, fileName) + ".csv");
+                        File.WriteAllLines(Path.Combine(Application.dataPath, fileName) + ".csv", Rows.Select(l => string.Join(",", l)).Prepend(Header));
+                        break;
+
+
+                    }
+                case shouldSaveData.permanentpath:
+                    {
+                        Debug.Log("Movement data saved at: " + Path.Combine(Application.persistentDataPath, fileName) + ".csv");
+                        File.WriteAllLines(Path.Combine(Application.persistentDataPath, fileName) + ".csv", Rows.Select(l => string.Join(",", l)).Prepend(Header));
+                        break;
+
+
+
+                    }
+
+
+                    throw new NotImplementedException();
             }
+
+
+
             OnExport?.Invoke(this, EventArgs.Empty);
 
         }

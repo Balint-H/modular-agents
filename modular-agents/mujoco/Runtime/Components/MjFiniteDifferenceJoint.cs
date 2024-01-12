@@ -219,8 +219,8 @@ using UnityEngine;
 
 
 
-            // MjFiniteDifferenceJoint[] siblings;
-            //  int indexme = -1;
+            MjFiniteDifferenceJoint[] siblings;
+            int indexme = -1;
 
             public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
             {
@@ -232,8 +232,8 @@ using UnityEngine;
               
                 MjFiniteDifferenceBody check = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
 
-            //    siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();    
-            //    indexme = siblings.TakeWhile(x => ! x.name.Equals(component.transform.name)).Count() ;
+               siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();    
+               indexme = siblings.TakeWhile(x => ! x.name.Equals(component.transform.name)).Count() ;
 
 
             }
@@ -305,14 +305,16 @@ using UnityEngine;
             double[] GetJointLocalRotation()
             {
 
+            //A. version with no siblings:
 
-                Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
-                return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
+            //Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
+            //return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
 
 
-                //below, an attempt to take into account the different hinges that are s
-                /*
-                switch (siblings.Length)
+            //B. version with 1 sibling:    
+            //below, an attempt to take into account the different hinges that are s
+            
+            switch (siblings.Length)
                 {
                     case 0:
                         Debug.LogWarning("Trying to get the location of a Hinge but the MjJoint" + component.transform.localRotation + " has no Hinge attached to it. This shouldnt be possible");
@@ -342,25 +344,39 @@ using UnityEngine;
                             }
 
 
-                            else
+                            else //it is 1
                             { 
                      
 
                                 FiniteDifferenceHinge[] hinges = siblings.Select(x => new FiniteDifferenceHinge(x, hinge)).ToArray();
-                                Quaternion tempHinge0 = hinges[0].initialRotationHinge * hinges[0].GetBodyLocalRotation();
-                                Quaternion rotationAlreadyDone = hinges[0].hinge.transform.localRotation * GetXRotation(Quaternion.Inverse(hinges[0].hinge.transform.localRotation) * tempHinge0);
 
-                                Quaternion temp =  Quaternion.Inverse(rotationAlreadyDone) *  initialRotationHinge * GetBodyLocalRotation();
-                                return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
 
+                                Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
+
+                                //the sibling 0 has rotation:
+                                Quaternion sibQ = new Quaternion(temp.x, 0, 0, -temp.w).normalized;
+
+                                //since we already applied the rotation of sibQ, we need to:
+                                Quaternion temp2 = Quaternion.Inverse(sibQ) * temp;
+
+                            return new double[1] { 2 * Mathf.Asin(temp2.x) * Mathf.Sign(-temp2.w) };
+
+
+                            
+                            //     Quaternion tempHinge0 = hinges[0].initialRotationHinge * hinges[0].GetBodyLocalRotation();
+                            //    Quaternion rotationAlreadyDone = hinges[0].hinge.transform.localRotation * GetXRotation(Quaternion.Inverse(hinges[0].hinge.transform.localRotation) * tempHinge0);
+
+                            //    Quaternion temp =  Quaternion.Inverse(rotationAlreadyDone) *  initialRotationHinge * GetBodyLocalRotation();
+                            //    return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
+                            
                             }
 
 
                         }
 
                 }
-
-                */
+                
+               
 
 
             }

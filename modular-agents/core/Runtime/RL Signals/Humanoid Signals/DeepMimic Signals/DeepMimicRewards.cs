@@ -12,6 +12,9 @@ namespace ModularAgents.DeepMimic
     //does not implement the initialization because it has no access to the body chain
     public abstract class DeepMimicRewards : RewardSource
     {
+        public bool useOppositeLocalRotation = false;
+
+
         [SerializeField]
         protected Transform kinRoot;
 
@@ -53,9 +56,22 @@ namespace ModularAgents.DeepMimic
 
         private static float Sq(float a) => a * a;
 
-        protected static float PoseReward(BodyChain kinChain, BodyChain simChain)
+        private static Quaternion Opposite(Quaternion q)
+        { 
+            return new Quaternion(-q.x, -q.y,-q.z,-q.w);
+        
+        }
+
+        protected  float PoseReward(BodyChain kinChain, BodyChain simChain)
         {
-            float poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation, kin.LocalRotation) * Mathf.Deg2Rad)).Sum();
+
+
+
+            float poseLoss = 0;
+            if(useOppositeLocalRotation)
+                poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation,  Opposite(kin.LocalRotation ) ) * Mathf.Deg2Rad)).Sum();
+            else
+                poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation,kin.LocalRotation) * Mathf.Deg2Rad)).Sum();
 
             return Mathf.Exp(-2f * poseLoss / kinChain.Count);
 

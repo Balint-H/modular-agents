@@ -33,8 +33,10 @@ namespace ModularAgents.Kinematic.Mujoco
 
         private Vector3 Position => transform.position;
         private Quaternion Rotation => transform.rotation;
+        
+        
+        //private Quaternion LocalRotation =>new Quaternion( - transform.localRotation.x, -transform.localRotation.y, -transform.localRotation.z, -transform.localRotation.w) ;
         private Quaternion LocalRotation => transform.localRotation;
-
 
         private float fs;
         private Vector3 Velocity => (currentPosition - prevPosition) * fs;
