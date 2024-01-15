@@ -195,7 +195,7 @@ namespace ModularAgents.MotorControl.Mujoco
             {
                 jointStates = actuatedJoints.Select(j => IMjJointState.GetJointState(j)).ToList();
 
-                activeReferenceStates = jointStates.Where(js => IsActive(js.Joint)).Select(js => IMjJointState.GetJointState(FindReference(js.Joint))).ToList();
+                activeReferenceStates = jointStates.Where(js => IsActive(js.Joint)).Select(js => FindReference(js.Joint)).ToList();
             }
 
             activeDofLocalIndices = GetActiveDofIndices(actuatedJoints).ToArray();
@@ -215,9 +215,19 @@ namespace ModularAgents.MotorControl.Mujoco
             if (MjScene.InstanceExists) MjScene.Instance.ctrlCallback -= UpdateTorque;
         }
 
-        private MjBaseJoint FindReference(MjBaseJoint joint)
+        private IMjJointState FindReference(MjBaseJoint joint)
         {
-            return kinematicRef ? kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)) : null;
+            if(!kinematicRef) return null;
+
+            if (kinematicRef.GetComponentInChildren<MjBaseJoint>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)));
+            }
+            else if( kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjMocapJointStateComponent>().First(rj => rj.name.Contains(joint.name)).transform);
+            }
+            return null;
         }
 
         private unsafe void Start()

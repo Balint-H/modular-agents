@@ -6,6 +6,7 @@ using System;
 using Mujoco;
 using Mujoco.Extensions;
 using ModularAgents.Kinematic.Mujoco;
+using System.Data;
 
 namespace ModularAgents.DReCon
 { 
@@ -40,23 +41,32 @@ namespace ModularAgents.DReCon
         {
             foreach (var body in rootTransform.GetComponentsInChildren<MjBody>())
             {
-                if (!body.GetComponentInDirectChildren<MjHingeJoint>() && !body.GetComponentInDirectChildren<MjBallJoint>() && !body.GetComponentInDirectChildren<MjFreeJoint>()) continue;
-                var colObject = new GameObject();
-                colObject.transform.SetParent(body.transform);
-                colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.GetLocalCenterOfMass()), body.transform.rotation * body.GetLocalCenterOfMassRotation());
-
-
-                var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
-                box.name = body.name + "_Unity_collider";
-
-                var diagInertia = body.GetInertia();
-                var mass = body.GetMass();
-
-                box.size = new Vector3(Mathf.Sqrt((diagInertia[1] + diagInertia[2] - diagInertia[0]) / mass * 6.0f),
-                                       Mathf.Sqrt((diagInertia[0] + diagInertia[2] - diagInertia[1]) / mass * 6.0f),
-                                       Mathf.Sqrt((diagInertia[0] + diagInertia[1] - diagInertia[2]) / mass * 6.0f));
-
+                CreateColliderForBody(body, body.transform);
             }
+
+            foreach (var dataView in rootTransform.GetComponentsInChildren<MjMocapBodyKinematicsComponent>())
+            {
+                CreateColliderForBody(dataView.PairedBody, dataView.transform);
+            }
+        }
+
+        void CreateColliderForBody(MjBody body, Transform parent)
+        {
+            if (!body.GetComponentInDirectChildren<MjHingeJoint>() && !body.GetComponentInDirectChildren<MjBallJoint>() && !body.GetComponentInDirectChildren<MjFreeJoint>()) return;
+            var colObject = new GameObject();
+            colObject.transform.SetParent(parent.transform);
+            colObject.transform.SetPositionAndRotation(body.transform.TransformPoint(body.GetLocalCenterOfMass()), body.transform.rotation * body.GetLocalCenterOfMassRotation());
+
+
+            var box = colObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
+            box.name = body.name + "_Unity_collider";
+
+            var diagInertia = body.GetInertia();
+            var mass = body.GetMass();
+
+            box.size = new Vector3(Mathf.Sqrt((diagInertia[1] + diagInertia[2] - diagInertia[0]) / mass * 6.0f),
+                                   Mathf.Sqrt((diagInertia[0] + diagInertia[2] - diagInertia[1]) / mass * 6.0f),
+                                   Mathf.Sqrt((diagInertia[0] + diagInertia[1] - diagInertia[2]) / mass * 6.0f));
         }
 
         public void RemoveColliders(Transform rootTransform)

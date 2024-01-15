@@ -135,7 +135,8 @@ namespace ModularAgents.DReCon
 
             foreach ((var p, var v) in drawPos.Zip(drawVel, Tuple.Create))
             {
-                Gizmos.DrawLine(p, p + v * scale);
+                var v2 = this[bodyIndex].Velocity;  // TODO
+                Gizmos.DrawLine(p, p + v2 * scale);
             }
         }
 

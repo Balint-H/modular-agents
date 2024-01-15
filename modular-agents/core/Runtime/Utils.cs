@@ -236,7 +236,10 @@ public static class Utils
         return axis*angle;
     }
 
-    public static double[] QuaternionError(double[] cur, double[] des)
+    /// <summary>
+    /// In real-first quaternion notation.
+    /// </summary>
+    public static double[] QuaternionError(double[] cur, double[] des) 
     {
         //performing inverse and multiplication simultaneously
         double[] err = new[] {  cur[0]*des[0] + cur[1]*des[1] + cur[2]*des[2] + cur[3]*des[3], /*w1w2 + x1x2 + y1y2 + z1z2*/
@@ -250,8 +253,25 @@ public static class Utils
         return new[] { angle * err[1] / denom, angle * err[2] / denom, angle * err[3] / denom };
     }
 
+    /// <summary>
+    /// In real-first quaternion notation.
+    /// </summary>
+    public static float[] QuaternionError(float[] cur, float[] des)
+    {
+        //performing inverse and multiplication simultaneously
+        float[] err = new[] {  cur[0]*des[0] + cur[1]*des[1] + cur[2]*des[2] + cur[3]*des[3], /*w1w2 + x1x2 + y1y2 + z1z2*/
+                            cur[0]*des[1] - cur[1]*des[0] - cur[2]*des[3] + cur[3]*des[2], /*w1x2 - x1w2 - y1z2 + z1y2*/
+                            cur[0]*des[2] + cur[1]*des[3] - cur[2]*des[0] - cur[3]*des[1], /*w1y2 + x1z2 - y1w2 - z1x2*/
+                            cur[0]*des[3] - cur[1]*des[2] + cur[2]*des[1] - cur[3]*des[0]};/*w1z2 - x1y2 + y1x2 - z1w2*/
+        if (err[0] >= 1) return new[] { 0.0f, 0.0f, 0.0f };
+        float angle = 2.0f * Mathf.Acos(err[0]);
+        //if (angle == 0) return new[] { 0.0, 0.0, 0.0};
+        float denom = Mathf.Sqrt(1 - err[0] * err[0]);
+        return new[] { angle * err[1] / denom, angle * err[2] / denom, angle * err[3] / denom };
+    }
 
-    static  List<ArticulationBody> GetArticulationBodyMotors(GameObject theRoot, bool returnRoot = false)
+
+        static  List<ArticulationBody> GetArticulationBodyMotors(GameObject theRoot, bool returnRoot = false)
     {
 
         if (!returnRoot) { 

@@ -17,14 +17,14 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public MjBodyChain(IEnumerable<Transform> bodies)
         {
-            chain = bodies.Select(mjb => new MjBodyAdapter(mjb.GetComponent<MjBody>())).ToList().AsReadOnly();
+            chain = bodies.Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
 
             mass = chain.Select(k => k.Mass).Sum();
         }
 
         protected override IReadOnlyList<IKinematic> GetKinematicChain(Transform root)
         {
-            return root.GetComponentsInChildren<MjBody>().Select(mjb => new MjBodyAdapter(mjb)).ToList().AsReadOnly();
+            return root.GetComponentsInChildren<Transform>().Where(t => t.IsIKinematic()).Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
         }
     }
 
@@ -42,12 +42,20 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public static IKinematic GetIKinematic(this Transform transform)
         {
-            return new  MjBodyAdapter(transform.GetComponent<MjBody>()); 
+            if (transform.GetComponent<MjBody>())
+            {
+                return new MjBodyAdapter(transform.GetComponent<MjBody>());
+            }
+            else if(transform.GetComponent<MjMocapBodyKinematicsComponent>())
+            {
+                return transform.GetComponent<MjMocapBodyKinematicsComponent>().GetIKinematic();
+            }
+            throw new NotImplementedException($"No kinematic component recognized on transform {transform.name}");
         }
 
         public static bool IsIKinematic(this Transform transform)
         {
-            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>();
+            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>();
         }
     }
 
@@ -85,7 +93,7 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             mass = mjBody.GetMass();
             inertiaLocalPos = mjBody.GetLocalCenterOfMass();
-            inertiaRelMatrix = mjBody.GetLocalCenterOfMassMatrix();
+            inertiaRelMatrix = mjBody.GetInertiaToBodyMatrix();
         }
 
         public Vector3 Velocity => mjBody.GlobalVelocity();
@@ -94,7 +102,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public float Mass => mass;
 
-        public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);
+        public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);  // TODO: Replace using Data->xipos
 
         public Vector3 Position => mjBody.GetPosition();
 
