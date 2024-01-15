@@ -101,7 +101,7 @@ namespace ModularAgents
 
         public override void FeedObservationsToSensor(VectorSensor sensor)
         {
-            (var pos, var force) = GetMeanGRF();
+            (var pos, var force) = !updateOnPostStep? GetMeanGRF() : lastPosAndVec;
             DReCon.ReferenceFrame simRef = new DReCon.ReferenceFrame(rootKinematics.Forward, rootKinematics.Position);
             sensor.AddObservation(simRef.WorldToCharacter(pos));
             sensor.AddObservation(simRef.WorldDirectionToCharacter(force)/forceScale);
