@@ -220,7 +220,10 @@ using UnityEngine;
 
 
             MjFiniteDifferenceJoint[] siblings;
-            int indexme = -1;
+
+            Quaternion[] initialRotationSiblings;
+
+        int indexme = -1;
 
             public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
             {
@@ -234,6 +237,10 @@ using UnityEngine;
 
                siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();    
                indexme = siblings.TakeWhile(x => ! x.name.Equals(component.transform.name)).Count() ;
+               initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+
+
+               // Debug.Log("I am: " + hinge.transform.name + " my rot is: " + initialRotationHinge + " my rot in siblings is:  " + initialRotationSiblings[indexme] + " with index: " + indexme);
 
 
             }
@@ -326,57 +333,45 @@ using UnityEngine;
                            
                             Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
 
-                            return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
+
+                                                      // parentKinematics.    parentKinematics.LocalRotation;
+
+                        return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
 
                         }
 
                     default: //tested only for 2 elements, the case with 3 hinges is not considered for now.
                         {
 
-                            if (indexme == 0)
+                            if (indexme == 1)
                             {
-                              
-                                Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
+
+                           
+                                Quaternion temp = Quaternion.Inverse(initialRotationSiblings[indexme]) * GetBodyLocalRotation();
+
                                 return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
 
-                               
-
                             }
 
 
-                            else //it is 1
-                            { 
-                     
+                            else //indexme is 0
+                            {
 
-                                FiniteDifferenceHinge[] hinges = siblings.Select(x => new FiniteDifferenceHinge(x, hinge)).ToArray();
-
-
-                                Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
-
-                                //the sibling 0 has rotation:
-                                Quaternion sibQ = new Quaternion(temp.x, 0, 0, -temp.w).normalized;
-
-                                //since we already applied the rotation of sibQ, we need to:
-                                Quaternion temp2 = Quaternion.Inverse(sibQ) * temp;
-
-                            return new double[1] { 2 * Mathf.Asin(temp2.x) * Mathf.Sign(-temp2.w) };
+                                Quaternion temp = Quaternion.Inverse(initialRotationSiblings[0]) * GetBodyLocalRotation();
+                                Quaternion sibQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;
+                                Quaternion temp2 = Quaternion.Inverse(sibQ) * Quaternion.Inverse(initialRotationSiblings[1]) *  GetBodyLocalRotation();
+                                return new double[1] { - 2 * Mathf.Asin(temp2.x) * Mathf.Sign( - temp2.w) };
 
 
-                            
-                            //     Quaternion tempHinge0 = hinges[0].initialRotationHinge * hinges[0].GetBodyLocalRotation();
-                            //    Quaternion rotationAlreadyDone = hinges[0].hinge.transform.localRotation * GetXRotation(Quaternion.Inverse(hinges[0].hinge.transform.localRotation) * tempHinge0);
 
-                            //    Quaternion temp =  Quaternion.Inverse(rotationAlreadyDone) *  initialRotationHinge * GetBodyLocalRotation();
-                            //    return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
-                            
-                            }
+                        }
 
 
                         }
 
                 }
                 
-               
+              
 
 
             }

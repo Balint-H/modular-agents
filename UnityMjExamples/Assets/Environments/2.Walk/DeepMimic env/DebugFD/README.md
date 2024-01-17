@@ -109,15 +109,9 @@ Above we have:
 
 -In cyan training of Deep Mimic with the pupet, using observations BOTH from FD and the pupet (see the marginal increment)
 
-
-
-
-
 12.01.2024
 
 trying to understand why the rewards that we get from the finite differences do not work, I launch the following tests:
-
-
 
 WalkFD7:
 
@@ -127,30 +121,40 @@ Launch instruction:
 
 ```
 (marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4027-WalkFD7-t1 --env=envs/WalkFD7/WalkFD --time-scale=1 
-
 ```
-
-
-
-
 
 WalkFD8: 
 
-invert the localRotatoin of the ball joints and use the new decomposition for sibling hinge joints
+invert the localRotatoin of the ball joints and use the new decomposition for sibling hinge joints  (check this: it is actually re-inverted in the reward, the operation was undone in the reward )
 
 ```shell
 (marathon-envs) artanim@artanim-train-02:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml  --run-id=run4026-WalkFD8-t1   --time-scale=1 --env=envs/WalkFD8/WalkFD 
 ```
 
-
-
 WalkFD9:
 
-do not invert localRotation in ball joints and use hte new decomposition for sibling hinge joints
-
-
+do not invert localRotation in ball joints and use hte new decomposition for sibling hinge joints (check this: localRotation is actually inverted in the reward, the operation was redone in the reward )
 
 ```shell
 (marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4029-WalkFD9-t1 --env=envs/WalkFD9/WalkFD --time-scale=1
+```
+
+WalkFD10:
+
+do not invert localRotation in ball joints, use the decomposition for sibling  hinge joints and do not invert localRotation in the reward
+
+
 
 ```
+(marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4030-WalkFD10-t1 --env=envs/WalkFD10/WalkFD --time-scale=1
+```
+
+
+
+16.01.2024
+
+WalkFD11:
+
+fix to the way the sibling hinge joints have their rotations calculated
+
+(marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4031-WalkFD11-t1 --env=envs/WalkFD11/WalkFD --time-scale=1 
