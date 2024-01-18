@@ -1,0 +1,2 @@
+This folder contains some scripts to visualise the qPos and qVel, comparing if they are calculated with the FD differences or the Pupet.
+The main scene used to generate this data is in \UnityMjExamples\Assets\Environments\2.Walk\DeepMimic env\DebugFD\8.StraightWalk_deepMimic_Record_PoseFD_PosePupet_Observations_Rewards.unity

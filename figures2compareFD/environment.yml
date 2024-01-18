@@ -1,0 +1,9 @@
+name: compare-controllers
+channels:
+  - pytorch
+dependencies:
+  - python=3.8
+  - pandas
+  - numpy
+  - jupyter
+  - matplotlib
