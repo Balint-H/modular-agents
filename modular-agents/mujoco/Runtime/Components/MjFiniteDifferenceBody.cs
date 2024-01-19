@@ -32,11 +32,14 @@ namespace ModularAgents.Kinematic.Mujoco
         Quaternion currentLocalRotation = Quaternion.identity;
 
         private Vector3 Position => transform.position;
-        private Quaternion Rotation => transform.rotation;
+        private Quaternion Rotation =>  transform.rotation;
+
+
+        // private Quaternion localRotationOffset = Quaternion.identity;
+
+        // private Quaternion LocalRotation => Quaternion.Inverse(localRotationOffset) * transform.localRotation;
         
-        
-        //private Quaternion LocalRotation =>new Quaternion( - transform.localRotation.x, -transform.localRotation.y, -transform.localRotation.z, -transform.localRotation.w) ;
-        private Quaternion LocalRotation => transform.localRotation;
+        private Quaternion LocalRotation =>  transform.localRotation;
 
         private float fs;
         private Vector3 Velocity => (currentPosition - prevPosition) * fs;
@@ -76,6 +79,8 @@ namespace ModularAgents.Kinematic.Mujoco
         {
             fs = 1 / Time.fixedDeltaTime;
           
+
+
         }
 
       

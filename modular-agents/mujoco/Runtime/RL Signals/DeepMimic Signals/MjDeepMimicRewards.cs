@@ -57,7 +57,7 @@ namespace ModularAgents.DeepMimic
             double cr = CenterOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
             recorder.Record( new double[1] { pr },"reward_pose_" + name );
             recorder.Record(new double[1] { vr }, "reward_velocity_" + name);
-            recorder.Record(new double[1] { er }, "reward_velocity_" + name);
+            recorder.Record(new double[1] { er }, "reward_ee_" + name);
             recorder.Record(new double[1] {cr }, "reward_com_" + name);
 
             recorder.Record(new double[1] {

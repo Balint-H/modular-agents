@@ -17,14 +17,14 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public MjBodyChain(IEnumerable<Transform> bodies)
         {
-            chain = bodies.Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
+            chain = bodies.Select(mjT => mjT.GetIKinematic()).OrderBy(x => x.Name).ToList().AsReadOnly();
 
             mass = chain.Select(k => k.Mass).Sum();
         }
 
         protected override IReadOnlyList<IKinematic> GetKinematicChain(Transform root)
         {
-            return root.GetComponentsInChildren<Transform>().Where(t => t.IsIKinematic()).Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
+            return root.GetComponentsInChildren<Transform>().Where(t => t.IsIKinematic()).Select(mjT => mjT.GetIKinematic()).OrderBy(x => x.Name).ToList().AsReadOnly();
         }
     }
 

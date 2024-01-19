@@ -12,9 +12,7 @@ namespace ModularAgents.DeepMimic
     //does not implement the initialization because it has no access to the body chain
     public abstract class DeepMimicRewards : RewardSource
     {
-        public bool useOppositeLocalRotation = false;
-
-
+        
         [SerializeField]
         protected Transform kinRoot;
 
@@ -44,10 +42,10 @@ namespace ModularAgents.DeepMimic
             ReferenceFrame kinFrame = new ReferenceFrame(kinChain.RootForward, kinChain.Root.Position); // Not CoM as then the CoM reward would have no meaning
 
 
-            return 0.65f * PoseReward(kinChain, simChain) +
-                    0.1f * VelocityReward(kinChain, simChain) +
+            return 0.65f *  PoseReward(kinChain, simChain) +
+                    0.1f *  VelocityReward(kinChain, simChain) +
                     0.15f * EndEffectorReward(kinEEs, simEEs, kinFrame, simFrame, useGlobalPositions) +
-                    0.1f * CenterOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
+                    0.1f *  CenterOfMassReward(kinChain, simChain, kinFrame, simFrame, useGlobalPositions);
         }
 
 
@@ -68,9 +66,8 @@ namespace ModularAgents.DeepMimic
 
 
             float poseLoss = 0;
-            if(useOppositeLocalRotation)
-                poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation,  Opposite(kin.LocalRotation ) ) * Mathf.Deg2Rad)).Sum();
-            else
+     
+
                 poseLoss = simChain.Zip(kinChain, (sim, kin) => Sq(Quaternion.Angle(sim.LocalRotation,kin.LocalRotation) * Mathf.Deg2Rad)).Sum();
 
             return Mathf.Exp(-2f * poseLoss / kinChain.Count);
@@ -133,6 +130,10 @@ namespace ModularAgents.DeepMimic
                 Gizmos.color = Color.blue;
                 Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
             }
+
+            //Elements used to calculate end effector rewards
+
+
         }
     }
 
