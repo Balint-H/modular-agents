@@ -155,10 +155,6 @@ fix to the way the sibling hinge joints have their rotations calculated
 
 (marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4031-WalkFD11-t1 --env=envs/WalkFD11/WalkFD --time-scale=1 
 
-
-
-
-
 19.01.2024
 
 Training set ups using FDReward:
@@ -185,7 +181,6 @@ training instruction:
    
    ```shell
    (marathon-envs) artanim@artanim-train-02:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml  --run-id=run4042-WalkFD42-t1   --time-scale=1 --env=envs/WalkFD42/WalkFD 
-   
    ```
    
    note: this environment uses wrists instead of hands for the End Effector reward component
@@ -200,7 +195,6 @@ training instruction:
 
 ```shell
 (marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4043-WalkFD43-t1 --env=envs/WalkFD43/WalkFD --time-scale=1
-
 ```
 
 4. Pupet, pupet rewards, new reset
@@ -213,9 +207,68 @@ training instruction:
    
    ```shell
    (marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4044-WalkFD44-t1 --env=envs/WalkFD44/WalkFD --time-scale=1 
-   
    ```
    
    This scene is to double check that using the old method with the new reset method still works
 
-The 4 environments have been laucnhed with the versoin of the project in commit *Commit: fadba8f867a23e18b26ddf7d04f429b1b0363bc6 [fadba8f]*
+The 4 environments have been launched with the versoin of the project in commit *Commit: fadba8f867a23e18b26ddf7d04f429b1b0363bc6 [fadba8f]*
+
+23.01.2024
+
+The rewards for cases 42 and 44 do not work very well, but are very similar and still better than 41 and 43.
+
+I try with pupet and old reset, but with FD rewards.
+
+To launch with pupet and old reset, only changing the FD rewards
+
+scene: **9.StraightWalk_deepMimic_FDRewards**
+
+build: **WalkFD45**
+
+*Commit: 96b3d91549208206347dd31cf26db971cc189d9f [96b3d91]* 
+
+training instruction:
+
+```shell
+(marathon-envs) artanim@artanim-train-01:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4045-WalkFD45-t2 --env=envs/WalkFD45/WalkFD --time-scale=1 
+```
+
+Exactly the same environment switching the reward calculation:
+
+scene: **9.2.StraightWalk_deepMimic_PupetRewards**
+
+build: **WalkFD46**
+
+*Commit:  f12377454745c372f17716bd0cdb5c4133749de5 [f123774]* 
+
+training instruction:
+
+```shell
+(marathon-envs) artanim@artanim-train-02:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4046-WalkFD46-t1 --env=envs/WalkFD46/WalkFD --time-scale=1 
+```
+
+Set up the new reset and the removal of the ragdoll, but using EXACTLY the same limbs ofr the rewards, I get:
+
+scene: **9.3.StraightWalk_deepMimic_NoPupet**
+
+build: **WalkFD47**
+
+training:
+
+```
+mlagents-learn config/trainWalk2Target.yaml --run-id=run4047-WalkFD47-t1 --env=envs/WalkFD47/WalkFD --time-scale=1
+```
+
+After several trials,  I change one thing in the way the FD Ball joints work, and relaunch a training using:
+
+scene: **9.3.StraightWalk_deepMimic_NoPupet**
+
+build: **WalkFD50**
+
+training: 
+
+
+
+```
+(marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4050-WalkFD50-t2 --env=envs/WalkFD50/WalkFD --time-scale=1
+```

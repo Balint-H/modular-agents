@@ -49,8 +49,10 @@ public class MjFiniteDifferenceManager :MonoBehaviour
         //MjState.TeleportMjRoot(pairedRootJoint, animationRoot.transform.position, animationRoot.transform.rotation);
 
         foreach (MjFiniteDifferenceJoint mfdj in orderedJoints)
-            mfdj.Reset();  
-        
+        { 
+          
+                mfdj.Reset();
+        }
         ForwardKinematics();
 
     }

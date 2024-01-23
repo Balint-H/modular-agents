@@ -457,9 +457,13 @@ using UnityEngine;
                 Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationBody) * parentKinematics.LocalRotation;
 
                 //in mujoco coordinates, this gives:
+                //return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
+                if (localJointRotation.w > 0)
+                    return new double[4] { localJointRotation.w, -localJointRotation.x, -localJointRotation.z, -localJointRotation.y };
                 return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
 
-            }
+
+        }
 
 
             public double[] PositionErrors => throw new System.NotImplementedException();
