@@ -13,9 +13,7 @@ namespace ModularAgentsRecorder
     //public class FDSampler : TrainingEventHandler
     public class FDSampler : MonoBehaviour
     {
-        [Range(1, 10)]
-        public int LoggingPeriod = 2;
-        int loggingCounter = 0;
+      
 
         public enum DataToSave
         {
