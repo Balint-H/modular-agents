@@ -74,15 +74,10 @@ public class MjFiniteDifferenceManager :MonoBehaviour
     public unsafe void FixedUpdate()
       {
           Step();
-         ForwardKinematics();
+       
       }
       
-    /*
-    private void OnAnimatorIK(int layerIndex)
-    {
-        Step();
-    }
-    */
+  
 
 
 }

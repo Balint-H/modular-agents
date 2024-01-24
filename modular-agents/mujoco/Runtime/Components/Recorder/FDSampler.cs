@@ -34,9 +34,11 @@ namespace ModularAgentsRecorder
         [SerializeField]
         MjFiniteDifferenceManager FDManager;
 
+
+        /*
         [SerializeField]
         MjBody PupetRoot;
-
+        */
 
         [SerializeField]
         ValueRecorder recorder;
@@ -50,7 +52,7 @@ namespace ModularAgentsRecorder
 
 
         List<MjFiniteDifferenceJoint> jointsFD = null;
-        List<MjBaseJoint> jointsPupet = null;
+        //List<MjBaseJoint> jointsPupet = null;
 
         private void FixedUpdate()
         {
@@ -77,12 +79,12 @@ namespace ModularAgentsRecorder
 
                         }
 
-
+                        /*
                         if (jointsPupet == null)
                         {
                             GetJointOrderPupet();
 
-                        }
+                        }*/
 
 
                         CollectVelocitiesFD();
@@ -96,12 +98,12 @@ namespace ModularAgentsRecorder
 
                         }
 
-
+                        /*
                         if (jointsPupet == null)
                         {
                             GetJointOrderPupet();
 
-                        }
+                        }*/
 
 
                         CollectPositionsFD();
@@ -116,12 +118,12 @@ namespace ModularAgentsRecorder
 
                         }
 
-
+                        /*
                         if (jointsPupet == null)
                         {
                             GetJointOrderPupet();
 
-                        }
+                        }*/
 
 
                         CollectAll();
@@ -161,8 +163,8 @@ namespace ModularAgentsRecorder
 
             CollectVelocitiesFD();
 
-            CollectPositionsPupet();
-            CollectVelocitiesPupet();
+            //CollectPositionsPupet();
+            //CollectVelocitiesPupet();
             foreach (MjDeepMimicObservations mjobs in DMObs)
             {
                 mjobs.LogObservations(recorder);
@@ -198,6 +200,8 @@ namespace ModularAgentsRecorder
 
 
         //unsafe void CollectPositionsPupet(object sender, EventArgs e)
+
+        /*
         void CollectPositionsPupet()
         {
 
@@ -211,7 +215,7 @@ namespace ModularAgentsRecorder
             }
 
 
-        }
+        }*/
 
 
         // unsafe void CollectVelocitiesFD(object sender, EventArgs e)
@@ -229,6 +233,7 @@ namespace ModularAgentsRecorder
         }
 
         //unsafe void CollectVelocitiesPupet(object sender, EventArgs e)
+        /*
         void CollectVelocitiesPupet()
         {
 
@@ -241,7 +246,7 @@ namespace ModularAgentsRecorder
 
 
         }
-
+        */
 
 
         void GetJointOrderFD()
@@ -253,6 +258,7 @@ namespace ModularAgentsRecorder
 
         }
 
+        /*
         void GetJointOrderPupet()
         {
 
@@ -260,7 +266,7 @@ namespace ModularAgentsRecorder
 
             jointsPupet = fdJoints.OrderBy(x => x.MujocoId).ToList();
 
-        }
+        }*/
 
     }
 

@@ -267,8 +267,26 @@ build: **WalkFD50**
 
 training: 
 
-
-
 ```
 (marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4050-WalkFD50-t2 --env=envs/WalkFD50/WalkFD --time-scale=1
+```
+
+extra training removing the *ForwardKinematics();* in line 77 of MjFiniteDifferenceManager:
+
+```shell
+(marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4051-WalkFD51-t1 --env=envs/WalkFD51/WalkFD --time-scale=1
+```
+
+24.01.2024
+
+relaunched the previous (without forwardKinematics) with 800 steps to have a comparable metric. Insturction:
+
+```shell
+(marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4052-WalkFD52-t1 --env=envs/WalkFD52/WalkFD --time-scale=1
+```
+
+Double check about the root joint (I now add it in observations):
+
+```shell
+(marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4053-WalkFD53-t1 --env=envs/WalkFD53/WalkFD --time-scale=1
 ```

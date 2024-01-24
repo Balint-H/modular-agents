@@ -24,13 +24,16 @@ namespace ModularAgents.DeepMimic
         protected IKinematic root;
         protected IReadOnlyList<IKinematic> observedKinematics;
 
-
+     
 
         public override int Size => (FilterTransforms(rootTransform.GetComponentsInChildren<Transform>()).Count()) * 15 + (usePhase ? 1 : 0);
 
         public override void FeedObservationsToSensor(VectorSensor sensor)
         {
             ReferenceFrame fDyn = new ReferenceFrame(root.Forward, root.Position);
+
+            
+            
 
             foreach (IKinematic k in observedKinematics)
             {
