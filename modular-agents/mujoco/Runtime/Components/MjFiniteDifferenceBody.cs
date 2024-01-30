@@ -173,12 +173,23 @@ namespace ModularAgents.Kinematic.Mujoco
 
         }
 
+        void Update()
+        {
+
+            DebugValuesFor("rfemur");
+
+        }
+
         public void DebugValuesFor(string targetname)
         {
 
             if (name.Contains(targetname))
             {
                 MjBody pupeteeredJoint4Debug = GetComponent<MjBody>();
+
+                if (pupeteeredJoint4Debug == null)
+                    return;
+
                 IKinematic pupetKin = pupeteeredJoint4Debug.transform.GetIKinematic();
                 Debug.Log( targetname +":          AngVel: " + AngularVelocity + "  pupet: " + pupeteeredJoint4Debug.GlobalAngularVelocity() + "pupetKin:" + pupetKin.AngularVelocity);
                 Debug.Log(targetname + ":     localAngVel: " + LocalAngularVelocity + "  pupet: " + pupetKin.LocalAngularVelocity );

@@ -21,6 +21,13 @@ public class DrawVelocitiies : MonoBehaviour
     public
     List<MjBody> pupetb;
 
+
+    public string bodyName = "rtibia";
+
+    public Vector3 fdangularVelocity = Vector3.zero;
+    public Vector3 pupetangularVelocity = Vector3.zero;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,12 +55,35 @@ public class DrawVelocitiies : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        foreach (MjFiniteDifferenceBody b in fdb)
+
+        if (bodyName.Length > 0)
+        {
+
+            MjFiniteDifferenceBody b = fdb.First(x => x.name.Contains(bodyName));
             DrawLocalAngularVel(b);
 
+            fdangularVelocity = b.AngularVelocity;
 
-        foreach (MjBody b in pupetb)
-            DrawLocalAngularVel(b);
+            MjBody c = pupetb.First(x => x.name.Contains(bodyName));
+            DrawLocalAngularVel(c);
+            pupetangularVelocity = c.transform.GetIKinematic().AngularVelocity;
+
+        }
+        else
+        {
+
+            foreach (MjFiniteDifferenceBody b in fdb)
+
+                DrawLocalAngularVel(b);
+
+
+            foreach (MjBody b in pupetb)
+                DrawLocalAngularVel(b);
+
+
+        }
+
+     
 
     }
 
@@ -69,13 +99,13 @@ public class DrawVelocitiies : MonoBehaviour
         var parent = body.transform.parent.GetComponent<MjBody>();
 
 
-        //Gizmos.color = Color.blue;
-        //Gizmos.DrawRay(Position, parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity) * 0.1f);
-        //Gizmos.DrawRay(Position, body.transform.parent.rotation * pupetKin.LocalAngularVelocity * 0.1f);
+        Gizmos.color = Color.blue;
+       // Gizmos.DrawRay(Position, parent.GetTransformMatrix().MultiplyVector(pupetKin.LocalAngularVelocity) * 0.1f);
+        Gizmos.DrawRay(Position, body.transform.parent.rotation * pupetKin.LocalAngularVelocity * 0.1f);
         
 
-        Gizmos.color = Color.yellow;
-       Gizmos.DrawRay(Position, pupetKin.AngularVelocity * 0.1f);
+       // Gizmos.color = Color.yellow;
+       //Gizmos.DrawRay(Position, pupetKin.AngularVelocity * 0.1f);
 
           
 
@@ -100,13 +130,13 @@ public class DrawVelocitiies : MonoBehaviour
 
         IKinematic myKin = b.transform.GetIKinematic();
 
-       // Gizmos.color = Color.black;
-       // Gizmos.DrawRay(b.Position , b.transform.parent.rotation * myKin.LocalAngularVelocity * 0.1f );
+        Gizmos.color = Color.black;
+        Gizmos.DrawRay(b.Position , b.transform.parent.rotation * myKin.LocalAngularVelocity * 0.1f );
 
      
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(b.Position , myKin.AngularVelocity * 0.1f);
+       // Gizmos.color = Color.red;
+       // Gizmos.DrawRay(b.Position , myKin.AngularVelocity * 0.1f);
 
 
     }

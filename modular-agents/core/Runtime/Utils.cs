@@ -230,22 +230,18 @@ public static class Utils
 
 
 
-    public static Vector3 RotationVel(Quaternion current, Quaternion previous, float sampling_rate = -1)
+    public static Vector3 RotationVel(Quaternion previous, Quaternion current, float sampling_rate = -1)
     {
 
         if (sampling_rate == -1)
             sampling_rate = 1.0f / Time.fixedDeltaTime;
 
-              Quaternion qdif = Quaternion.Inverse(previous) * current;
-            //Quaternion qdif = current * Quaternion.Inverse(previous) ;
+            //  Quaternion qdif = Quaternion.Inverse(previous) * current;
+            Quaternion qdif = current * Quaternion.Inverse(previous) ;
             Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
-        float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * Mathf.PI / 180.0f * sampling_rate ;
-
-        //Vector3 currentaxis = new Vector3(current.x, current.y, current.z).normalized;
-
-               return speed * axis.normalized;
-           // return speed * currentaxis.normalized;
-        }
+        float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * sampling_rate;
+        return speed * axis.normalized;
+    }
 
 
         public static Vector3 QuaternionError(Quaternion cur, Quaternion des)
