@@ -74,6 +74,8 @@ namespace ModularAgents.TrainingEvents
                     MjScene.Instance.SetMjKinematics(rootBody, sourceKinematics.Item1, sourceKinematics.Item2);
 
                 }
+
+                /*
                 else //we are in a finite difference case:
                 
                 {
@@ -81,32 +83,18 @@ namespace ModularAgents.TrainingEvents
                     (double[], double[]) rootKinematicsFD;
 
 
-                //if (rootRef)
-                //{
+              
                     MjKinematicRigFD mjReferenceFD = reference as MjKinematicRigFD;
                     //MjKinematicRigFD mjReferenceFD = rootRef.GetComponent<MjKinematicRigFD>();
                     sourceKinematicsFD = mjReferenceFD.GetMjKinematics();
                     rootKinematicsFD = mjReferenceFD.GetRootKinematics();
 
-                    //}
-
-                    /*
-                    Debug.Log("lengths:  " + sourceKinematics.Item1.Count() + "  " + sourceKinematicsFD.Item1.Count());
-                    Debug.Log("root values:  " + rootKinematics.Item1[0] + "  " + rootKinematicsFD.Item1[0]  + "\n"
-                                               + rootKinematics.Item1[1] + "  " + rootKinematicsFD.Item1[1] + "\n"
-                                               + rootKinematics.Item1[2] + "  " + rootKinematicsFD.Item1[2] + "\n"
-                                               + rootKinematics.Item1[3] + "  " + rootKinematicsFD.Item1[3] + "\n"
-                                               + rootKinematics.Item1[4] + "  " + rootKinematicsFD.Item1[4] + "\n"
-                                               + rootKinematics.Item1[5] + "  " + rootKinematicsFD.Item1[5] + "\n"
-                                               + rootKinematics.Item1[6] + "  " + rootKinematicsFD.Item1[6] + "\n"
-                        );
-                    */
-
+                 
 
                     MjScene.Instance.SetMjKinematics(rootBody, sourceKinematicsFD.Item1, sourceKinematicsFD.Item2);
 
                 }
-
+                */
 
 
                 //MjScene.Instance.SetMjKinematics(rootBody, sourceKinematics.Item1, sourceKinematics.Item2);

@@ -290,3 +290,5 @@ Double check about the root joint (I now add it in observations):
 ```shell
 (marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4053-WalkFD53-t1 --env=envs/WalkFD53/WalkFD --time-scale=1
 ```
+
+![](img\2024-01-30-09-22-34-image.png)
