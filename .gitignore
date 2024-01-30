@@ -17,6 +17,7 @@
 /UnityMjExamples/Assets/*.csv.meta
 /UnityMjExamples/Assets/Recordings/*
 /UnityMjExamples/Recordings
+/Training
 /envs
 
 # Environemnt logfile
