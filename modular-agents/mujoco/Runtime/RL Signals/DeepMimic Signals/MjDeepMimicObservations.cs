@@ -20,19 +20,13 @@ namespace ModularAgents.DeepMimic
      
         protected override IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection)
         {
-            /*
+            
             return transformCollection
                 .Where(t => t.IsIKinematic())
                 .Where(mjb => mjb.GetComponentInDirectChildren<MjBaseJoint>() && !mjb.GetComponentInDirectChildren<MjFreeJoint>())
                 .Where(t => !t.name.Contains("toe", System.StringComparison.OrdinalIgnoreCase) && !t.name.Contains("neck", System.StringComparison.OrdinalIgnoreCase))
                 .Select(mjb => mjb.transform);
-            */
-
-            return transformCollection
-                .Where(t => t.IsIKinematic())
-                .Where(mjb => mjb.GetComponentInDirectChildren<MjBaseJoint>() )
-                .Where(t => !t.name.Contains("toe", System.StringComparison.OrdinalIgnoreCase) && !t.name.Contains("neck", System.StringComparison.OrdinalIgnoreCase))
-                .Select(mjb => mjb.transform);
+            
 
         }
 
