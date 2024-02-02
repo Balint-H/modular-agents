@@ -1,16 +1,14 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mujoco;
-using Mujoco.Extensions;
+//using Mujoco;
+//using Mujoco.Extensions;
 using System.Linq;
 using ModularAgents.DeepMimic;
-using ModularAgents.Kinematic.Mujoco;
+//using ModularAgents.Kinematic.Mujoco;
 
 namespace ModularAgentsRecorder
 {
-    //public class FDSampler : TrainingEventHandler
+   
     public class FDSampler : MonoBehaviour
     {
       
@@ -22,12 +20,11 @@ namespace ModularAgentsRecorder
             all,
             counter
         }
-      
+
+        Animator animator = null;
 
         public DataToSave dataToSave = DataToSave.qpos;
 
-
-        //public override EventHandler Handler => CollectDataFD;
 
         [SerializeField]
         MjFiniteDifferenceManager FDManager;
@@ -52,92 +49,22 @@ namespace ModularAgentsRecorder
         List<MjFiniteDifferenceJoint> jointsFD = null;
         //List<MjBaseJoint> jointsPupet = null;
 
+
+        private void OnEnable()
+        {
+            animator = FDManager.GetComponent<Animator>();
+            GetJointOrderFD();
+        }
+
         private void FixedUpdate()
         {
-            CollectDataFD();
-        }
-
-        //  void CollectDataFD(object sender, EventArgs e)
-        void CollectDataFD()
-        {
-           
-            {
-          
 
 
-
-                switch (dataToSave)
-                {
-                    case DataToSave.qvel:
-
-
-                        if (jointsFD == null)
-                        {
-                            GetJointOrderFD();
-
-                        }
-
-                        /*
-                        if (jointsPupet == null)
-                        {
-                            GetJointOrderPupet();
-
-                        }*/
-
-
-                        CollectVelocitiesFD();
-                        break;
-
-                    case DataToSave.qpos:
-
-                        if (jointsFD == null)
-                        {
-                            GetJointOrderFD();
-
-                        }
-
-                        /*
-                        if (jointsPupet == null)
-                        {
-                            GetJointOrderPupet();
-
-                        }*/
-
-
-                        CollectPositionsFD();
-                        break;
-
-                    case DataToSave.all:
-
-
-                        if (jointsFD == null)
-                        {
-                            GetJointOrderFD();
-
-                        }
-
-                        /*
-                        if (jointsPupet == null)
-                        {
-                            GetJointOrderPupet();
-
-                        }*/
-
-
-                        CollectAll();
-                        break;
-                    case DataToSave.counter:
-                        CollectCounter();
-                        break;
-
-
-                }
-
-
-            }
+            CollectAll();
 
 
         }
+
 
         int counti = 0;
         void CollectCounter()
@@ -148,14 +75,26 @@ namespace ModularAgentsRecorder
             counti++;
         }
 
-
-        void CollectAll()
+        void CollectPhase()
         {
-            //if (storeTimeReference)
-            //    RecordValue(Time.fixedTime, "time");
+            if(animator)
+                recorder.Record(new double[] { animator.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 }, "phase");
 
 
+
+
+        }
+
+
+
+
+
+
+    void CollectAll()
+        {
+          
             CollectCounter();
+            CollectPhase();
 
             CollectPositionsFD();
 
