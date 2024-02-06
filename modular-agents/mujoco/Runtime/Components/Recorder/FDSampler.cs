@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-//using Mujoco;
-//using Mujoco.Extensions;
+using Mujoco;
+using Mujoco.Extensions;
 using System.Linq;
 using ModularAgents.DeepMimic;
+using UnityEditor;
 //using ModularAgents.Kinematic.Mujoco;
 
 namespace ModularAgentsRecorder
@@ -20,6 +21,9 @@ namespace ModularAgentsRecorder
             all,
             counter
         }
+
+        public bool recordOnlyOneAnimCycle = false;
+        public bool useMujocoNames = false;
 
         Animator animator = null;
 
@@ -53,15 +57,35 @@ namespace ModularAgentsRecorder
         private void OnEnable()
         {
             animator = FDManager.GetComponent<Animator>();
-            GetJointOrderFD();
+          
         }
+
+        private void Start()
+        {
+
+            MjState.ExecuteAfterMjStart(GetJointOrderFD);
+            //GetJointOrderFD();
+        }
+
+        float lastPhaseRecorded = 0;
 
         private void FixedUpdate()
         {
 
 
-            CollectAll();
+            CollectData();
+            if (recordOnlyOneAnimCycle)
+            {
+                if (!animator)
+                    Debug.LogError("no animator to check");
+                float currentPhase =  animator.GetCurrentAnimatorStateInfo(0).normalizedTime % 1;
+                if (currentPhase > lastPhaseRecorded)
+                    lastPhaseRecorded = currentPhase;
+                else
+                    EditorApplication.ExitPlaymode();
+                    // Application.Quit();
 
+            }
 
         }
 
@@ -90,29 +114,53 @@ namespace ModularAgentsRecorder
 
 
 
-    void CollectAll()
+    void CollectData()
         {
+
+            switch (dataToSave)
+            {
+                case (DataToSave.qpos):
+                    recorder.Record(new double[] { Time.fixedTimeAsDouble }, "time");
+                    CollectPositionsFD();
+                    break;
+
+                case (DataToSave.qvel):
+                    recorder.Record(new double[] { Time.fixedTimeAsDouble }, "time");
+                    CollectVelocitiesFD();
+                    break;
+
+
+                case (DataToSave.all):
+                    
+                   
+
+
           
-            CollectCounter();
-            CollectPhase();
+                    CollectCounter();
+                    CollectPhase();
 
-            CollectPositionsFD();
+                    CollectPositionsFD("pos_");
 
-            CollectVelocitiesFD();
+                    CollectVelocitiesFD("vel_");
 
-            //CollectPositionsPupet();
-            //CollectVelocitiesPupet();
-            foreach (MjDeepMimicObservations mjobs in DMObs)
-            {
-                mjobs.LogObservations(recorder);
+                    //CollectPositionsPupet();
+                    //CollectVelocitiesPupet();
+                    foreach (MjDeepMimicObservations mjobs in DMObs)
+                    {
+                        mjobs.LogObservations(recorder);
 
-                mjobs.LogObservationsSimpler(recorder);
+                        mjobs.LogObservationsSimpler(recorder);
 
-            }
+                    }
 
-            foreach (MjDeepMimicRewards mjobs in DMRewards)
-            {
-                mjobs.LogRewards(recorder);
+                    foreach (MjDeepMimicRewards mjobs in DMRewards)
+                    {
+                        mjobs.LogRewards(recorder);
+
+                    }
+                    break;
+
+
 
             }
 
@@ -122,13 +170,18 @@ namespace ModularAgentsRecorder
 
 
         //unsafe void CollectPositionsFD(object sender, EventArgs e)
-        void CollectPositionsFD()
+        void CollectPositionsFD(string prefix = "")
         {
 
           
             foreach(MjFiniteDifferenceJoint j in jointsFD) 
             {
-                recorder.Record(j.QPos,"FD_QPos_" + j.name);
+
+
+                if(useMujocoNames)
+                    recorder.Record(j.QPos, j.PairedJoint.MujocoName);
+                else
+                    recorder.Record(j.QPos, prefix + j.name);
 
             }
 
@@ -156,13 +209,16 @@ namespace ModularAgentsRecorder
 
 
         // unsafe void CollectVelocitiesFD(object sender, EventArgs e)
-        void CollectVelocitiesFD()
+        void CollectVelocitiesFD(string prefix = "")
         {
 
 
             foreach (MjFiniteDifferenceJoint j in jointsFD)
             {
-                recorder.Record(j.QVel, "FD_QVel_" +  j.name);
+                if (useMujocoNames)
+                    recorder.Record(j.QVel, j.PairedJoint.MujocoName );
+                else
+                    recorder.Record(j.QVel, prefix +  j.name );
 
             }
 
@@ -192,6 +248,9 @@ namespace ModularAgentsRecorder
             MjFiniteDifferenceJoint[] fdJoints = FDManager.transform.GetComponentsInChildren<MjFiniteDifferenceJoint>();
 
             jointsFD =fdJoints.OrderBy(x => x.PairedJoint.MujocoId).ToList();
+
+            //foreach(MjFiniteDifferenceJoint mjfd in jointsFD)
+            //    Debug.Log("joints: " + mjfd.name + " mujocName: " + mjfd.PairedJoint.MujocoName + " " + mjfd.PairedJoint.MujocoId + " name: " + mjfd.PairedJoint.transform.name);
 
         }
 
