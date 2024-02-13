@@ -291,4 +291,29 @@ Double check about the root joint (I now add it in observations):
 (marathon-envs) artanim@artanim-train-04:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4053-WalkFD53-t1 --env=envs/WalkFD53/WalkFD --time-scale=1
 ```
 
+30.01.2024
+
+the results show it learns, but still does not match the previous
+
 ![](img\2024-01-30-09-22-34-image.png)
+
+we explore what is wrong with the angular velocities. After fixing the velocities, we retrain the same scene
+
+scene: **9.3.StraightWalk_deepMimic_NoPupet**
+
+build: **WalkFD54**
+
+training:
+
+```shell
+(marathon-envs) artanim@artanim-train-03: mlagents-learn config/trainWalk2Target.yaml --run-id=run4054-WalkFD54-t1 --env=envs/WalkFD54/WalkFD --time-scale=1
+```
+
+2024.02.13
+
+some dimension mismatch... rebuild and retrain
+
+```shell
+(marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4055-WalkFD55-t2 --env=envs/WalkFD55/WalkFD --time-scale=1
+
+```

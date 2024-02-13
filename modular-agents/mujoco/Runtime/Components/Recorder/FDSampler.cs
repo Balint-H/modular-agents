@@ -82,8 +82,12 @@ namespace ModularAgentsRecorder
                 if (currentPhase > lastPhaseRecorded)
                     lastPhaseRecorded = currentPhase;
                 else
+#if UNITY_EDITOR
                     EditorApplication.ExitPlaymode();
-                    // Application.Quit();
+#else
+                    Application.Quit();
+#endif
+
 
             }
 
