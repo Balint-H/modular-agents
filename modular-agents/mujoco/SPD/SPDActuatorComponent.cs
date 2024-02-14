@@ -154,6 +154,18 @@ namespace ModularAgents.MotorControl.Mujoco
 
         public float[] GetActionsFromState()
         {
+            /*
+            if (kinematicRef && !trackState)
+            {
+                float[] refs = activeReferenceStates.SelectMany(rs => rs.PositionErrors).Select(p => -(float)(p / actionScale)).ToArray();
+                //Debug.Log("we have: " + refs.Length + "  " + ActionSpaceSize);
+                return refs;
+            }
+            else
+            {
+                return Enumerable.Repeat(0f, ActionSpaceSize).ToArray();
+            }
+            */
             return (kinematicRef && !trackState) ? activeReferenceStates.SelectMany(rs => rs.PositionErrors).Select(p => -(float)(p / actionScale)).ToArray() : Enumerable.Repeat(0f, ActionSpaceSize).ToArray();
         }
 
@@ -223,10 +235,16 @@ namespace ModularAgents.MotorControl.Mujoco
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)));
             }
-            else if( kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
+            else if (kinematicRef.GetComponentInChildren<MjFiniteDifferenceJoint>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().First(rj => rj.name.Contains(joint.name)).transform);
+
+            }
+            else if (kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjMocapJointStateComponent>().First(rj => rj.name.Contains(joint.name)).transform);
             }
+           
             return null;
         }
 

@@ -315,5 +315,19 @@ some dimension mismatch... rebuild and retrain
 
 ```shell
 (marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4055-WalkFD55-t2 --env=envs/WalkFD55/WalkFD --time-scale=1
+```
+
+2024.02.14
+
+The previous setup get a character walking but the walking is "tired". 
+
+I notice that when resetting in the SPD there is no reference for the pose. To correct this I add the PositionError in the MJFiniteDifferenceHinge and MjFiniteDifferenceBall, and then relaunch a training
+
+build: **WalkFD56**
+
+instruction 4 training:
+
+```shell
+(marathon-envs) artanim@artanim-train-03:~/marathon-training$ mlagents-learn config/trainWalk2Target.yaml --run-id=run4056-WalkFD56-t1 --env=envs/WalkFD56/WalkFD --time-scale=1
 
 ```

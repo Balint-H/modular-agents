@@ -10,6 +10,7 @@ using System.Linq;
 using UnityEngine;
 
 
+using ModularAgents;
 
     public class MjFiniteDifferenceJoint : MonoBehaviour, IFiniteDifferenceComponent, IMjJointStateProvider
     {
@@ -212,105 +213,105 @@ using UnityEngine;
 
 
 
-        private class FiniteDifferenceHinge : FiniteDifferenceJointState, IMjJointState
-        {
-            MjHingeJoint hinge;
-            Quaternion initialRotationHinge;
+    private class FiniteDifferenceHinge : FiniteDifferenceJointState, IMjJointState
+    {
+        MjHingeJoint hinge;
+        Quaternion initialRotationHinge;
 
 
 
-            MjFiniteDifferenceJoint[] siblings;
+        MjFiniteDifferenceJoint[] siblings;
 
-            Quaternion[] initialRotationSiblings;
+        Quaternion[] initialRotationSiblings;
 
         int indexme = -1;
 
-            public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
-            {
-              
-
-                this.hinge = hinge;
-                initialRotationHinge = hinge.transform.localRotation;
-
-              
-                MjFiniteDifferenceBody check = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
-
-               siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();    
-               indexme = siblings.TakeWhile(x => ! x.name.Equals(component.transform.name)).Count() ;
-               initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+        public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
+        {
 
 
-               // Debug.Log("I am: " + hinge.transform.name + " my rot is: " + initialRotationHinge + " my rot in siblings is:  " + initialRotationSiblings[indexme] + " with index: " + indexme);
+            this.hinge = hinge;
+            initialRotationHinge = hinge.transform.localRotation;
 
 
-            }
+            MjFiniteDifferenceBody check = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
+
+            siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();
+            indexme = siblings.TakeWhile(x => !x.name.Equals(component.transform.name)).Count();
+            initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+
+
+            // Debug.Log("I am: " + hinge.transform.name + " my rot is: " + initialRotationHinge + " my rot in siblings is:  " + initialRotationSiblings[indexme] + " with index: " + indexme);
+
+
+        }
 
 
 
-            static Quaternion GetHingeRotation(MjFiniteDifferenceJoint component, MjHingeJoint hinge)
-            {
-                FiniteDifferenceHinge fdh = new FiniteDifferenceHinge(component, hinge);
+        static Quaternion GetHingeRotation(MjFiniteDifferenceJoint component, MjHingeJoint hinge)
+        {
+            FiniteDifferenceHinge fdh = new FiniteDifferenceHinge(component, hinge);
 
-                Quaternion hingeRot = (Quaternion.Inverse(fdh.hinge.transform.localRotation) * fdh.LocalRotation);
+            Quaternion hingeRot = (Quaternion.Inverse(fdh.hinge.transform.localRotation) * fdh.LocalRotation);
 
-                //the rotation that we are interested in corresponds to the X component:
-                //return (new Quaternion(hingeRot.x, 0,0, hingeRot.w).normalized);
-                return hingeRot;
-
-
-            }
-
-            static Quaternion GetXRotation(Quaternion q)
-            {
-                return new Quaternion(q.x, 0, 0, q.w).normalized;
-            
-            
-            }
+            //the rotation that we are interested in corresponds to the X component:
+            //return (new Quaternion(hingeRot.x, 0,0, hingeRot.w).normalized);
+            return hingeRot;
 
 
-            public int[] DofAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
+        }
 
-            public int[] PosAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
-
-            public double[] TargetPositions => throw new System.NotImplementedException();  // Okay to leave as such, or replace with zero values
-
-            public MjBaseJoint Joint => hinge;
-
-            public IMjJointState ReferenceState => throw new System.NotImplementedException(); //  Okay to leave as such, or replace with zero class
-
-            public double[] Accelerations => throw new System.NotImplementedException("Currently only first order joint states supported.");
+        static Quaternion GetXRotation(Quaternion q)
+        {
+            return new Quaternion(q.x, 0, 0, q.w).normalized;
 
 
-            public double[] Velocities => GetJointAngularVelocity();
+        }
 
 
-            double[] GetJointAngularVelocity()
-            {
+        public int[] DofAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
 
-            
-              
-                return new double[1] { (Quaternion.Inverse(hinge.transform.localRotation) * LocalAngularVelocity).x };
+        public int[] PosAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
 
-              
+        public double[] TargetPositions => throw new System.NotImplementedException();  // Okay to leave as such, or replace with zero values
 
-            }
+        public MjBaseJoint Joint => hinge;
 
+        public IMjJointState ReferenceState => throw new System.NotImplementedException(); //  Okay to leave as such, or replace with zero class
 
-           Quaternion GetBodyLocalRotation()
-            {
+        public double[] Accelerations => throw new System.NotImplementedException("Currently only first order joint states supported.");
 
 
-              
-                Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationBody) * parentKinematics.LocalRotation;
-
-                return localJointRotation;
+        public double[] Velocities => GetJointAngularVelocity();
 
 
-            }
+        double[] GetJointAngularVelocity()
+        {
 
 
-            double[] GetJointLocalRotation()
-            {
+
+            return new double[1] { (Quaternion.Inverse(hinge.transform.localRotation) * LocalAngularVelocity).x };
+
+
+
+        }
+
+
+        Quaternion GetBodyLocalRotation()
+        {
+
+
+
+            Quaternion localJointRotation = Quaternion.Inverse(component.initialRotationBody) * parentKinematics.LocalRotation;
+
+            return localJointRotation;
+
+
+        }
+
+
+        double[] GetJointLocalRotation()
+        {
 
             //A. version with no siblings:
 
@@ -320,87 +321,89 @@ using UnityEngine;
 
             //B. version with 1 sibling:    
             //below, an attempt to take into account the different hinges that are s
-            
+
             switch (siblings.Length)
-                {
-                    case 0:
-                        Debug.LogWarning("Trying to get the location of a Hinge but the MjJoint" + component.transform.localRotation + " has no Hinge attached to it. This shouldnt be possible");
-                        return new double[1] { 0.0 };
-                      
-
-                    case 1:
-                        {
-                           
-                            Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
+            {
+                case 0:
+                    Debug.LogWarning("Trying to get the location of a Hinge but the MjJoint" + component.transform.localRotation + " has no Hinge attached to it. This shouldnt be possible");
+                    return new double[1] { 0.0 };
 
 
-                                                      // parentKinematics.    parentKinematics.LocalRotation;
+                case 1:
+                    {
+
+                        Quaternion temp = Quaternion.Inverse(initialRotationHinge) * GetBodyLocalRotation();
+
+
+                        // parentKinematics.    parentKinematics.LocalRotation;
 
                         return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
 
-                        }
+                    }
 
-                    default: //tested only for 2 elements, the case with 3 hinges is not considered for now.
+                default: //tested only for 2 elements, the case with 3 hinges is not considered for now.
+                    {
+
+                        if (indexme == 1)
                         {
 
-                            if (indexme == 1)
-                            {
 
-                           
-                                Quaternion temp = Quaternion.Inverse(initialRotationSiblings[indexme]) * GetBodyLocalRotation();
+                            Quaternion temp = Quaternion.Inverse(initialRotationSiblings[indexme]) * GetBodyLocalRotation();
 
-                                return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
+                            return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
 
-                            }
+                        }
 
 
-                            else //indexme is 0
-                            {
+                        else //indexme is 0
+                        {
 
-                                Quaternion temp = Quaternion.Inverse(initialRotationSiblings[0]) * GetBodyLocalRotation();
-                                Quaternion sibQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;
-                                Quaternion temp2 = Quaternion.Inverse(sibQ) * Quaternion.Inverse(initialRotationSiblings[1]) *  GetBodyLocalRotation();
-                                return new double[1] { - 2 * Mathf.Asin(temp2.x) * Mathf.Sign( - temp2.w) };
+                            Quaternion temp = Quaternion.Inverse(initialRotationSiblings[0]) * GetBodyLocalRotation();
+                            Quaternion sibQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;
+                            Quaternion temp2 = Quaternion.Inverse(sibQ) * Quaternion.Inverse(initialRotationSiblings[1]) * GetBodyLocalRotation();
+                            return new double[1] { -2 * Mathf.Asin(temp2.x) * Mathf.Sign(-temp2.w) };
 
 
 
                         }
 
 
-                        }
-
-                }
-                
-              
-
+                    }
 
             }
 
 
 
 
-            public double[] Positions => GetJointLocalRotation();
-
-            public void CheckLocalRotations()
-            {
-                Quaternion q = MjEngineTool.MjQuaternion(gameObject.transform.rotation);
-
-                //Vector3 upMj = MjEngineTool.MjVector3Up;
-                Vector3 upMj = MjEngineTool.MjVector3(gameObject.transform.up);
-
-                Vector3 upUn = gameObject.transform.up;
-                Vector3 test = LocalAngularVelocity;
-
-
-                Debug.Log(gameObject.name + " has up in unity: " + upUn + " up in mujoco: " + upMj + "  and local angle velocity: " + test);
-
-            }
+        }
 
 
 
 
+        public double[] Positions => GetJointLocalRotation();
 
-            public double[] PositionErrors => throw new System.NotImplementedException();  // TODO (Positions for hinge, quat error from identity for ball)
+        public void CheckLocalRotations()
+        {
+            Quaternion q = MjEngineTool.MjQuaternion(gameObject.transform.rotation);
+
+            //Vector3 upMj = MjEngineTool.MjVector3Up;
+            Vector3 upMj = MjEngineTool.MjVector3(gameObject.transform.up);
+
+            Vector3 upUn = gameObject.transform.up;
+            Vector3 test = LocalAngularVelocity;
+
+
+            Debug.Log(gameObject.name + " has up in unity: " + upUn + " up in mujoco: " + upMj + "  and local angle velocity: " + test);
+
+        }
+
+
+
+
+
+        //public double[] PositionErrors => throw new System.NotImplementedException();  // TODO (Positions for hinge, quat error from identity for ball)
+
+        public double[] PositionErrors => Positions;
 
             public double[] VelocityErrors => Velocities;
 
@@ -466,7 +469,8 @@ using UnityEngine;
         }
 
 
-            public double[] PositionErrors => throw new System.NotImplementedException();
+        public double[] PositionErrors => Utils.QuaternionError(Positions,new double[4] {1,0,0,0 });//the difference between the current position and the null rotatoin in mujoco space
+            
 
             public double[] VelocityErrors => throw new System.NotImplementedException();
 
