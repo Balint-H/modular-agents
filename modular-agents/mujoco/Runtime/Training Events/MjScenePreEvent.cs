@@ -6,13 +6,14 @@ using Mujoco;
 
 public class MjScenePreEvent : TrainingEvent
 {
+
     public override void SubscribeHandler(EventHandler subscriber)
     {
-        MjScene.Instance.preUpdateEvent += subscriber;
+        MjScene.Instance.preUpdateEvent += (sender, args) => subscriber(sender, args);  // TODO: Confirm this works as intended
     }
 
     public override void UnsubscribeHandler(EventHandler subscribed)
     {
-        if (MjScene.InstanceExists) MjScene.Instance.preUpdateEvent -= subscribed;
+        if (MjScene.InstanceExists) MjScene.Instance.preUpdateEvent -= (sender, args) => subscribed(sender, args);
     }
 }

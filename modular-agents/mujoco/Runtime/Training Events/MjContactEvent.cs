@@ -22,7 +22,6 @@ namespace ModularAgents.TrainingEvents
         private unsafe void Start()
         {
             MjScene.Instance.ctrlCallback += CheckContacts;
-            SubscribeSerializedHandlers();
         }
 
         private unsafe void CheckContacts(object sender, MjStepArgs args)
