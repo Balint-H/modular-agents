@@ -42,6 +42,9 @@ namespace ModularAgents.MotorControl.Mujoco
         // an IRememberPreviousActions object (e.g. so action smoothing is cleared from the previous episode)
         // TODO: replace this explicit reference with an event that all interested components may subscribe to.
         protected IReadOnlyList<IMjJointState> activeReferenceStates;
+
+        public IReadOnlyList<IMjJointState> ActiveReferenceStates => activeReferenceStates;
+
         IRememberPreviousActions prevActionSource;
 
         // Addresses in the qfrc_applied array of MuJoCo controlled (either actively modulating by the agent, or "softExcluded" ones simply tracking)

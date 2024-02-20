@@ -254,7 +254,7 @@ public static class Utils
 
 
         /// <summary>
-        /// In real-first quaternion notation.
+        /// In real-first quaternion notation. Returns desired - current
         /// </summary>
         public static double[] QuaternionError(double[] cur, double[] des) 
     {

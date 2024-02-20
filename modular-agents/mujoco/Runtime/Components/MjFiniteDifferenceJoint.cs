@@ -403,7 +403,7 @@ using ModularAgents;
 
         //public double[] PositionErrors => throw new System.NotImplementedException();  // TODO (Positions for hinge, quat error from identity for ball)
 
-        public double[] PositionErrors => Positions;
+        public double[] PositionErrors => Positions.Select(x => -x).ToArray();//reference (here 0)minus me
 
             public double[] VelocityErrors => Velocities;
 
