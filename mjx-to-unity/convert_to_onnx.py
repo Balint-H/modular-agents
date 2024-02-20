@@ -250,4 +250,4 @@ def set_onnx_opset(onnx_model, target_opset=19):
 
 
 if __name__ == '__main__':
-    convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./params2.pickle", save_path="feedforward_model_2.onnx", normalize=True)
+    convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
