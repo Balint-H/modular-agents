@@ -24,6 +24,8 @@ using ModularAgents;
         IMjJointState jointState;
 
         protected Quaternion initialRotationBody = Quaternion.identity;
+
+
     
 
         /*
@@ -224,6 +226,10 @@ using ModularAgents;
 
         Quaternion[] initialRotationSiblings;
 
+
+        Quaternion initGlobalRot;
+
+
         int indexme = -1;
 
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
@@ -238,12 +244,13 @@ using ModularAgents;
 
             siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();
             indexme = siblings.TakeWhile(x => !x.name.Equals(component.transform.name)).Count();
-            initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+            // initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+            initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().transform.localRotation).ToArray();
 
 
             // Debug.Log("I am: " + hinge.transform.name + " my rot is: " + initialRotationHinge + " my rot in siblings is:  " + initialRotationSiblings[indexme] + " with index: " + indexme);
 
-
+            initGlobalRot = component.transform.rotation;
         }
 
 
@@ -319,9 +326,11 @@ using ModularAgents;
             //return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };
 
 
+            //return new double[1] { Quaternion.Angle(component.transform.rotation , initGlobalRot ) * Mathf.Deg2Rad };
+
             //B. version with 1 sibling:    
             //below, an attempt to take into account the different hinges that are s
-
+            
             switch (siblings.Length)
             {
                 case 0:
@@ -357,11 +366,19 @@ using ModularAgents;
 
                         else //indexme is 0
                         {
-
+                            
                             Quaternion temp = Quaternion.Inverse(initialRotationSiblings[0]) * GetBodyLocalRotation();
-                            Quaternion sibQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;
-                            Quaternion temp2 = Quaternion.Inverse(sibQ) * Quaternion.Inverse(initialRotationSiblings[1]) * GetBodyLocalRotation();
+                            Quaternion meQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;
+                            Quaternion temp2 = Quaternion.Inverse(meQ) * Quaternion.Inverse(initialRotationSiblings[1]) * GetBodyLocalRotation();
+
                             return new double[1] { -2 * Mathf.Asin(temp2.x) * Mathf.Sign(-temp2.w) };
+
+                            //Quaternion temp2 = Quaternion.Inverse(initialRotationSiblings[0]) * Quaternion.Inverse(initialRotationSiblings[1]) * GetBodyLocalRotation();
+                            
+
+                            //Quaternion temp3 = component.initialRotationBody * Quaternion.Inverse(parentKinematics.LocalRotation) * initialRotationSiblings[0];
+
+                           // return new double[1] { -2 * Mathf.Asin(temp3.x) * Mathf.Sign(-temp3.w) };
 
 
 
