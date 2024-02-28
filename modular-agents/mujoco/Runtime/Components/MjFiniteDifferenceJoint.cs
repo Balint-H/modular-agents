@@ -264,6 +264,8 @@ using ModularAgents;
         Transform referenceBodyTransform; //for the first hinge, it is the body grand parent, for the second and the rest of hinges, it is the previous hinge
         Quaternion deviationFromReferenceBody;
 
+        Quaternion initialRotationBodyIAmTurning;
+        MjFiniteDifferenceBody bodyIAmTurning;
 
         public Vector3 RotationAxis { 
             get
@@ -272,31 +274,18 @@ using ModularAgents;
                // return hinge.transform.rotation * Vector3.right;
                 switch (indexme)
                 {
-                    case -1:
-                        return hinge.transform.rotation * Vector3.right;
+                    // case -1:
+                    //     return hinge.transform.rotation * Vector3.right;
 
+                    default:
                     case 0:
                     case 1:
-                        return deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
-                    
-                    /*    
-                     case 1:
-                        {
-                            Quaternion orientationHinge0 = HingeSiblings[0].deviationFromReferenceBody * referenceBodyTransform.transform.rotation;
+                        // return initialRotationBodyIAmTurning * Quaternion.Inverse(bodyIAmTurning.transform.rotation) * deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
+                        return  deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
 
-                            Vector3 axisHinge0 = new Vector3(orientationHinge0.x, orientationHinge0.y, orientationHinge0.z).normalized;
-                            Quaternion rotationApplied = Quaternion.AngleAxis( (float) HingeSiblings[0].Positions[0] * Mathf.Rad2Deg, axisHinge0);
-
-                            return rotationApplied * orientationHinge0 * Vector3.right;
+                       
 
 
-                        }
-                    */
-
-                     default:
-                        return hinge.transform.localRotation * Vector3.right;
-
-                   
                 }
 
             }
@@ -314,7 +303,7 @@ using ModularAgents;
             initialRotationHinge = hinge.transform.localRotation;
 
 
-            MjFiniteDifferenceBody bodyIAmTurning = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
+            bodyIAmTurning = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
 
             siblings = bodyIAmTurning.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();
             indexme = siblings.TakeWhile(x => !x.name.Equals(component.transform.name)).Count();
@@ -327,9 +316,10 @@ using ModularAgents;
             else
                 referenceBodyTransform = siblings[indexme - 1].transform;
 
-            deviationFromReferenceBody = Quaternion.Inverse(referenceBodyTransform.transform.rotation) * hinge.transform.rotation ; 
+            deviationFromReferenceBody =  hinge.transform.rotation * Quaternion.Inverse(referenceBodyTransform.transform.rotation);
+            initialRotationBodyIAmTurning = bodyIAmTurning.Rotation;
 
-          
+
         }
 
 
