@@ -26,21 +26,26 @@ using ModularAgents;
         protected Quaternion initialRotationBody = Quaternion.identity;
 
 
+        FiniteDifferenceHinge hingeFD = null; 
+
         public Vector3 HingeRotationAxis
         {
 
 
-        get { if (QPos.Length == 1)
+            get { if (hingeFD != null)
+
+                    return hingeFD.RotationAxis ;
+                else
+                    return Vector3.zero;
 
 
-                return transform.rotation * Vector3.right;
-            else
-                return Vector3.zero;
-
+            }
 
         }
 
-    }
+
+
+
 
         /*
           
@@ -70,7 +75,14 @@ using ModularAgents;
     public IMjJointState GetJointState()
         {
             if (jointState == null)
+            {
                 jointState = FiniteDifferenceJointState.GetFiniteDifferenceJointState(this, pairedJoint);
+                if(jointState.Positions.Length == 1) //if its a hinge we need to keep track of the rotation axis for display
+                    hingeFD = new FiniteDifferenceHinge(this, (MjHingeJoint) pairedJoint);
+
+
+            }
+            
             return jointState;
         }
 
@@ -88,9 +100,9 @@ using ModularAgents;
 
         void MjInitialize()
         {
-            //CheckLocalAxisPos();
-
+           
             initialRotationBody = pairedJoint.transform.parent.localRotation;
+           
          
         }
 
@@ -202,6 +214,7 @@ using ModularAgents;
             protected Quaternion LocalRotation => parentKinematics.LocalRotation;
             protected Vector3 LocalAngularVelocity => parentKinematics.LocalAngularVelocity;
 
+            
             public FiniteDifferenceJointState(MjFiniteDifferenceJoint component)
             {
                 this.component = component;
@@ -238,12 +251,59 @@ using ModularAgents;
 
         MjFiniteDifferenceJoint[] siblings;
 
+        public FiniteDifferenceHinge[] HingeSiblings
+            {   
+                get =>  siblings.Select(x => new FiniteDifferenceHinge(x, (MjHingeJoint) x.pairedJoint) ).ToArray();
+
+            }
+
+      
         Quaternion[] initialRotationSiblings;
 
 
-        Quaternion initGlobalRot;
+        Transform referenceBodyTransform; //for the first hinge, it is the body grand parent, for the second and the rest of hinges, it is the previous hinge
+        Quaternion deviationFromReferenceBody;
 
 
+        public Vector3 RotationAxis { 
+            get
+
+            { //offset2Reference* referenceBody.transform.rotation* Vector3.right;
+               // return hinge.transform.rotation * Vector3.right;
+                switch (indexme)
+                {
+                    case -1:
+                        return hinge.transform.rotation * Vector3.right;
+
+                    case 0:
+                    case 1:
+                        return deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
+                    
+                    /*    
+                     case 1:
+                        {
+                            Quaternion orientationHinge0 = HingeSiblings[0].deviationFromReferenceBody * referenceBodyTransform.transform.rotation;
+
+                            Vector3 axisHinge0 = new Vector3(orientationHinge0.x, orientationHinge0.y, orientationHinge0.z).normalized;
+                            Quaternion rotationApplied = Quaternion.AngleAxis( (float) HingeSiblings[0].Positions[0] * Mathf.Rad2Deg, axisHinge0);
+
+                            return rotationApplied * orientationHinge0 * Vector3.right;
+
+
+                        }
+                    */
+
+                     default:
+                        return hinge.transform.localRotation * Vector3.right;
+
+                   
+                }
+
+            }
+        }
+
+
+      
         int indexme = -1;
 
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
@@ -254,40 +314,24 @@ using ModularAgents;
             initialRotationHinge = hinge.transform.localRotation;
 
 
-            MjFiniteDifferenceBody check = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
+            MjFiniteDifferenceBody bodyIAmTurning = component.transform.parent.GetComponent<MjFiniteDifferenceBody>();
 
-            siblings = check.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();
+            siblings = bodyIAmTurning.GetBodyChildComponents<MjFiniteDifferenceJoint>().ToArray();
             indexme = siblings.TakeWhile(x => !x.name.Equals(component.transform.name)).Count();
-            // initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
-            initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().transform.localRotation).ToArray();
+            initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().pairedJoint.transform.localRotation).ToArray();
+            //initialRotationSiblings = siblings.Select(x => x.GetComponent<MjFiniteDifferenceJoint>().transform.localRotation).ToArray();
 
 
-            // Debug.Log("I am: " + hinge.transform.name + " my rot is: " + initialRotationHinge + " my rot in siblings is:  " + initialRotationSiblings[indexme] + " with index: " + indexme);
+            if (indexme == 0)
+                referenceBodyTransform = bodyIAmTurning.GetComponentInParent<MjFiniteDifferenceBody>().transform; //rotations are relative to the grand-dad
+            else
+                referenceBodyTransform = siblings[indexme - 1].transform;
 
-            initGlobalRot = component.transform.rotation;
+            deviationFromReferenceBody = Quaternion.Inverse(referenceBodyTransform.transform.rotation) * hinge.transform.rotation ; 
+
+          
         }
 
-
-
-        static Quaternion GetHingeRotation(MjFiniteDifferenceJoint component, MjHingeJoint hinge)
-        {
-            FiniteDifferenceHinge fdh = new FiniteDifferenceHinge(component, hinge);
-
-            Quaternion hingeRot = (Quaternion.Inverse(fdh.hinge.transform.localRotation) * fdh.LocalRotation);
-
-            //the rotation that we are interested in corresponds to the X component:
-            //return (new Quaternion(hingeRot.x, 0,0, hingeRot.w).normalized);
-            return hingeRot;
-
-
-        }
-
-        static Quaternion GetXRotation(Quaternion q)
-        {
-            return new Quaternion(q.x, 0, 0, q.w).normalized;
-
-
-        }
 
 
         public int[] DofAddresses => throw new System.NotImplementedException();  // Okay to leave as such, or replace with negative values
@@ -380,6 +424,9 @@ using ModularAgents;
 
                         else //indexme is 0
                         {
+
+                            //WRONG
+
                             
                             Quaternion temp = Quaternion.Inverse(initialRotationSiblings[0]) * GetBodyLocalRotation();
                             Quaternion meQ = new Quaternion(temp.x, 0, 0, temp.w).normalized;

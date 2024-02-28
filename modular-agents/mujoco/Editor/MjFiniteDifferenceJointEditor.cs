@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-using Mujoco;
 
 
 
+using ModularAgents.Kinematic.Mujoco;
 
-[CustomEditor(typeof(MjFiniteDifferenceJoint))]
+
+
+    [CustomEditor(typeof(MjFiniteDifferenceJoint))]
 public class MjFiniteDifferenceJointEditor : Editor
 {
     private MjFiniteDifferenceJoint _joint;
@@ -39,6 +41,11 @@ public class MjFiniteDifferenceJointEditor : Editor
     {
         Handles.color = Color.cyan;
         MjHandles.Axis(joint.transform.position, joint.HingeRotationAxis);
+
+        Handles.color = Color.yellow;
+        MjHandles.Axis(joint.transform.position, 0.5f* joint.PairedJoint.transform.GetComponent<MjHingeJoint>().RotationAxis);
+
+
     }
 
 
