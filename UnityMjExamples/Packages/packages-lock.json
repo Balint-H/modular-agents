@@ -215,11 +215,11 @@
       "url": "https://packages.unity.com"
     },
     "org.mujoco": {
-      "version": "https://github.com/deepmind/mujoco.git?path=unity",
+      "version": "https://github.com/deepmind/mujoco.git?path=unity#3.1.2",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "24eb4c9f092da7dd245a116841a5325a0fb359b9"
+      "hash": "f75923a48d2d8543c4adefc96f89316c4e07a6c6"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

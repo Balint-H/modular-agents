@@ -1,0 +1,2 @@
+These scenes start the transfer of an MJX policy to Unity, using the example of the [humanoid control scene from the official tutorials](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/mjx/tutorial.ipynb).
+This scene expects a timestep of 0.005s. Please examine the source XML for further details.
