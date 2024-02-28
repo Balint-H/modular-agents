@@ -26,7 +26,21 @@ using ModularAgents;
         protected Quaternion initialRotationBody = Quaternion.identity;
 
 
-    
+        public Vector3 HingeRotationAxis
+        {
+
+
+        get { if (QPos.Length == 1)
+
+
+                return transform.rotation * Vector3.right;
+            else
+                return Vector3.zero;
+
+
+        }
+
+    }
 
         /*
           
