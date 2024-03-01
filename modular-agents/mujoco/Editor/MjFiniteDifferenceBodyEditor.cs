@@ -36,12 +36,15 @@ public class MjFiniteDifferenceBodyEditor : Editor
 
     public static void DrawHandles(MjFiniteDifferenceJoint joint)
     {
-        Handles.color = Color.cyan;
-        MjHandles.Axis(joint.transform.position, joint.HingeRotationAxis);
+     
+            Handles.color = Color.cyan;
+            MjHandles.Axis(joint.transform.position, joint.HingeRotationAxis);
 
-        Handles.color = Color.yellow;
-        MjHandles.Axis(joint.transform.position, 0.5f * joint.PairedJoint.transform.GetComponent<MjHingeJoint>().RotationAxis);
+            //if we wanted to check it matches with the axis coming from mujoco we would uncomment this below:
+            //Handles.color = Color.yellow;
+            //MjHandles.Axis(joint.transform.position, 0.5f * joint.PairedJoint.transform.GetComponent<MjHingeJoint>().RotationAxis);
 
+      
 
     }
 

@@ -44,21 +44,40 @@ using ModularAgents;
         }
 
 
+    public int HingeIndex
+    {
 
 
-
-        /*
-          
-        //if we wanted this to inherit from MujocoBaseBody, we would do:
-        protected override void OnParseMjcf(XmlElement mjcf) { }
-
-        protected override XmlElement OnGenerateMjcf(XmlDocument doc)
+        get
         {
-            return (XmlElement)doc.CreateElement("");
-        }
-        */
+            if (hingeFD != null)
 
-        public double[] QPos
+                return hingeFD.IndexMe;
+            else
+                return -1;
+
+
+        }
+
+    }
+
+
+
+
+
+
+    /*
+
+    //if we wanted this to inherit from MujocoBaseBody, we would do:
+    protected override void OnParseMjcf(XmlElement mjcf) { }
+
+    protected override XmlElement OnGenerateMjcf(XmlDocument doc)
+    {
+        return (XmlElement)doc.CreateElement("");
+    }
+    */
+
+    public double[] QPos
          {
         get {return  GetJointState().Positions; }
     
@@ -264,36 +283,18 @@ using ModularAgents;
         Transform referenceBodyTransform; //for the first hinge, it is the body grand parent, for the second and the rest of hinges, it is the previous hinge
         Quaternion deviationFromReferenceBody;
 
-        Quaternion initialRotationBodyIAmTurning;
+  
         MjFiniteDifferenceBody bodyIAmTurning;
 
-        public Vector3 RotationAxis { 
-            get
-
-            { //offset2Reference* referenceBody.transform.rotation* Vector3.right;
-               // return hinge.transform.rotation * Vector3.right;
-                switch (indexme)
-                {
-                    // case -1:
-                    //     return hinge.transform.rotation * Vector3.right;
-
-                    default:
-                    case 0:
-                    case 1:
-                        // return initialRotationBodyIAmTurning * Quaternion.Inverse(bodyIAmTurning.transform.rotation) * deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
-                        return  deviationFromReferenceBody * referenceBodyTransform.transform.rotation * Vector3.right;
-
-                       
-
-
-                }
-
-            }
+        public Vector3 RotationAxis {
+            get => referenceBodyTransform.transform.rotation * deviationFromReferenceBody * Vector3.right;
         }
 
 
       
         int indexme = -1;
+
+        public int IndexMe { get => indexme; }
 
         public FiniteDifferenceHinge(MjFiniteDifferenceJoint component, MjHingeJoint hinge) : base(component)
         {
@@ -312,12 +313,15 @@ using ModularAgents;
 
 
             if (indexme == 0)
-                referenceBodyTransform = bodyIAmTurning.GetComponentInParent<MjFiniteDifferenceBody>().transform; //rotations are relative to the grand-dad
+                //referenceBodyTransform = bodyIAmTurning.GetComponentInParent<MjFiniteDifferenceBody>().transform; //rotations are relative to the grand-dad
+                referenceBodyTransform = bodyIAmTurning.transform.parent.GetComponent<MjFiniteDifferenceBody>().transform; //rotations are relative to the grand-dad
+
             else
                 referenceBodyTransform = siblings[indexme - 1].transform;
 
-            deviationFromReferenceBody =  hinge.transform.rotation * Quaternion.Inverse(referenceBodyTransform.transform.rotation);
-            initialRotationBodyIAmTurning = bodyIAmTurning.Rotation;
+            //deviationFromReferenceBody =  hinge.transform.rotation * Quaternion.Inverse(referenceBodyTransform.transform.rotation);
+            deviationFromReferenceBody =  Quaternion.Inverse(referenceBodyTransform.transform.rotation) * hinge.transform.rotation ;
+
 
 
         }
