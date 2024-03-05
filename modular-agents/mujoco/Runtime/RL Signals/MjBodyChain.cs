@@ -17,14 +17,14 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public MjBodyChain(IEnumerable<Transform> bodies)
         {
-            chain = bodies.Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
+            chain = bodies.Select(mjT => mjT.GetIKinematic()).OrderBy(x => x.Name).ToList().AsReadOnly();
 
             mass = chain.Select(k => k.Mass).Sum();
         }
 
         protected override IReadOnlyList<IKinematic> GetKinematicChain(Transform root)
         {
-            return root.GetComponentsInChildren<Transform>().Where(t => t.IsIKinematic()).Select(mjT => mjT.GetIKinematic()).ToList().AsReadOnly();
+            return root.GetComponentsInChildren<Transform>().Where(t => t.IsIKinematic()).Select(mjT => mjT.GetIKinematic()).OrderBy(x => x.Name).ToList().AsReadOnly();
         }
     }
 
@@ -46,16 +46,20 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 return new MjBodyAdapter(transform.GetComponent<MjBody>());
             }
-            else if(transform.GetComponent<MjMocapBodyKinematicsComponent>())
+            else if (transform.GetComponent<MjMocapBodyKinematicsComponent>())
             {
                 return transform.GetComponent<MjMocapBodyKinematicsComponent>().GetIKinematic();
+            }
+            else if (transform.GetComponent<MjFiniteDifferenceBody>())
+            {
+                return transform.GetComponent<MjFiniteDifferenceBody>().GetIKinematic();
             }
             throw new NotImplementedException($"No kinematic component recognized on transform {transform.name}");
         }
 
         public static bool IsIKinematic(this Transform transform)
         {
-            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>();
+            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>() || transform.GetComponent<MjFiniteDifferenceBody>();
         }
     }
 
@@ -100,6 +104,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         public Vector3 AngularVelocity => mjBody.GlobalAngularVelocity();
 
+
         public float Mass => mass;
 
         public Vector3 CenterOfMass => mjBody.GetTransformMatrix().MultiplyPoint3x4(inertiaLocalPos);  // TODO: Replace using Data->xipos
@@ -135,8 +140,15 @@ namespace ModularAgents.Kinematic.Mujoco
         public GameObject gameObject { get => mjBody.gameObject; }
         public MjBody ParentBody { get => parentBody; }
 
-        public Vector3 LocalVelocity => MjState.LocalVelocity(mjBody);
+        public Vector3 LocalVelocity => isRoot? mjBody.GlobalVelocity() : mjBody.GlobalVelocity() - parentBody.GlobalVelocity();
 
-        public Vector3 LocalAngularVelocity => MjState.LocalAngularVelocity(mjBody);
+         public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+       
+        
+        // notice we want this in the parent's coordinate axis, if we want to visualise in global cartesian coordinates we can simply remove the parents "rotation removal":
+       // public Vector3 LocalAngularVelocityCartesianCoords => isRoot ? mjBody.GlobalAngularVelocity() : (mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+
+
+
     }
 }

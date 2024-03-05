@@ -4,12 +4,15 @@ using UnityEngine;
 using System;
 using System.Linq;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 namespace Mujoco.Extensions
 {
     public static class MjState
     {
         static MjScene mjScene { get => MjScene.Instance; }
+
+      
 
         public static unsafe (IEnumerable<double[]>, IEnumerable<double[]>) GetMjKinematics(MjBody rootBody)
         {
@@ -249,33 +252,119 @@ namespace Mujoco.Extensions
             return -Vector3.Cross(globalComPositionVector, angularVelocity) + frameVelocity;
         }
 
-        public static unsafe Vector3 GlobalVelocity(this MjBaseBody body, MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY)
+        /// <summary>
+        /// Get the linear velocityof a body in cartesian space.
+        /// </summary>
+        /// <param name="fromCenterOfMass"> If true, the velocity corresponds to the body's center of mass (i.e., the velocity that can be used to calculate momentum, or kinetic energy).
+        /// This may be different from the body frame's velocity (the case when it's false) if the body has angular velocity.</param>
+        /// <param name="inBodyFrame">If true, the returned velocity will be represented in the body's own reference frame. Note that this is not local velocity in the kinematic tree 
+        /// sense, this value is independent from the parent body's kinematics.</param>
+        public static unsafe Vector3 GlobalVelocity(this MjBaseBody body, bool fromCenterOfMass = false, bool inBodyFrame=false)
         {
             MujocoLib.mjModel_* Model = mjScene.Model;
             MujocoLib.mjData_* Data = mjScene.Data;
+
+            MujocoLib.mjtObj objType = fromCenterOfMass? MujocoLib.mjtObj.mjOBJ_BODY : MujocoLib.mjtObj.mjOBJ_XBODY;
+
             Vector3 bodyVel = Vector3.zero;
             double[] mjBodyVel = new double[6];
             fixed (double* res = mjBodyVel)
             {
                 MujocoLib.mj_objectVelocity(
-                    Model, Data, (int)objType, body.MujocoId, res, 0);
+                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame? 1 : 0);
                 // linear velocity is in the last 3 entries
                 bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
             }
             return bodyVel;
         }
 
-        public static unsafe Vector3 LocalVelocity(this MjBody body, MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY)
+        public static IEnumerable<T> GetDepthFirstSubtreeComponents<T>(this MjBody mjBody) where T: MjComponent
+        {
+            foreach(var comp in mjBody.GetBodyChildComponents<T>() )
+            {
+                yield return comp;
+            }
+
+            foreach(var child in mjBody.GetBodyChildComponents<MjBody>() )
+            {
+                foreach(var chc in child.GetDepthFirstSubtreeComponents<T>())
+                {
+                    yield return chc;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The order of components in MuJoCo arrays is determined by the order they appear in the XML/hierarchy (so they may not necessarily be depth first, or breadth first).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="mjBody"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetTopDownOrderedComponents<T>(this MjBody mjBody) where T : MjComponent
+        {
+            foreach (var comp in mjBody.GetBodyChildComponents<MjComponent>() )
+            {
+                switch (comp)
+                {
+                    case T t:
+                        yield return t; 
+                        break;
+                    case MjBody b:
+                        foreach (var chc in b.GetDepthFirstSubtreeComponents<T>())
+                        {
+                            yield return chc;
+                        }
+                        break;
+
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Get the first component of type T more proximally than the body it was called on. 
+        /// Not the same as GetComponentInParent or MjHierarchyTool.FindParentComponent, as this checks the child GameObjects of the parent MjBody
+        /// </summary>
+        internal static T GetFirstInParentBody<T>(this MjBaseBody body, bool recurseUp = true) where T : MjComponent
+        {
+            var parent = MjHierarchyTool.FindParentComponent<MjBaseBody>(body);
+            if (!parent) return null;
+            var parentComponent = parent.GetBodyChildComponents<T>().FirstOrDefault();  // ASSUMPTION 1
+            if (!parentComponent && recurseUp) return parent.GetFirstInParentBody<T>();
+            return parentComponent;
+        }
+
+        /// <summary>
+        /// Iterate over all components that use this body as their MJCF parent directly (e.g. MjGeom, MjInertial, MjBaseJoint, and child MjBaseBody).
+        /// </summary>
+        public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
+        {
+            foreach (var childComponent in body.GetComponentsInChildren<T>().OrderBy(c => c.transform.GetSiblingIndex()))
+            {
+                if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
+            }
+        }
+
+        /// <summary>
+        /// Get the linear velocityof a body in cartesian space.
+        /// </summary>
+        /// <param name="inBodyFrame">If true, the returned velocity will be represented in the body's own reference frame. Note that this is not local velocity in the kinematic tree 
+        /// sense, this value is independent from the parent body's kinematics.</param>
+        public static unsafe Vector3 GlobalAngularVelocity(this MjBaseBody body, bool inBodyFrame = false)
         {
             MujocoLib.mjModel_* Model = mjScene.Model;
             MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyVel = Vector3.one;
+
+            MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY;
+
+            Vector3 bodyVel = Vector3.zero;
             double[] mjBodyVel = new double[6];
             fixed (double* res = mjBodyVel)
             {
                 MujocoLib.mj_objectVelocity(
-                    Model, Data, (int)objType, body.MujocoId, res, 1);
-                bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
+                    Model, Data, (int)objType, body.MujocoId, res, inBodyFrame ? 1 : 0);
+                // angular velocity is in the first 3 entries
+                bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
             }
             return bodyVel;
         }
@@ -325,36 +414,7 @@ namespace Mujoco.Extensions
         }
 
 
-        public static unsafe Vector3 GlobalAngularVelocity(this MjBody body)
-        {
-            MujocoLib.mjModel_* Model = mjScene.Model;
-            MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyAngVel = Vector3.zero;
-            double[] mjBodyAngVel = new double[6];
-            fixed (double* res = mjBodyAngVel)
-            {
-                MujocoLib.mj_objectVelocity(
-                    Model, mjScene.Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 0);
-                bodyAngVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
-            }
-            return bodyAngVel;
-        }
 
-
-        public static unsafe Vector3 LocalAngularVelocity(this MjBody body)
-        {
-            MujocoLib.mjModel_* Model = mjScene.Model;
-            MujocoLib.mjData_* Data = mjScene.Data;
-            Vector3 bodyAngVel = Vector3.one;
-            double[] mjBodyAngVel = new double[6];
-            fixed (double* res = mjBodyAngVel)
-            {
-                MujocoLib.mj_objectVelocity(
-                    mjScene.Model, Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 1);
-                bodyAngVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
-            }
-            return bodyAngVel;
-        }
 
         public static unsafe float GetAcceleration(this MjActuator act)
         {
@@ -441,13 +501,70 @@ namespace Mujoco.Extensions
             return (float)mjScene.Model->body_mass[bd.MujocoId];
         }
 
+
+        public static unsafe double[] GetQPos(this MjBaseJoint joint)
+        {
+            return Enumerable.Range(0, joint.PosCount()).Select(i => mjScene.Data->qpos[joint.QposAddress + i]).ToArray();
+        }
+
+
+
+        /*
         public static unsafe float[] GetQPos(this MjBaseJoint joint)
         {
             return Enumerable.Range(0, joint.PosCount()).Select(i => (float)mjScene.Data->qpos[joint.QposAddress + i]).ToArray();
         }
+        */
+
+
+
+        /*
+        public static unsafe double[] GetJointQPos(MjBaseJoint joint)
+        {
+            MujocoLib.mjModel_* Model = mjScene.Model;
+            MujocoLib.mjData_* Data = mjScene.Data;
+            double[] qpos;
+
+            switch (Model->jnt_type[joint.MujocoId])
+            {
+                default:
+                case (int)MujocoLib.mjtJoint.mjJNT_HINGE:
+                case (int)MujocoLib.mjtJoint.mjJNT_SLIDE:
+                    qpos = new double[] { Data->qpos[joint.QposAddress] };
+                    break;
+                case (int)MujocoLib.mjtJoint.mjJNT_BALL:
+                    qpos = new double[] { Data->qpos[joint.QposAddress],
+                                                     Data->qpos[joint.QposAddress+1],
+                                                     Data->qpos[joint.QposAddress+2],
+                                                     Data->qpos[joint.QposAddress+3]};
+                    break;
+
+                case (int)MujocoLib.mjtJoint.mjJNT_FREE:
+                    qpos = new double[] {
+                                                        Data->qpos[joint.QposAddress],
+                                                        Data->qpos[joint.QposAddress+1],
+                                                        Data->qpos[joint.QposAddress+2],
+                                                        Data->qpos[joint.QposAddress+3],
+                                                        Data->qpos[joint.QposAddress+4],
+                                                        Data->qpos[joint.QposAddress+5],
+                                                        Data->qpos[joint.QposAddress+6]};
+                    break;
+
+
+            }
+
+            return qpos;
+        }*/
+
+        /*
         public static unsafe float[] GetQVel(this MjBaseJoint joint)
         {
             return Enumerable.Range(0, joint.DofCount()).Select(i => (float)mjScene.Data->qvel[joint.DofAddress + i]).ToArray();
+        }*/
+
+        public static unsafe double[] GetQVel(this MjBaseJoint joint)
+        {
+            return Enumerable.Range(0, joint.DofCount()).Select(i => mjScene.Data->qvel[joint.DofAddress + i]).ToArray();
         }
 
 

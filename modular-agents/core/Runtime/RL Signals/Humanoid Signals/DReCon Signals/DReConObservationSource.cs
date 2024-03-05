@@ -46,7 +46,7 @@ namespace ModularAgents.DReCon
         protected GameObject previousActionGameObject;
         protected IRememberPreviousActions previousActionProvider;
 
-
+        public bool gizmoFDcolors = false;
 
         public override int Size => 13 + simulationSubset.Count*12 + previousActionGameObject.GetComponent<IRememberPreviousActions>().RememberedActionSize;
 
@@ -98,26 +98,75 @@ namespace ModularAgents.DReCon
             ReferenceFrame fKin = new ReferenceFrame(kinChain.RootForward, kinChain.CenterOfMass);
             ReferenceFrame fSim = new ReferenceFrame(kinChain.RootForward, simChain.CenterOfMass);
 
-            fKin.Draw();
-            fSim.Draw();
-            Gizmos.color = Color.magenta;
-            DrawBodyPositonDifferences(fKin, fSim);
+            //fKin.Draw();
+            // fSim.Draw();
+
+         
+            if (gizmoFDcolors)
+                Gizmos.color = Color.grey;
+            else
+                Gizmos.color = Color.magenta;
+            DrawBodyPositionDifferences(fKin, fSim);
+           
+
+
 
             Vector3 kinCOMV = fKin.WorldDirectionToCharacter(kinChain.CenterOfMassVelocity);
             Vector3 simCOMV = fSim.WorldDirectionToCharacter(simChain.CenterOfMassVelocity);
 
             Vector3 inputDesiredVelocity = fKin.WorldDirectionToCharacter(userInputs.GetDesiredVelocity());
 
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D() + Vector3.up / 10f, fSim.CharacterDirectionToWorld(simCOMV)/10f);
-            Gizmos.color = Color.red;
-            Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D() + Vector3.up / 10f, fSim.CharacterDirectionToWorld(kinCOMV)/10f);
-            Gizmos.color = Color.blue;
-            Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D()+Vector3.up/10f, fSim.CharacterDirectionToWorld(inputDesiredVelocity.Horizontal3D())/10f);
+
+            /* if (gizmoFDcolors)
+                 Gizmos.color = Color.grey;
+             else
+                 Gizmos.color = Color.magenta;
+
+             //Gizmos.color = Color.cyan;
+             //Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D() + Vector3.up / 10f, fSim.CharacterDirectionToWorld(simCOMV)/10f);
+             Gizmos.DrawRay(simChain.CenterOfMass, fSim.CharacterDirectionToWorld(simCOMV) );
+
+             */
+            if (gizmoFDcolors)
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawRay(simChain.CenterOfMass + Vector3.one * 0.1f, fSim.CharacterDirectionToWorld(kinCOMV) / 2);
+            }
+
+            else
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(simChain.CenterOfMass, fSim.CharacterDirectionToWorld(kinCOMV));
+            }
+
+
+
+            //Gizmos.color = Color.red;
+            // Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D() + Vector3.up / 10f, fSim.CharacterDirectionToWorld(kinCOMV)/10f);
+            
+            /*
+            if (gizmoFDcolors)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawRay(simChain.CenterOfMass, fSim.CharacterDirectionToWorld(inputDesiredVelocity)/2);
+
+            }
+            else {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(simChain.CenterOfMass, fSim.CharacterDirectionToWorld(inputDesiredVelocity));
+
+
+            }
+            */
+
+
+            //Gizmos.color = Color.blue;
+            //Gizmos.DrawRay(simChain.CenterOfMass.Horizontal3D()+Vector3.up/10f, fSim.CharacterDirectionToWorld(inputDesiredVelocity.Horizontal3D())/10f);
+        
 
         }
 
-        private void DrawBodyPositonDifferences(ReferenceFrame fKin, ReferenceFrame fSim)
+        private void DrawBodyPositionDifferences(ReferenceFrame fKin, ReferenceFrame fSim)
         {
             foreach (var ((pSim, vSim), (pKin, vKin)) in GetZippedStats(simSubsetBodies).Zip(GetZippedStats(kinSubsetBodies), Tuple.Create))
             {

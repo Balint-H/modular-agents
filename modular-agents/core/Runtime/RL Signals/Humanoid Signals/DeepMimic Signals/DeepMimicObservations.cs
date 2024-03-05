@@ -24,7 +24,7 @@ namespace ModularAgents.DeepMimic
         protected IKinematic root;
         protected IReadOnlyList<IKinematic> observedKinematics;
 
-
+     
 
         public override int Size => (FilterTransforms(rootTransform.GetComponentsInChildren<Transform>()).Count()) * 15 + (usePhase ? 1 : 0);
 
@@ -32,10 +32,13 @@ namespace ModularAgents.DeepMimic
         {
             ReferenceFrame fDyn = new ReferenceFrame(root.Forward, root.Position);
 
+            
+            
+
             foreach (IKinematic k in observedKinematics)
             {
                 sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.Velocity));
-                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.AngularVelocity));
+                sensor.AddObservation(fDyn.WorldDirectionToCharacter(k.AngularVelocity));       
                 sensor.AddObservation(fDyn.WorldToCharacter(k.Position));
                 (var normal, var tangent) = k.TransformMatrix.ToNormalTangent();
                 sensor.AddObservation(fDyn.WorldDirectionToCharacter(normal));

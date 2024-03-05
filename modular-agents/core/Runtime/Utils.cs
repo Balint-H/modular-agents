@@ -229,24 +229,41 @@ public static class Utils
     }
 
 
-    public static Vector3 QuaternionError(Quaternion cur, Quaternion des)
+
+    public static Vector3 RotationVel(Quaternion previous, Quaternion current, float sampling_rate = -1)
     {
-        Quaternion err = Quaternion.Inverse(cur)*des;
-        err.ToAngleAxis(out float angle, out Vector3 axis);
-        return axis*angle;
+
+        if (sampling_rate == -1)
+            sampling_rate = 1.0f / Time.fixedDeltaTime;
+
+            //  Quaternion qdif = Quaternion.Inverse(previous) * current;
+            Quaternion qdif = current * Quaternion.Inverse(previous) ;
+            Vector3 axis = new Vector3(qdif.x, qdif.y, qdif.z);
+        float speed = 2 * Mathf.Atan2(axis.magnitude, qdif.w) * sampling_rate;
+        return speed * axis.normalized;
     }
 
-    /// <summary>
-    /// In real-first quaternion notation.
-    /// </summary>
-    public static double[] QuaternionError(double[] cur, double[] des) 
+
+        public static Vector3 QuaternionError(Quaternion cur, Quaternion des)
+    {
+        Quaternion err = Quaternion.Inverse(cur) * des;
+        err.ToAngleAxis(out float angle, out Vector3 axis);
+        return - axis * (angle * Mathf.Deg2Rad);
+    }
+
+
+
+        /// <summary>
+        /// In real-first quaternion notation. Returns desired - current
+        /// </summary>
+        public static double[] QuaternionError(double[] cur, double[] des) 
     {
         //performing inverse and multiplication simultaneously
         double[] err = new[] {  cur[0]*des[0] + cur[1]*des[1] + cur[2]*des[2] + cur[3]*des[3], /*w1w2 + x1x2 + y1y2 + z1z2*/
                                 cur[0]*des[1] - cur[1]*des[0] - cur[2]*des[3] + cur[3]*des[2], /*w1x2 - x1w2 - y1z2 + z1y2*/
                                 cur[0]*des[2] + cur[1]*des[3] - cur[2]*des[0] - cur[3]*des[1], /*w1y2 + x1z2 - y1w2 - z1x2*/
                                 cur[0]*des[3] - cur[1]*des[2] + cur[2]*des[1] - cur[3]*des[0]};/*w1z2 - x1y2 + y1x2 - z1w2*/
-        if (err[0] >= 1) return new[] { 0.0, 0.0, 0.0 };
+        if ( Mathf.Abs( (float) err[0]) >= 1) return new[] { 0.0, 0.0, 0.0 };
         double angle = 2.0 * System.Math.Acos(err[0]);
         //if (angle == 0) return new[] { 0.0, 0.0, 0.0};
         double denom = System.Math.Sqrt(1 - err[0] * err[0]);
@@ -411,9 +428,24 @@ public static class Utils
         return parent.GetComponents<T>();
     }
 
+    public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> list)
+    {
+            if (list == null)
+            {
+                Debug.LogWarning("you are asking for a list that is null");
+                return null;
+            }
+            if (list.Count() > 0 )
+                return
+                    //generate the list of top-level indices of transposed list
+                    Enumerable.Range(0, list.First().Count())
+                    //selects elements at list[y][x] for each x, for each y
+                    .Select(x => list.Select(y => y.ElementAt(x)));
+            else
+                return list;
+    }
 
-
-}
+    }
 
 namespace MathNet.Numerics.LinearAlgebra
 {

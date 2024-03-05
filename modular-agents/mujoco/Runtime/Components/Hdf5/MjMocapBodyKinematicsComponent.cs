@@ -74,7 +74,10 @@ public class MocapBodyKinematics : IKinematic
     {
         dataLoader.Root.GetConnectedBodies(out _, out MjBaseBody rootBody);
         bodyIdInData = pairedBody.MujocoId - rootBody.MujocoId - 1;
-        var parent = pairedBody.GetComponentInParent<MjBody>();
+        //var parent = pairedBody.GetComponentInParent<MjBody>();
+        var parent = pairedBody.transform.parent.GetComponent<MjBody>();
+
+
         pairedParentBodyIdInData = parent ? parent.MujocoId - rootBody.MujocoId - 1 : -1;
         dt = Time.fixedDeltaTime;
 

@@ -12,8 +12,13 @@
 /UnityMjExamples/Assets/TrainedModelTests*
 
 /UnityMjExamples/Assets/ML-Agents
-/Training/env*
 
+/UnityMjExamples/Assets/*.csv
+/UnityMjExamples/Assets/*.csv.meta
+/UnityMjExamples/Assets/Recordings/*
+/UnityMjExamples/Recordings
+/Training
+/envs
 
 # Environemnt logfile
 *UnityMjExamples.log

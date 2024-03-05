@@ -3,47 +3,81 @@ using Mujoco;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Mujoco.Extensions;
 using UnityEngine;
 
-public class MjFiniteDifferenceManager : TrainingEventHandler
+public class MjFiniteDifferenceManager :MonoBehaviour
 {
-    [SerializeField]
+   public
     MjFreeJoint pairedRootJoint;
 
+    List<MjFiniteDifferenceJoint> orderedJoints;
+
+    public MjFreeJoint Root => pairedRootJoint;
+
+    public MjFiniteDifferenceBody animationRoot;
+    [Header("To add the FD components in the hierarchy: ")]
     [SerializeField]
     Animator animator;
+    public Animator Animator => animator;
 
-    IFiniteDifferenceComponent[] managedComponents;
+    MjFiniteDifferenceBody[] managedComponents;
 
-    public override EventHandler Handler => (_, _) => Step();
-
+  
     private void Start()
     {
+      managedComponents =  gameObject.transform.GetComponentsInChildren<MjFiniteDifferenceBody>();
+        
+        //to make sure they all have the right tracking of their parents we do:
+       foreach (MjFiniteDifferenceBody comp in managedComponents)
+            comp.GetIKinematic();
+       var fdJoints = GetComponentsInChildren<MjFiniteDifferenceJoint>();
+        orderedJoints = pairedRootJoint.GetComponentInParent<MjBody>().GetTopDownOrderedComponents<MjBaseJoint>().Select(j => fdJoints.First(fdj => fdj.PairedJoint == j)).ToList();
         
 
+
+        Debug.LogWarning("Set the option --timescale=1 when training a humanoid ragdoll from a reference based on Mujoco Finite Difference Bodies, \n" +
+                         " otherwise the method CopyStateToPairedTree(), used when resetting the humanoid, will not work well. ");
+      
     }
+
+
+    public unsafe void CopyStateToPairedTree()
+    {
+    
+        //MjState.TeleportMjRoot(pairedRootJoint, animationRoot.transform.position, animationRoot.transform.rotation);
+
+        foreach (MjFiniteDifferenceJoint mfdj in orderedJoints)
+        { 
+          
+                mfdj.Reset();
+        }
+        ForwardKinematics();
+
+    }
+
+
 
     public void Step()
     {
-        // We store the old state.
-        foreach (var component in managedComponents)
-        {
-            component.Step();
-        }
-
-        // Get the new state.
-        animator.Update(Time.fixedDeltaTime);
+            foreach (var component in managedComponents)
+                component.Step();
     }
 
-    public void JumpToNormalizedTime(float normalizedTime)
+    public unsafe void ForwardKinematics() 
     {
-        
-        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        var startTime = Mathf.Clamp01(normalizedTime - Time.fixedDeltaTime/stateInfo.length);
-        animator.Play(stateInfo.fullPathHash, -1, startTime);
-        animator.Update(0);
-        Step();
+        MujocoLib.mj_forward(MjScene.Instance.Model, MjScene.Instance.Data);
     }
+
+
+    public unsafe void FixedUpdate()
+      {
+          Step();
+       
+      }
+      
+  
 
 
 }

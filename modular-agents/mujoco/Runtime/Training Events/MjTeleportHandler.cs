@@ -10,10 +10,18 @@ namespace ModularAgents.TrainingEvents
     public class MjTeleportHandler : TrainingEventHandler
     {
         [SerializeField]
-        MjFreeJoint freeJointToTeleport;
+        MjFreeJoint freeJointToTeleport = null;
+
+        [SerializeField]
+        Animator  animatorToTeleport = null;
+
+
 
         [SerializeField]
         Transform destination;
+
+        [SerializeField]
+        float freeJointHeight;
 
         [SerializeField]
         bool shouldZeroVelocityAndAcceleration;
@@ -22,7 +30,15 @@ namespace ModularAgents.TrainingEvents
 
         private unsafe void Teleport()
         {
-            MjState.TeleportMjRoot(freeJointToTeleport, destination.position, destination.rotation);
+            if (freeJointToTeleport != null)
+            {
+
+                MjState.TeleportMjRoot(freeJointToTeleport, destination.position + new Vector3(0,freeJointHeight,0), destination.rotation);
+            }
+            
+            if(animatorToTeleport != null)
+                animatorToTeleport.transform.position = destination.position;
+
             if(shouldZeroVelocityAndAcceleration )
             {
                 MjEngineTool.SetMjVector3(MjScene.Instance.Data->qacc + freeJointToTeleport.DofAddress, Vector3.zero);
