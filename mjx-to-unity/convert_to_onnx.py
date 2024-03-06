@@ -3,6 +3,26 @@ import onnx
 import numpy as np
 from onnx import helper, numpy_helper
 
+from absl import app, flags
+
+
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string(
+  'obs_name', 'obs_0', 'typically obs_0, but it can be different.')
+flags.DEFINE_integer('obs_size', 336, 'the size of the observation array.')
+#flags.register_validator(
+#  'env', lambda env: env in ['ShadowEnv', 'Humanoid', 'HumanoidDeepMimic'],
+#  message='--env must be Humanoid or ShadowEnv'
+#)
+flags.DEFINE_integer('actuator_size', 21, 'the size of the actuation outputs.')
+flags.DEFINE_string('input', '', 'The weights of the neural net to convert.')
+flags.DEFINE_string('output', 'feedforward_model.onnx', 'The name of the .onnx file you get as output, with the extension. By default it is feedforward_model.onnx')
+flags.DEFINE_bool('normalize', True, 'Do you want normalisation?')
+
+
+#  convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
+
 
 def convert_to_feedforward_onnx_model(named_input_size_tuples, output_size, brax_path,
                                       save_path="feedforward_model.onnx",
@@ -248,6 +268,18 @@ def set_onnx_opset(onnx_model, target_opset=19):
     opset.version = target_opset
     return onnx_model
 
+def main(unused_argv):
+    if FLAGS.normalize:
+        print("normalisation is true")
+    else:
+        print("normalisation is false")
 
-if __name__ == '__main__':
-    convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
+    print("Launching conversion....")
+    #convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
+    convert_to_feedforward_onnx_model([(FLAGS.obs_name, FLAGS.obs_size)], FLAGS.actuator_size,FLAGS.input, save_path=FLAGS.output, normalize=FLAGS.normalize)
+
+    print("saved model in: " + FLAGS.output)
+
+if __name__ == "__main__":
+ 
+    app.run(main)
