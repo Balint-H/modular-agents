@@ -16,7 +16,7 @@ flags.DEFINE_integer('obs_size', 336, 'the size of the observation array.')
 #  message='--env must be Humanoid or ShadowEnv'
 #)
 flags.DEFINE_integer('actuator_size', 21, 'the size of the actuation outputs.')
-flags.DEFINE_string('input', '', 'The weights of the neural net to convert.')
+flags.DEFINE_string('input', 'mjx_brax_policy.pickle', 'The weights of the neural net to convert.')
 flags.DEFINE_string('output', 'feedforward_model.onnx', 'The name of the .onnx file you get as output, with the extension. By default it is feedforward_model.onnx')
 flags.DEFINE_bool('normalize', True, 'Do you want normalisation?')
 
@@ -278,7 +278,7 @@ def main(unused_argv):
     #convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
     convert_to_feedforward_onnx_model([(FLAGS.obs_name, FLAGS.obs_size)], FLAGS.actuator_size,FLAGS.input, save_path=FLAGS.output, normalize=FLAGS.normalize)
 
-    print("saved model in: " + FLAGS.output)
+    print("saved output in: " + FLAGS.output)
 
 if __name__ == "__main__":
  
