@@ -38,8 +38,8 @@ public class PhysXBasicSetupHandler
     }
 
 
-
-	protected override IEnumerator DelayedExecution(object sender, EventArgs eventArgs)
+    /*
+	protected IEnumerator DelayedExecution(object sender, EventArgs eventArgs)
     {
 		IsWaiting = true;
 		yield return WaitFrames();
@@ -56,7 +56,7 @@ public class PhysXBasicSetupHandler
 		//kinematicRig.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
 		IsWaiting = false;
 
-	}
+	}*/
 
 	
 
@@ -91,8 +91,8 @@ public class PhysXBasicSetupHandler
 
             }
 
-            public void CopyKinematicsFrom(IKinematicReference referenceGeneralRig, Vector3 offset)
-        {
+            public void CopyKinematicsFrom(IKinematicReference referenceGeneralRig, Vector3 offset, Transform rootRef = null)
+            {
             //Set root kinematics
             KinematicRig referenceRig = referenceGeneralRig as KinematicRig;
 

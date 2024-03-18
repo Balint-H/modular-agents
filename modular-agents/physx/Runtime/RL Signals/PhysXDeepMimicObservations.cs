@@ -11,7 +11,11 @@ namespace ModularAgents.DeepMimic
 { 
 public class PhysXDeepMimicObservations : DeepMimicObservations
 {
-    protected override IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection)
+
+        [SerializeField]
+        protected Animator animator;
+
+        protected override IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection)
     {
         return transformCollection
             .Where(t => t.IsIKinematic())
@@ -29,6 +33,13 @@ public class PhysXDeepMimicObservations : DeepMimicObservations
         observedKinematics = FilterTransforms(rootTransform.GetComponentsInChildren<Transform>()).Select(x => x.GetIKinematic()).ToList();
          
     }
+
+
+    protected override float GetPhase()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+    }
+
 }
 }
 

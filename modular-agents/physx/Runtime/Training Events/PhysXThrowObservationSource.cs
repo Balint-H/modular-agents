@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ModularAgents.Kinematic.PhysX;
-
+using ModularAgents.Kinematic;
 namespace ModularAgents.Throwing
 { 
 public class PhysXThrowObservationSource : ThrowObservationSource
