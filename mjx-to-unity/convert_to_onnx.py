@@ -19,7 +19,7 @@ flags.DEFINE_integer('actuator_size', 21, 'the size of the actuation outputs.')
 flags.DEFINE_string('input', 'mjx_brax_policy.pickle', 'The weights of the neural net to convert.')
 flags.DEFINE_string('output', 'feedforward_model.onnx', 'The name of the .onnx file you get as output, with the extension. By default it is feedforward_model.onnx')
 flags.DEFINE_bool('normalize', True, 'Do you want normalisation?')
-
+flags.DEFINE_bool('convert4unity', False, 'the resulting .onnx will be used in unity?')
 
 #  convert_to_feedforward_onnx_model([("obs_0", 336)], 21, "./mjx_brax_policy.pickle", save_path="feedforward_model.onnx", normalize=True)
 
@@ -33,6 +33,7 @@ def convert_to_feedforward_onnx_model(named_input_size_tuples, output_size, brax
                                       activation="swish"):
     normalize_params, layer_params = get_brax_params(brax_path)
 
+    print("creating onnx layers...")
     # Create an ONNX graph
     graph = helper.make_graph(nodes=[], name='feedforward_model', inputs=[], outputs=[], initializer=[])
 
@@ -137,23 +138,44 @@ def convert_to_feedforward_onnx_model(named_input_size_tuples, output_size, brax
             )
         graph.node.append(act_node)
         if output_hidden:
+        
             get_output(graph, f'hidden_output_{i + 1}_activated', [1, output_size])
 
     if output_hidden:
+
+        
         get_output(graph, f'hidden_output_{len(layer_params)}_biased', [1, output_size*2])
-    # We output unprocessed action distribution means and stds, need to split it
-    # For some reason, Unity expects you to use the `split` arguement with value `[output_size, output_size]`
-    # but `onnxruntime` complains if you use the `split`.
-    # To have the model load in unity num_outputs= 2 should be replaced by split =[output_size, output_size]
-    # To have the model load in onnxruntime use num_outputs= 2 instead of split =[output_size, output_size]
-    split_node = helper.make_node(
+        
+        
+        # We output unprocessed action distribution means and stds, need to split it
+        # For some reason, Unity expects you to use the `split` argument with value `[output_size, output_size]`
+        # but `onnxruntime` complains if you use the `split`.
+        # To have the model load in unity num_outputs= 2 should be replaced by split =[output_size, output_size]
+        # To have the model load in onnxruntime use num_outputs= 2 instead of split =[output_size, output_size]
+        
+        
+    if(FLAGS.convert4unity):
+        print("onnx formatted for import in unity.......")
+        split_node = helper.make_node(
+        'Split',
+        [f'hidden_output_{len(layer_params)}_biased'],
+        ['loc', 'scale'],
+        axis=-1,
+        split =[output_size, output_size],
+        name='Split Action'
+        )
+
+    else:
+        print("onnx formatted for import using onnxruntime.......")
+    
+        split_node = helper.make_node(
         'Split',
         [f'hidden_output_{len(layer_params)}_biased'],
         ['loc', 'scale'],
         axis=-1,
         num_outputs=2,
         name='Split Action'
-    )
+        )
     graph.node.extend([split_node])
 
     if output_hidden:
