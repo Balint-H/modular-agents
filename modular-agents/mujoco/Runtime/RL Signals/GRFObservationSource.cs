@@ -116,6 +116,11 @@ namespace ModularAgents
             }
         }
         
+        public void UpdateLastPosAndVec()
+        {
+          lastPosAndVec = GetMeanGRF();
+        }
+        
         public override void OnAgentStart()
         {
         }
