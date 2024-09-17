@@ -6,6 +6,8 @@ using ModularAgents.MotorControl.CircularBuffer;
 using System.Linq;
 using Mujoco.Extensions;
 
+using ModularAgents;
+
 namespace ModularAgents.Kinematic.Mujoco
 {
     /// <summary>
