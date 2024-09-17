@@ -95,12 +95,7 @@ namespace ModularAgents.MotorControl
         {
             var vels = Velocities;
             var posError = PositionErrors;
-            double result = posError[0] - vels[0] * dt;
-            if (double.IsNaN(result))
-            {
-                Debug.LogWarning("Hinge object:" + Name + "has values: pos " + posError[0] + "and vel: " + vels[0]);
-            }
-            return new[] { result};
+            return new[] { posError[0] - vels[0] * dt };
         }
 
         public double[] GetStableVelocityErrors(double dt)
@@ -206,22 +201,7 @@ namespace ModularAgents.MotorControl
         {
             var vels = Velocities;
             var posError = PositionErrors;
-
-            double[] result = new double[3] { posError[0] - vels[0] * dt, posError[1] - vels[1] * dt, posError[2] - vels[2] * dt };
-
-            int i = 0;
-            foreach (double d in result)
-            {
-                if (double.IsNaN(d))
-                {
-                    Debug.LogWarning("Ball object:" + Name + "has values: pos " + posError[i] + "and vel: " + vels[i] + " on axis " + i);
-                }
- 
-                i++;
-            }
-
-
-            return  result;
+            return new[] { posError[0] - vels[0] * dt, posError[1] - vels[1] * dt, posError[2] - vels[2] * dt };
         }
 
         public double[] GetStableVelocityErrors(double dt)
@@ -388,10 +368,6 @@ namespace ModularAgents.MotorControl
             else if (transform.GetComponent<MjBaseJoint>())
             {
                 return GetJointState(transform.GetComponent<MjBaseJoint>());
-            }
-            else if (transform.GetComponent<MjFiniteDifferenceJoint>())
-            {
-                return transform.GetComponent<MjFiniteDifferenceJoint>().GetJointState();
             }
             else if(transform.GetComponent<MjMocapJointStateComponent>())
             {

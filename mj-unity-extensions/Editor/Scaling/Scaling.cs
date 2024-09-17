@@ -1,9 +1,11 @@
 using JetBrains.Annotations;
+using MathNet.Numerics.Statistics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Mujoco.Extensions
@@ -27,7 +29,7 @@ namespace Mujoco.Extensions
         /// For this reason we assume that if there are multiple joints in a body, then they are coincident.
         /// This is closer to the way animation rigs are structured, and helps getting the correct axes and magnitude of scaling necessary.
         /// </summary>
-        public class ScalingSegment
+        internal class ScalingSegment
         {
             readonly MjBaseJoint startJoint;
 
@@ -107,7 +109,7 @@ namespace Mujoco.Extensions
                             results.Add(alignments.Max());
                         }
                     }
-                    return (float) results.Sum()/results.Count;
+                    return (float) results.Mean();
                 }
             }
 
@@ -376,7 +378,7 @@ namespace Mujoco.Extensions
                 alignments.AddRange(orthogonalAlginments);
                 results.Add(alignments.Max());
             }
-            return (float)results.Sum() / results.Count;
+            return (float)results.Mean();
         }
 
         /// <summary>
@@ -388,6 +390,29 @@ namespace Mujoco.Extensions
             return MjHierarchyTool.FindParentComponent<MjBaseBody>(mjComponent).GetFirstInParentBody<T>(recurseUp);
         }
 
+        /// <summary>
+        /// Get the first component of type T more proximally than the body it was called on. 
+        /// Not the same as GetComponentInParent or MjHierarchyTool.FindParentComponent, as this checks the child GameObjects of the parent MjBody
+        /// </summary>
+        internal static T GetFirstInParentBody<T>(this MjBaseBody body, bool recurseUp=true) where T : MjComponent
+        {
+            var parent = MjHierarchyTool.FindParentComponent<MjBaseBody>(body);
+            if (!parent) return null;
+            var parentComponent = parent.GetBodyChildComponents<T>().FirstOrDefault();  // ASSUMPTION 1
+            if(!parentComponent && recurseUp) return parent.GetFirstInParentBody<T>();
+            return parentComponent;
+        }
+
+        /// <summary>
+        /// Iterate over all components that use this body as their MJCF parent directly (e.g. MjGeom, MjInertial, MjBaseJoint, and child MjBaseBody).
+        /// </summary>
+        internal static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
+        {
+            foreach(var childComponent in body.GetComponentsInChildren<T>())
+            {
+                if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
+            }
+        }
 
         /// <summary>
         /// Gives the global position of where the segment corresponding to this body would start, including fixed joints (which are defined as the absence of any MjBaseJoint).

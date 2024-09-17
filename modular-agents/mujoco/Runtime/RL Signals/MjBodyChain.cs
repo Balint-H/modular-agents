@@ -1,5 +1,3 @@
-#define USE_FDDIF 
-
 using ModularAgents.Kinematic;
 using Mujoco;
 using Mujoco.Extensions;
@@ -52,25 +50,12 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 return transform.GetComponent<MjMocapBodyKinematicsComponent>().GetIKinematic();
             }
-
-#if USE_FDDIF
-            else if (transform.GetComponent<MjFiniteDifferenceBody>())
-            {
-                return transform.GetComponent<MjFiniteDifferenceBody>().GetIKinematic();
-            }
-
-#endif
-
             throw new NotImplementedException($"No kinematic component recognized on transform {transform.name}");
         }
 
         public static bool IsIKinematic(this Transform transform)
         {
-#if USE_FDDIF
-            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>() || transform.GetComponent<MjFiniteDifferenceBody>();
-#else
             return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>();
-#endif
         }
     }
 
