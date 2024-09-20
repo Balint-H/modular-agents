@@ -6,6 +6,21 @@ using ModularAgents.Kinematic;
 using Mujoco;
 using Mujoco.Extensions;
 
+
+public static class Extensions
+{
+
+
+    public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
+    {
+        foreach (var childComponent in body.GetComponentsInChildren<T>())
+        {
+            if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
+        }
+    }
+
+}
+
 [CustomEditor(typeof(Hdf5Loader))]
 public class Hdf5LoaderEditor : Editor
 {
@@ -23,6 +38,8 @@ public class Hdf5LoaderEditor : Editor
         serializedObject.ApplyModifiedProperties();
 
     }
+
+
 
     private void RecursiveDataViewCreation(MjBody mjBody, Transform parentTransform, Hdf5Loader dataLoader)
     {
@@ -44,4 +61,10 @@ public class Hdf5LoaderEditor : Editor
             RecursiveDataViewCreation(childBody, bodyView.transform, dataLoader);
         }
     }
+
+
+
+
+
+
 }

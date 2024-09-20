@@ -1,0 +1,18 @@
+{
+    "name": "MjModularEnvEditor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:046f0e164cbb19645a71b4fc344ee91a",
+        "GUID:97b95f856ad17db4e855cd960cd3170f",
+        "GUID:62e270fc6ccbe61c59f510a8e31d067c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

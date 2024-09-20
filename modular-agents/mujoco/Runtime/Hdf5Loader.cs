@@ -14,6 +14,14 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics;
 using ModularAgents;
 
+public static class HierarchyToolExtensions
+{ 
+
+
+
+
+}
+
 public class Hdf5Loader : MonoBehaviour
 {
     [SerializeField]
@@ -432,6 +440,7 @@ public class Hdf5Loader : MonoBehaviour
             }
 
         }
+
     }
 
     public class MocapPlaybackEventArgs: EventArgs
@@ -444,5 +453,7 @@ public class Hdf5Loader : MonoBehaviour
             this.frameId = frameId;
         }
     }
+
+
 }
 

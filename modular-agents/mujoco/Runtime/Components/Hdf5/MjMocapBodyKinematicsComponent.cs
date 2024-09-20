@@ -13,7 +13,7 @@ using System.Linq;
 using UnityEngine.UIElements;
 using ModularAgents.Kinematic.Mujoco;
 
-public class MjMocapBodyKinematicsComponent : MonoBehaviour, IKinematicProvider
+public class MjMocapBodyKinematicsComponent : MonoBehaviour //, IKinematicProvider
 {
     [SerializeField]
     Hdf5Loader dataLoader;

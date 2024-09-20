@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Unity.VisualScripting;
+
 using UnityEngine;
 
 namespace Mujoco.Extensions
@@ -21,7 +21,8 @@ namespace Mujoco.Extensions
     /// 6. Assume that branching bodies are only in the torso and aligned with the global vertical direction.
     /// We don't use Unity transform scales, due to limitations in non-aligned scaling directions and rotating child bodies in scaled hierarchies.
     /// </summary>
-    public static class Scaling
+    public static class ScalingTools
+
     {
         /// <summary>
         /// We define a ScalingSegment as the spatial connection between a joint that couples two bodies, and the joint(s) of the proximal body.
