@@ -1,7 +1,21 @@
 # Edit Environments
 
-The scripts in this package are used to modify the training environments. For example, they allow changing the names of the parts of a ragdolls to match a hierarchy given by a skeleton used in an animation. 
-They also allow modifying a ragdoll to match the joint positions and rotations of a  skeleton  in a given pose (see below).
+This assembly contains tools to modify the training environments.
+
+- Exporting a MuJoCo mesh (script *Editor/MjMeshExporter*). Pressing right click on the root of the hierarchy that you want to export will export it in the folder Assets > Resources
+
+- Tweaking a ragdoll can be done using the *MjRagdollTweaker*
+
+- Adding a prefix to the name of all relevant objects in a hierarchy can be done with the *Prefixer*
+
+- Changing the names of the parts of a ragdolls to match a hierarchy given by a skeleton used in an animation can be done with *BodyNameMatcher*
+
+- Scaling a ragdoll to match a given skeleton can be done using the *ScalingInspector*. (see below for more details on doing this).
+
+All the previous scripts have a custom editor to access the main functionality. The scaling can also be done  using the *MjScalingEditorWindow*.
+
+
+
 
 ## MuJoCo Humanoid Scaling
 
