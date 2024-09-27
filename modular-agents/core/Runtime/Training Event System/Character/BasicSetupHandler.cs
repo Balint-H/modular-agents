@@ -50,12 +50,21 @@ public abstract class BasicSetupHandler : TrainingEventHandler
 
 	protected IResettable kineticChainToReset;
 
-    public override EventHandler Handler => HandleSetup;
+
+	[Tooltip("if this is undefined, to set up the kinetic chain we will assume the animation root is  the immediate parent of the reference animation root")]
+    [SerializeField]
+    Transform animatorTransform;
+
+        public override EventHandler Handler => HandleSetup;
 
     private void Awake()
     {
 
-		referenceAnimationParent = referenceAnimationRoot.parent;
+		if(animatorTransform == null)
+
+			referenceAnimationParent = referenceAnimationRoot.parent;
+		else
+			referenceAnimationParent = animatorTransform;
 
 		SetupKineticChain();
 		kinematicRig = kinematicRigObject.GetComponent<IKinematicReference>();
