@@ -26,7 +26,7 @@ namespace Mujoco.Extensions
 
 
         [SerializeField]
-        Scaling.ScalingSegment displaySegment;
+        ScalingTools.ScalingSegment displaySegment;
 
         [SerializeField]
         bool showSegments;
@@ -262,7 +262,7 @@ namespace Mujoco.Extensions
                     MecanimBoneTransform.TryAddNewMecanimBones(segment, referenceAvatar, referenceRootGameObject, ref mecanimConnectionTransforms);
                 }
 
-                List<Scaling.ScalingSegment.ComponentScaleCandidate> componentScaleCandidates = new List<Scaling.ScalingSegment.ComponentScaleCandidate>();
+                List<ScalingTools.ScalingSegment.ComponentScaleCandidate> componentScaleCandidates = new List<ScalingTools.ScalingSegment.ComponentScaleCandidate>();
                 foreach (var mjMecanimName in mjMecanimNames.Where(mjName => refMecanimNames.Contains(mjName)))  // We are now guaranteed to find a length for the bone.
                 {
                     var segmentsOfMecanimBone = segments.Where(s => s.MecanimName == mjMecanimName).ToList();
@@ -302,7 +302,7 @@ namespace Mujoco.Extensions
 
 
                 var componentsToScale = componentScaleCandidates.GroupBy(cand => cand.body)
-                                                                .Select(grp => Scaling.ScalingSegment.ComponentScaleCandidate.WeightedMix(grp));
+                                                                .Select(grp => ScalingTools.ScalingSegment.ComponentScaleCandidate.WeightedMix(grp));
                 foreach (var component in componentsToScale) 
                 {
                     component.Scale();                
@@ -386,7 +386,7 @@ namespace Mujoco.Extensions
         /// <summary>
         /// Find the corresponding mecanim bones in the Unity avatar, and get that bone's length. If symmetric arguement is enabled, will return the average bone length for bilateral bones.
         /// </summary>
-        private float CalculateDesiredSegmentLength(string startMecanimName, string endMecanimName, bool symmetric, Dictionary<(string, string), MecanimBoneTransform> positionDict)
+        private  float CalculateDesiredSegmentLength(string startMecanimName, string endMecanimName, bool symmetric, Dictionary<(string, string), MecanimBoneTransform> positionDict)
         {
 
             var processedEndMecanimName = symmetric? SideAgnostic(endMecanimName) : endMecanimName;
@@ -418,20 +418,20 @@ namespace Mujoco.Extensions
         /// <summary>
         /// Segment creation is performed proximal->distal (scaling will be distal->proximal). Must start with a body corresponding to a MecanimBone.
         /// </summary>
-        private Scaling.ScalingSegment RecursiveCreateSegments(MjBaseBody curBody, Scaling.ScalingSegment parentSegment = null)
+        private ScalingTools.ScalingSegment RecursiveCreateSegments(MjBaseBody curBody, ScalingTools.ScalingSegment parentSegment = null)
         {
             var mecanimName = BodyToMecanimName(curBody);
 
             var startBody = curBody;
             var childMecanimBodies = GetChildMecanimBodies(curBody).ToList();
 
-            parentSegment ??= new Scaling.ScalingSegment(curBody, curBody);
+            parentSegment ??= new ScalingTools.ScalingSegment(curBody, curBody);
 
             if(childMecanimBodies.Count == 0) // We are at an end effector
             {
                 foreach(var eeSite in GetEndEffectorSites(curBody)) 
                 {
-                    Scaling.ScalingSegment segment = new Scaling.ScalingSegment(startBody, eeSite);
+                    ScalingTools.ScalingSegment segment = new ScalingTools.ScalingSegment(startBody, eeSite);
                     segment.ParentSegment = parentSegment;
                     segment.MecanimName = mecanimName;
                     parentSegment.ChildMecanimName = mecanimName;
@@ -440,7 +440,7 @@ namespace Mujoco.Extensions
 
             foreach (var childMecanimBody in childMecanimBodies) 
             {
-                Scaling.ScalingSegment segment = new Scaling.ScalingSegment(startBody, childMecanimBody);
+                ScalingTools.ScalingSegment segment = new ScalingTools.ScalingSegment(startBody, childMecanimBody);
                 segment.ParentSegment = parentSegment;
                 segment.MecanimName = mecanimName;
                 parentSegment.ChildMecanimName = mecanimName;
@@ -513,14 +513,14 @@ namespace Mujoco.Extensions
 
             public int subtreeSize;
 
-            private MecanimBoneTransform(Matrix4x4 transform, Scaling.ScalingSegment segment)
+            private MecanimBoneTransform(Matrix4x4 transform, ScalingTools.ScalingSegment segment)
             {
                 this.transform = transform;
                 mecanimName = segment.MecanimName;
                 childMecanimName = segment.ChildMecanimName;
             }
 
-            internal static void TryAddNewMecanimBones(Scaling.ScalingSegment segment, Avatar referenceAvatar, GameObject referenceRootGameObject, ref Dictionary<(string, string), MecanimBoneTransform> existingBones)
+            internal static void TryAddNewMecanimBones(ScalingTools.ScalingSegment segment, Avatar referenceAvatar, GameObject referenceRootGameObject, ref Dictionary<(string, string), MecanimBoneTransform> existingBones)
             {
                 if (existingBones.ContainsKey((segment.MecanimName, $"{segment.ChildMecanimName}")))  // String interpolation, as ChildMecanimName may be null
                 {

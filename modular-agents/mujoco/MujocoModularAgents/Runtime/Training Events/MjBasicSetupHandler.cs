@@ -13,6 +13,9 @@ namespace ModularAgents.TrainingEvents
 { 
     public class MjBasicSetupHandler : BasicSetupHandler
     {
+
+       
+
         protected override void SetupKineticChain()
         {
             kineticChainToReset = new ResettableMjBody(kineticRagdollRoot.GetComponentInChildren<MjBody>());

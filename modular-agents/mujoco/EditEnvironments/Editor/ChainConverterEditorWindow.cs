@@ -10,7 +10,7 @@ namespace Mujoco.Extensions
 
     public class ChainConverterEditorWindow : EditorWindow
     {
-        [MenuItem("GameObject/Convert Chain/Convert MuJoCo Chain to ArticulationBodies")]
+        //[MenuItem("GameObject/Convert Chain/Convert MuJoCo Chain to ArticulationBodies")]
         public static void ConvertMjToArticulationBody()
         {
             foreach (var mjBody in Selection.activeGameObject.GetComponentsInChildren<MjBody>())
@@ -23,7 +23,7 @@ namespace Mujoco.Extensions
 
         }
 
-        [MenuItem("GameObject/Convert Chain/Convert MuJoCo Chain to ArticulationBodies with Builtin Operation")]
+        //[MenuItem("GameObject/Convert Chain/Convert MuJoCo Chain to ArticulationBodies with Builtin Operation")]
         public static void ConvertMjToArticulationBodyBultin()
         {
             var mjBody = Selection.activeGameObject.GetComponent<MjBody>();
@@ -31,13 +31,8 @@ namespace Mujoco.Extensions
 
         }
 
-        /*        [MenuItem("GameObject/Convert Chain/Convert MuJoCo Chain to RCA")]
-                public static void ConvertMjToArticulationBodyDefault()
-                {
-                    ConvertMj2Rca.ConvertTree(Selection.activeGameObject.GetComponent<MjBody>());
-                }*/
-
-        [MenuItem("GameObject/Convert Chain/Convert ArticulationBody Chain to MuJoCo")]
+       
+        //[MenuItem("GameObject/Convert Chain/Convert ArticulationBody Chain to MuJoCo")]
         public static void ConvertArticulationBodyToMj()
         {
 
