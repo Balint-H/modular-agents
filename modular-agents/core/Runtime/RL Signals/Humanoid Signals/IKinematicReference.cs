@@ -6,10 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using ModularAgents.Kinematic;
+
+
+namespace ModularAgents.Kinematic
+{ 
 
 /// <summary>
-/// Temporary interface so both KinematicRig and MapAnimation2Ragdoll works
+/// Interface for KinematicRig and MapAnimation2Ragdoll, as weill as for MjRagdoll2Skin
 /// </summary>
 public interface IKinematicReference
 {
@@ -27,4 +30,8 @@ public interface IKinematicReference
     public IReadOnlyList<Vector3> RagdollAngularVelocities { get; }
 
     public IReadOnlyList<IKinematic> Kinematics { get;  }
+}
+
+
+
 }

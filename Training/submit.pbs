@@ -1,0 +1,9 @@
+#PBS -l walltime=16:00:00
+#PBS -l select=1:ncpus=8:mem=40gb
+
+module load anaconda3/personal
+source activate mlagents
+
+cd $PBS_O_WORKDIR
+
+mlagents-learn configs/drecon.yaml --env="env/GaitKeeper.exe" --num-envs=8 --run-id=SF_hfield --initialize-from=IK_SF_Step --no-graphics --time-scale=1 --resume

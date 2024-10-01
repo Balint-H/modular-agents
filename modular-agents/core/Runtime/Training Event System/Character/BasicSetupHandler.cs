@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
+using ModularAgents.Kinematic;
 
 namespace ModularAgents.TrainingEvents { 
 
@@ -50,12 +50,21 @@ public abstract class BasicSetupHandler : TrainingEventHandler
 
 	protected IResettable kineticChainToReset;
 
-    public override EventHandler Handler => HandleSetup;
+
+	[Tooltip("if this is undefined, to set up the kinetic chain we will assume the animation root is  the immediate parent of the reference animation root")]
+    [SerializeField]
+    Transform animatorTransform;
+
+        public override EventHandler Handler => HandleSetup;
 
     private void Awake()
     {
 
-		referenceAnimationParent = referenceAnimationRoot.parent;
+		if(animatorTransform == null)
+
+			referenceAnimationParent = referenceAnimationRoot.parent;
+		else
+			referenceAnimationParent = animatorTransform;
 
 		SetupKineticChain();
 		kinematicRig = kinematicRigObject.GetComponent<IKinematicReference>();
@@ -84,17 +93,16 @@ public abstract class BasicSetupHandler : TrainingEventHandler
 		//Then we move the ragdoll as well, still in different joint orientations, but overlapping roots.
 		if (shouldResetPosition) kineticChainToReset.TeleportRoot(referenceAnimationRoot.position, referenceAnimationRoot.rotation);
 
-            //We copy the rotations, velocities and angular velocities from the kinematic reference (which has the "same" pose as the animation).
-            //kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset,referenceAnimationRoot);
-            kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
-        }
+        //We copy the rotations, velocities and angular velocities from the kinematic reference (which has the "same" pose as the animation).
+        kineticChainToReset.CopyKinematicsFrom(kinematicRig, offset);
+    }
 
 
 	//As I can see this handler to be extended to chains other then Articulationbody ones, here's a WIP interface
     public interface IResettable
     {
         public void TeleportRoot(Vector3 position, Quaternion rotation);
-        public void CopyKinematicsFrom(IKinematicReference reference, Vector3 offset, Transform rootRef = null);
+        public void CopyKinematicsFrom(IKinematicReference reference, Vector3 offset);
 
     }
 

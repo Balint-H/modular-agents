@@ -5,13 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Environments/2.Walk/DReCon env/StraightWalk_DReCon.unity
-    guid: f055018b6de39674e8c191f759759788
-  - enabled: 0
-    path: Assets/Environments/0.CartPole/cartpole.unity
-    guid: f585428f8b92bf24e9de8f871aaf158d
   - enabled: 1
-    path: Assets/Environments/2.Walk/DeepMimic env/StraightWalk_DeepMimic_HDF5.unity
-    guid: 1cd15f5e5860252499cc569fc15d51c0
+    path: Assets/Scaling/StraightWalk_DReCon.unity
+    guid: 150f8cfd471ab824d93e43f9d3b48916
   m_configObjects: {}
