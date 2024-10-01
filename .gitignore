@@ -14,7 +14,7 @@
 /UnityMjExamples/Assets/ML-Agents
 /Training/env*
 
-
+Assets/ML-Agents
 # Environemnt logfile
 *UnityMjExamples.log
 
