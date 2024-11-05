@@ -1,16 +1,23 @@
 name: ml-agents
 channels:
   - pytorch
+  - nvidia
+  - defaults
+
 dependencies:
-  - python=3.8
+  - python=3.10.12 #above this mlagents complains
   - pip
-  - pytorch 
+  - pytorch=1.13.1
   - torchvision 
   - torchaudio 
   # - cudatoolkit=10.2
-  - numpy
+  - numpy=1.21.2  #in windows  Microsoft Visual C++ 14.0 is required for numpy 21.2. Get it here: https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170 and reboot
   - protobuf=3.20
+  - six
   - pip:
-     - mlagents==0.29     #- corresponds to mlagents 2.0.1 in C#
-
-
+     - mlagents==1.0.0
+   
+    # alternatively, to install locally:  
+    # git clone --branch release_21 https://github.com/Unity-Technologies/ml-agents.git
+    # cd ml-agents/ml-agents
+    #  pip install -e .
