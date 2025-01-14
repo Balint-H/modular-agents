@@ -8,11 +8,11 @@ public class MjScenePostEvent : TrainingEvent
 {
     public override void SubscribeHandler(EventHandler subscriber)
     {
-        MjScene.Instance.postUpdateEvent += subscriber;
+        MjScene.Instance.postUpdateEvent += (sender, args) => subscriber(sender, args);  // TODO: Confirm this works as intended
     }
 
     public override void UnsubscribeHandler(EventHandler subscribed)
     {
-        if (MjScene.InstanceExists) MjScene.Instance.postUpdateEvent -= subscribed;
+        if (MjScene.InstanceExists) MjScene.Instance.postUpdateEvent -= (sender, args) => subscribed(sender, args);
     }
 }
