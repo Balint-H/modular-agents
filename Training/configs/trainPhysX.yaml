@@ -1,0 +1,32 @@
+behaviors:
+    DReCon-Mj:
+        trainer_type: ppo
+        hyperparameters:
+            num_epoch: 3
+            beta: 2e-4
+            epsilon: 0.1
+            learning_rate: 5e-5
+            batch_size: 2048 
+            buffer_size: 40960 # 768 * 4
+        summary_freq: 50000
+        checkpoint_interval: 500000
+        keep_checkpoints: 5
+        reward_signals:
+            extrinsic:
+                gamma: 0.995
+                strength: 1.0
+        network_settings:
+            num_layers: 3
+            hidden_units: 512    
+            normalize: true
+        max_steps: 25000000
+        time_horizon: 1024
+env_settings:
+  env_args:
+  - --spawn-env=WalkStraight
+  - --num-spawn-envs=5
+  base_port: 5005
+  num_envs: 8 #50 #34 #25 #1
+engine_settings:
+  no_graphics: true
+debug: false

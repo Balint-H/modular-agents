@@ -10,7 +10,7 @@ using UnityEngine.Assertions;
 using System;
 using Unity.MLAgents.Policies;
 using ModularAgents.MotorControl;
-
+using ModularAgents.Kinematic;
 
 namespace ModularAgents.DReCon
 { 

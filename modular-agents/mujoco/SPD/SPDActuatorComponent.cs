@@ -42,9 +42,6 @@ namespace ModularAgents.MotorControl.Mujoco
         // an IRememberPreviousActions object (e.g. so action smoothing is cleared from the previous episode)
         // TODO: replace this explicit reference with an event that all interested components may subscribe to.
         protected IReadOnlyList<IMjJointState> activeReferenceStates;
-
-        public IReadOnlyList<IMjJointState> ActiveReferenceStates => activeReferenceStates;
-
         IRememberPreviousActions prevActionSource;
 
         // Addresses in the qfrc_applied array of MuJoCo controlled (either actively modulating by the agent, or "softExcluded" ones simply tracking)
@@ -157,18 +154,6 @@ namespace ModularAgents.MotorControl.Mujoco
 
         public float[] GetActionsFromState()
         {
-            /*
-            if (kinematicRef && !trackState)
-            {
-                float[] refs = activeReferenceStates.SelectMany(rs => rs.PositionErrors).Select(p => -(float)(p / actionScale)).ToArray();
-                //Debug.Log("we have: " + refs.Length + "  " + ActionSpaceSize);
-                return refs;
-            }
-            else
-            {
-                return Enumerable.Repeat(0f, ActionSpaceSize).ToArray();
-            }
-            */
             return (kinematicRef && !trackState) ? activeReferenceStates.SelectMany(rs => rs.PositionErrors).Select(p => -(float)(p / actionScale)).ToArray() : Enumerable.Repeat(0f, ActionSpaceSize).ToArray();
         }
 
@@ -238,16 +223,10 @@ namespace ModularAgents.MotorControl.Mujoco
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)));
             }
-            else if (kinematicRef.GetComponentInChildren<MjFiniteDifferenceJoint>())
-            {
-                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().First(rj => rj.name.Contains(joint.name)).transform);
-
-            }
-            else if (kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
+            else if( kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjMocapJointStateComponent>().First(rj => rj.name.Contains(joint.name)).transform);
             }
-           
             return null;
         }
 
@@ -268,22 +247,15 @@ namespace ModularAgents.MotorControl.Mujoco
 
         private unsafe void Awake()
         {
-            SetPreviousActions();
-        }
-
-        public void SetPreviousActions()
-        {
-
             if (agent)
             {
-
+               
                 if (smoothingObject)
                 {
                     prevActionSource = smoothingObject.GetComponent<IRememberPreviousActions>();
                     agent.OnBegin += (object sender, EventArgs e) => prevActionSource.SetPreviousActions(GetActionsFromState());
                 }
             }
-
         }
 
         /// <summary>
