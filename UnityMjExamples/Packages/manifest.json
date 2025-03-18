@@ -9,6 +9,7 @@
     "com.unity.ugui": "1.0.0",
     "com.unity.visualscripting": "1.9.4",
     "org.mujoco": "https://github.com/deepmind/mujoco.git?path=unity#3.3.0",
+	"bin.mujoco": "https://github.com/joanllobera/mujoco-bin.git#3.3.0",
     "com.github.mj-unity-extensions": "file:../../mj-unity-extensions",
     "com.github.modular-agents.core": "file:../../modular-agents/core",
     "com.github.modular-agents.mujoco": "file:../../modular-agents/mujoco",
