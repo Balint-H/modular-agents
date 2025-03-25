@@ -54,9 +54,9 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
     public IReadOnlyList<IKinematic> Kinematics => kinematicRagdollRoot.GetComponentsInChildren<MjBody>().Select(mjb => (IKinematic) new MjBodyAdapter(mjb)).ToList();
 
     public Transform KinematicRagdollRoot { get => kinematicRagdollRoot; }
-  
+    public Transform TrackedTransformRoot { get => trackedTransformRoot; set => trackedTransformRoot = value; }
 
-    public void OnAnimatorIK(int k)
+        public void OnAnimatorIK(int k)
     {
         TrackKinematics();
     }
@@ -74,28 +74,42 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
 
     public void OnAgentInitialize()
     {
-        Func<string, string> MocapName = animatedName => $"{prefix}{Utils.SegmentName(animatedName)}";
 
-        void AlignOrientationsPositions(List<Transform> Trackers, List<Transform> Tracked)
-        {
-            foreach (Transform t in Tracked)
-            {
-                string targetname = MocapName(t.name);
-                Transform tracker = Trackers.FirstOrDefault(t => t.name.Equals(targetname));
-                tracker.rotation = t.rotation;
-                tracker.position = t.position;
-                //Debug.Log("aligned tracker " + tracker.name + "  with tracked transform: " + t.name);
-            }
-        }
-        
-        riggedTransforms = weldRoot.GetComponentsInChildren<MjWeld>().Select(krt => krt.Body1.transform).Where(t => t.name.Contains("Mocap") && t.gameObject.activeSelf).ToList().AsReadOnly();
-        trackedTransforms = riggedTransforms.Select(rt => trackedTransformRoot.GetComponentsInChildren<Transform>().First(tt => MocapName(tt.name).Equals(rt.name))).ToList().AsReadOnly();
-        AlignOrientationsPositions(riggedTransforms.ToList(), trackedTransforms.ToList());
-        mjMocapBodies = riggedTransforms.Select(t => t.GetComponent<MjMocapBody>()).ToList();
-        bodies = kinematicRagdollRoot.GetComponentsInChildren<MjBody>().ToList();
+            AlignPose(trackedTransformRoot);
     }
 
-    public virtual unsafe void TrackKinematics()
+
+    public void AlignPose(Transform poseRoot)
+    {
+
+            Func<string, string> MocapName = animatedName => $"{prefix}{Utils.SegmentName(animatedName)}";
+
+            riggedTransforms = weldRoot.GetComponentsInChildren<MjWeld>().Select(krt => krt.Body1.transform).Where(t => t.name.Contains("Mocap") && t.gameObject.activeSelf).ToList().AsReadOnly();
+            trackedTransforms = riggedTransforms.Select(rt => poseRoot.GetComponentsInChildren<Transform>().First(tt => MocapName(tt.name).Equals(rt.name))).ToList().AsReadOnly();
+            AlignOrientationsPositions(riggedTransforms.ToList(), trackedTransforms.ToList());
+            mjMocapBodies = riggedTransforms.Select(t => t.GetComponent<MjMocapBody>()).ToList();
+            bodies = kinematicRagdollRoot.GetComponentsInChildren<MjBody>().ToList();
+
+
+            void AlignOrientationsPositions(List<Transform> Trackers, List<Transform> Tracked)
+            {
+                foreach (Transform t in Tracked)
+                {
+                    string targetname = MocapName(t.name);
+                    Transform tracker = Trackers.FirstOrDefault(t => t.name.Equals(targetname));
+                    tracker.rotation = t.rotation;
+                    tracker.position = t.position;
+                    //Debug.Log("aligned tracker " + tracker.name + "  with tracked transform: " + t.name);
+                }
+            }
+
+
+
+
+        }
+
+
+        public virtual unsafe void TrackKinematics()
     {
         foreach ((var mjb, var tr) in riggedTransforms.Zip(trackedTransforms, Tuple.Create))
         {

@@ -24,7 +24,10 @@ public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
 	MjFreeJoint RagdollFreeJoint;
 
     [SerializeField]
-    Transform SkinSkeletonAnimationRoot;
+    Transform skinSkeletonAnimationRoot;
+
+
+    public Transform SkinSkeletonAnimationRoot { get => skinSkeletonAnimationRoot; }
 
 
     public string ragdollPrefix = "K_";
