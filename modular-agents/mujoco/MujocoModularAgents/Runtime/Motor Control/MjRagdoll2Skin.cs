@@ -9,6 +9,17 @@ using Mujoco.Extensions;
 
 using ModularAgents.Kinematic.Mujoco;
 
+
+public class InitRots : ScriptableObject
+{
+    public Quaternion[] bodyRotations;
+    public Quaternion[] skeletonRotations;
+
+
+}
+
+
+
 public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
 
 //this class maps a Mujoco Ragdoll to a skinned character with an equivalent topology
@@ -34,7 +45,7 @@ public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
 
     //private IReadOnlyList<MjBody> bodies;
 
-    [SerializeField]
+    //[SerializeField]
     private MjBody[] bodies;
     private IReadOnlyList<Transform> skeletonTransforms;
 
@@ -54,10 +65,15 @@ public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
     Quaternion[] initSkeletonRotations;
 
 
+    [SerializeField]
+    InitRots initialRotations;
+
+
+
     private void OnEnable()
     {
         OnAgentInitialize();
-
+        Debug.Log("Initializing MjRagdoll2Skin at time: " + Time.realtimeSinceStartup);
 
     }
 
@@ -179,8 +195,23 @@ public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
 
         skeletonTransforms = bodies.ToList().Select(x => FindSkeletonTransformMatchingMjBody(x)).ToList();
 
-        initSkeletonRotations = skeletonTransforms.Select(x => x.rotation).ToArray();
-        initBodyRotations     = bodies.Select(x => x.transform.rotation).ToArray();
+        if (initialRotations != null)
+        {
+
+            Debug.Log("loading stored offsets");
+            initSkeletonRotations = initialRotations.skeletonRotations;
+            initBodyRotations = initialRotations.bodyRotations;
+
+        }
+        else 
+        {
+            initSkeletonRotations = skeletonTransforms.Select(x => x.rotation).ToArray();
+            initBodyRotations = bodies.Select(x => x.transform.rotation).ToArray();
+
+        }
+
+
+
         if (initSkeletonRotations.Count() == 0)
         {
             Debug.LogWarning("I couldn't find any MjBody ragdoll components, maybe the ragdoll prefix is wrong?");
@@ -196,6 +227,39 @@ public class MjRagdoll2Skin : MonoBehaviour, IKinematicReference
 
 
     }
+
+
+    public InitRots InEditorInitialize()
+    {
+        bodies = FindMjBodiesDefinedInAvatar();
+
+        skeletonTransforms = bodies.ToList().Select(x => FindSkeletonTransformMatchingMjBody(x)).ToList();
+
+        initSkeletonRotations = skeletonTransforms.Select(x => x.rotation).ToArray();
+        initBodyRotations = bodies.Select(x => x.transform.rotation).ToArray();
+
+
+        InitRots initRots = ScriptableObject.CreateInstance<InitRots>();
+
+        initRots.bodyRotations = initBodyRotations;
+        initRots.skeletonRotations = initSkeletonRotations;
+
+
+        if (initSkeletonRotations.Count() == 0)
+        {
+            Debug.LogWarning("I couldn't find any MjBody ragdoll components, maybe the ragdoll prefix is wrong?");
+        }
+        else
+        {
+            Debug.Log("initSkelRots: " + initSkeletonRotations.Count() + " and initBodyRots: " + initBodyRotations.Count());
+        }
+
+
+        initialRotations = initRots;
+        return initRots;
+
+    }
+
 
     public void TeleportRoot(Vector3 pos)
     {

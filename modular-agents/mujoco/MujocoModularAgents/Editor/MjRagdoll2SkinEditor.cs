@@ -35,12 +35,15 @@ public class MjRagdoll2SkinEditor : Editor
         }
     */
 
-        if (GUILayout.Button("Check Initializationn"))
+        if (GUILayout.Button("Initialize mapping"))
         {
+
+
+
             MjRagdoll2Skin t = target as MjRagdoll2Skin;
 
-            t.OnAgentInitialize();
-
+            InitRots ir = t.InEditorInitialize();
+            AssetDatabase.CreateAsset(ir, "Assets/InitialRotations.asset");
 
         }
 
