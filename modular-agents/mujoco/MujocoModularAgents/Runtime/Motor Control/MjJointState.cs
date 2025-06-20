@@ -373,6 +373,14 @@ namespace ModularAgents.MotorControl
             {
                 return transform.GetComponent<MjMocapJointStateComponent>().GetIJointState();
             }
+            else if (transform.GetComponent<MjFiniteDifferenceJoint>())
+            {
+                return transform.GetComponent<MjFiniteDifferenceJoint>().GetJointState();
+            }
+            //else if(transform.GetComponent<MjMocapJointStateComponent>())
+            //{
+            //    return transform.GetComponent<MjMocapJointStateComponent>().GetIJointState();
+            //}
             throw new NotImplementedException($"No component on transform {transform.name} can be interpreted as a JointState.");
         }
 

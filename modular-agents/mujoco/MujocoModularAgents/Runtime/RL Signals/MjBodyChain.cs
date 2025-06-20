@@ -46,16 +46,22 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 return new MjBodyAdapter(transform.GetComponent<MjBody>());
             }
-            else if(transform.GetComponent<MjMocapBodyKinematicsComponent>())
+            else if (transform.GetComponent<MjMocapBodyKinematicsComponent>())
             {
                 return transform.GetComponent<MjMocapBodyKinematicsComponent>().GetIKinematic();
+            }
+            else if (transform.GetComponent<MjFiniteDifferenceBody>())
+            {
+                return transform.GetComponent<MjFiniteDifferenceBody>().GetIKinematic();
             }
             throw new NotImplementedException($"No kinematic component recognized on transform {transform.name}");
         }
 
         public static bool IsIKinematic(this Transform transform)
         {
-            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>();
+           
+            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>() || transform.GetComponent<MjFiniteDifferenceBody>();
+            //return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() ||  transform.GetComponent<MjFiniteDifferenceBody>();
         }
     }
 
@@ -135,8 +141,14 @@ namespace ModularAgents.Kinematic.Mujoco
         public GameObject gameObject { get => mjBody.gameObject; }
         public MjBody ParentBody { get => parentBody; }
 
-        public Vector3 LocalVelocity => MjState.LocalVelocity(mjBody);
+        // public Vector3 LocalVelocity => MjState.LocalVelocity(mjBody);
 
-        public Vector3 LocalAngularVelocity => MjState.LocalAngularVelocity(mjBody);
+        // public Vector3 LocalAngularVelocity => MjState.LocalAngularVelocity(mjBody);
+
+        public Vector3 LocalVelocity => isRoot ? mjBody.GlobalVelocity() : mjBody.GlobalVelocity() - parentBody.GlobalVelocity();
+
+        public Vector3 LocalAngularVelocity => isRoot ? mjBody.GlobalAngularVelocity() : parentBody.GetTransformMatrix().inverse.MultiplyVector(mjBody.GlobalAngularVelocity() - parentBody.GlobalAngularVelocity());
+
+
     }
 }

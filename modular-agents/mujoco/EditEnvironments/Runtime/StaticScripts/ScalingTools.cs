@@ -668,17 +668,7 @@ namespace Mujoco.Extensions
             return parentComponent;
         }
 
-        /// <summary>
-        /// Iterate over all components that use this body as their MJCF parent directly (e.g. MjGeom, MjInertial, MjBaseJoint, and child MjBaseBody).
-        /// </summary>
-        public static IEnumerable<T> GetBodyChildComponents<T>(this MjBaseBody body) where T : MjComponent
-        {
-            foreach(var childComponent in body.GetComponentsInChildren<T>())
-            {
-                if (MjHierarchyTool.FindParentComponent<MjBaseBody>(childComponent) == body) yield return childComponent;
-            }
-        }
-
+      
         /// <summary>
         /// Gives the global position of where the segment corresponding to this body would start, including fixed joints (which are defined as the absence of any MjBaseJoint).
         /// This is necessary to get the scaling directions for segments that include fixed MjBodies, as they don't have joints to query positions with.

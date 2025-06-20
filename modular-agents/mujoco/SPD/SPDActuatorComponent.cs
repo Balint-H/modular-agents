@@ -223,9 +223,16 @@ namespace ModularAgents.MotorControl.Mujoco
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)));
             }
+
             else if( kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
             {
                 return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjMocapJointStateComponent>().First(rj => rj.name.Contains(joint.name)).transform);
+            }
+
+            else if (kinematicRef.GetComponentInChildren<MjFiniteDifferenceJoint>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().First(rj => rj.name.Contains(joint.name)).transform);
+
             }
             return null;
         }
