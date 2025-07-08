@@ -17,11 +17,11 @@ public class MjFiniteDifferenceManager :MonoBehaviour
     public MjFreeJoint Root => pairedRootJoint;
 
     public MjFiniteDifferenceBody animationRoot;
-    [Header("To add the FD components in the hierarchy: ")]
+   /* [Header("To add the FD components in the hierarchy: ")]
     [SerializeField]
     Animator animator;
     public Animator Animator => animator;
-
+   */
     MjFiniteDifferenceBody[] managedComponents;
 
   
@@ -33,6 +33,9 @@ public class MjFiniteDifferenceManager :MonoBehaviour
 
       
     }
+
+
+
 
 
     private void Initialize()
@@ -65,7 +68,9 @@ public class MjFiniteDifferenceManager :MonoBehaviour
         Debug.LogWarning("Set the option --timescale=1 when training a humanoid ragdoll from a reference based on Mujoco Finite Difference Bodies, \n" +
                          " otherwise the method CopyStateToPairedTree(), used when resetting the humanoid, will not work well. ");
 
-        CopyStateToPairedTree();
+
+        //this creates errors in the editor, and doesn't seem needed i nthe inference, since it is called at reset time
+        //CopyStateToPairedTree();
 
 
     }
