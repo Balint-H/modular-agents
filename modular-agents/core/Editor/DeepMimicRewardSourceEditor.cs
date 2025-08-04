@@ -25,7 +25,8 @@ namespace ModularAgents.DeepMimic
                 DeepMimicRewards t = target as DeepMimicRewards;
 
                 t.SetEndEffectors(t.KinRoot.GetComponentsInChildren<Transform>().Where(tr => defaultNames.Select(n => tr.name.ToUpper().Contains(n)).Any(x => x) && tr.childCount > 0),
-                                  t.SimRoot.GetComponentsInChildren<Transform>().Where(tr => defaultNames.Select(n => tr.name.ToUpper().Contains(n)).Any(x => x) && tr.childCount > 0)); 
+                                  t.SimRoot.GetComponentsInChildren<Transform>().Where(tr => defaultNames.Select(n => tr.name.ToUpper().Contains(n)).Any(x => x) && tr.childCount > 0));
+                EditorUtility.SetDirty(target);
             }
 
 

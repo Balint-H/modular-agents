@@ -22,18 +22,19 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
     [SerializeField]
     private Vector3 offset;
 
+    [Tooltip("Prefix that identifies all the mocap bodies tracking the reference animation")]
     [SerializeField]
-    private string prefix;
+    private string prefix = "Mocap_";
 
     [SerializeField]
     [FormerlySerializedAs("ragdollRoot")]
     private Transform kinematicRagdollRoot;
 
     [SerializeField]
-    private int targetId;
+    private int targetId=-1;
 
     [SerializeField]
-    private bool intializeAlone;
+    private bool intializeAlone = true;
 
     // Private, since other scripts should reference rigidbodies from the hierarchy, and not depend on KinematicRig implementation if possible
     private IReadOnlyList<Transform> riggedTransforms;
@@ -84,8 +85,11 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
 
             Func<string, string> MocapName = animatedName => $"{prefix}{Utils.SegmentName(animatedName)}";
 
-            riggedTransforms = weldRoot.GetComponentsInChildren<MjWeld>().Select(krt => krt.Body1.transform).Where(t => t.name.Contains("Mocap") && t.gameObject.activeSelf).ToList().AsReadOnly();
-            trackedTransforms = riggedTransforms.Select(rt => poseRoot.GetComponentsInChildren<Transform>().First(tt => MocapName(tt.name).Equals(rt.name))).ToList().AsReadOnly();
+            riggedTransforms = weldRoot.GetComponentsInChildren<MjWeld>().Select(krt => krt.Body1.transform).Where(t => t.name.Contains(prefix) && t.gameObject.activeSelf).ToList().AsReadOnly();
+
+            Transform[] trackCandidates = poseRoot.GetComponentsInChildren<Transform>();
+
+            trackedTransforms = riggedTransforms.Select(rt => trackCandidates.First(tt => MocapName(tt.name).Equals(rt.name))).ToList().AsReadOnly();
             AlignOrientationsPositions(riggedTransforms.ToList(), trackedTransforms.ToList());
             mjMocapBodies = riggedTransforms.Select(t => t.GetComponent<MjMocapBody>()).ToList();
             bodies = kinematicRagdollRoot.GetComponentsInChildren<MjBody>().ToList();

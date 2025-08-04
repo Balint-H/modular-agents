@@ -140,7 +140,7 @@ using ModularAgents;
 
         }
 
-        public unsafe void Reset()
+        public unsafe void ResetState()
         {
            
 

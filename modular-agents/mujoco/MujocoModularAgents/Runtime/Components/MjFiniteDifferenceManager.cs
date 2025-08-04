@@ -92,7 +92,7 @@ public class MjFiniteDifferenceManager :MonoBehaviour
         foreach (MjFiniteDifferenceJoint mfdj in orderedJoints)
         { 
           
-                mfdj.Reset();
+                mfdj.ResetState();
         }
         ForwardKinematics();
 

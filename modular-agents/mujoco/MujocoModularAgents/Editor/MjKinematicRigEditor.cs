@@ -18,7 +18,7 @@ namespace ModularAgents.EditorScripts
             GUILayout.Label("");
 
             base.OnInspectorGUI();
-
+            /*
             if (GUILayout.Button("Loosen Joints"))
             {
                 MjKinematicRig t = target as MjKinematicRig;
@@ -47,7 +47,7 @@ namespace ModularAgents.EditorScripts
                 t.OnAgentInitialize();
 		EditorUtility.SetDirty(target);
             }
-
+            */
 
 
             serializedObject.ApplyModifiedProperties();
