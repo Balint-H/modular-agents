@@ -36,89 +36,26 @@ public class MjResetPoseEditor : Editor
         base.OnInspectorGUI();
 
 
-        if (GUILayout.Button("Generate Finite Difference Components"))
-        {
+           
+            /*
+            if (GUILayout.Button("Set up in Realtime"))
+            {
                 MjResetPose t = target as MjResetPose;
 
-                MjBody mjBody = t.mjRagdollRoot.GetComponentInParent<MjBody>();
-                //RecursiveComponentCreation(t, mjBody, t.transform, "");
-                RecursiveComponentCreation(t, mjBody,t.referenceRoot , "");
+
+                t.AwakeProxy();
 
 
-                //t.SetupFDElements(); ;
             }
+            */
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
 
     }
 
 
-
-        private void RecursiveComponentCreation(MjResetPose tar, MjBody mjBody, Transform parentTransform, string prefix)
-        {
-
-            List<Transform> childTransforms = new List<Transform>();
-            //this is supercustom for pupeteering case
-            //if (tar.useInPupeteering)
-            //         childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == "K_" + mjBody.name).Where(x => x.transform.GetComponent<MjBody>() != null).ToList();
-            // else
-
-            childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == prefix + mjBody.name).ToList();
-
-
-            if (childTransforms.Count() > 1)
-            {
-                Debug.LogWarning($"More than 1 match found for body {mjBody.name}: {string.Join(", ", childTransforms.Select(t => t.name))} Kinematic rig creation would likely fail.");
-                return;
-            }
-            if (childTransforms.Count() < 1)
-            {
-                Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody, being the ref:" + prefix + mjBody.name);
-                return;
-            }
-
-            MjFiniteDifferenceBody finiteDifferenceBody = childTransforms.First().gameObject.GetComponent<MjFiniteDifferenceBody>();
-            if (finiteDifferenceBody == null)
-            {
-                finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
-
-            }
-
-
-            finiteDifferenceBody.PairedBody = mjBody;
-
-            foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
-            {
-                var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
-                finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
-                finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
-                finiteDifferenceJoint.PairedJoint = joint;
-            }
-            foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
-            {
-                RecursiveComponentCreation(tar, childBody, finiteDifferenceBody.transform, prefix);
-            }
-        }
-
-
-
-
+      
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -177,6 +114,14 @@ public class MjResetPoseEditor : Editor
 
             //AddFDBodies(rootRagdoll, referenceRoot);
 
+            MjBody mjBody = mjRagdollRoot.GetComponentInParent<MjBody>();
+
+            //RecursiveComponentCreation(t, mjBody,t.referenceRoot , "");
+
+            Debug.Log("running recursive FD setup at runtime!");
+            RecursiveSetupFDBodies(this, mjBody, referenceRoot, "");
+
+
 
             Initialize();
 
@@ -220,17 +165,16 @@ public class MjResetPoseEditor : Editor
 
             if (ragdollBone == null)
             {
-                Debug.LogWarning($"No matching ragdoll name for {ragdollTransform.name}.");
+                //Debug.LogWarning($"No matching ragdoll name for {ragdollTransform.name}.");
                 return null;
             }
 
             string skeletonBoneName = referenceAvatar.humanDescription.human.FirstOrDefault(x => x.humanName.Equals(ragdollBone)).boneName;
 
-            if (skeletonBoneName == null)
-            {
-                Debug.LogWarning($"No matching puppet name for ragdoll Transform {ragdollTransform.name} with humanoid name {ragdollBone}");
+            //if (skeletonBoneName == null)
+            //    Debug.LogWarning($"No matching puppet name for ragdoll Transform {ragdollTransform.name} with humanoid name {ragdollBone}");
 
-            }
+            
 
 
             return skeletonBoneName;
@@ -239,6 +183,33 @@ public class MjResetPoseEditor : Editor
 
         }
 
+
+
+        MjFiniteDifferenceBody GetMatchingFiniteDifferenceBodyInAvatar(MjBody mjBody, Transform parentTransform)
+        {
+            string skeletonBoneName = GetMatchingSkeletonBoneName(mjBody);
+            MjFiniteDifferenceBody finiteDifferenceBody2=null;
+
+            if (skeletonBoneName != null)
+            {
+                Transform targetedTransform = parentTransform.GetComponentsInChildren<Transform>().FirstOrDefault(x => x.name.Equals(skeletonBoneName));
+
+
+                finiteDifferenceBody2 = targetedTransform.GetComponent<MjFiniteDifferenceBody>();
+
+                if (finiteDifferenceBody2 == null)
+                {
+                    finiteDifferenceBody2 = targetedTransform.AddComponent<MjFiniteDifferenceBody>();
+                    finiteDifferenceBody2.PairedBody = mjBody;
+                }
+
+
+            }
+
+
+            return finiteDifferenceBody2;
+
+        }
 
 
 
@@ -325,6 +296,194 @@ public class MjResetPoseEditor : Editor
 
 
 
+
+
+
+        public void RecursiveSetupFDBodies(MjResetPose tar, MjBody mjBody, Transform parentTransform, string prefix)
+        {
+            
+            List<Transform> childTransforms = new List<Transform>();
+
+
+            //GOAL: DEBUG THIS TO BE THE SAME THAN BELOW *****************************************
+
+               
+
+
+
+            MjFiniteDifferenceBody finiteDifferenceBody2 = GetMatchingFiniteDifferenceBodyInAvatar(mjBody, parentTransform);
+                      
+            if(finiteDifferenceBody2 == null) //this means the element in the skeleton matching the MjBody is not in the avatar definition (think of intermediary hip joints, for example).
+            {
+                //Debug.LogWarning($"the MjBody {mjBody.name} does not seem to be associated to the Avatar definition ");
+
+
+                //we find the matching body in the father:
+
+                //MjBody bodyDad = mjBody.GetComponentInParent<MjBody>(); //this finds itself!
+                MjBody bodyDad = mjBody.transform.parent.GetComponent<MjBody>();
+
+
+                MjFiniteDifferenceBody finiteDifferenceBody2Dad = GetMatchingFiniteDifferenceBodyInAvatar(bodyDad, parentTransform.parent);
+
+                if (finiteDifferenceBody2Dad != null)
+                {
+
+                //we find which child count of the parent mjBody is MjBody, and assume for finite differences it is the same childCount
+
+                    int childCount = finiteDifferenceBody2Dad.transform.childCount;
+                    if (childCount == 1) //this could be replaced by: if (bodyChilds.Length != fdCandidates.Length), and it would work for extensions of MjBody elements, like an object being hold.
+                    {
+
+                        //Transform targetedTransform = parentTransform.GetComponentsInChildren<Transform>().First();
+                        Transform targetedTransform = parentTransform.GetComponentsInChildren<Transform>()[0];
+                        finiteDifferenceBody2 = targetedTransform.AddComponent<MjFiniteDifferenceBody>();
+                        finiteDifferenceBody2.PairedBody = mjBody;
+
+                    }
+                    else {
+                        //if we are targeting an intermediate MjBody with no joint associated, so it will not be in the hierarchy.
+                        //But we need to consider it to set up the right pose when initializing.
+                        
+
+                        MjBody[] bodyChilds      = bodyDad.GetComponentsInDirectChildren<MjBody>();
+                        
+                        Transform[] fdCandidates = parentTransform.GetComponentsInDirectChildren<Transform>(); //TODO: exclude the ones that DO NOT have their own children (i.e., are ends of a chain)
+                        
+                        if (bodyChilds.Length == fdCandidates.Length)  //if they have the same number of sons we assume they are organised in the same order
+                        { 
+                            int index = Array.FindIndex(bodyChilds, EqualsNameMjBody);
+
+                            bool EqualsNameMjBody(MjBody candidate) { return candidate.name.Equals(mjBody.name);  }
+                            Transform targetedTransform = fdCandidates[index];
+                            finiteDifferenceBody2 = targetedTransform.AddComponent<MjFiniteDifferenceBody>();
+                        }
+
+                        if (bodyChilds.Length != fdCandidates.Length)
+                        {
+                            //This weird case will happen, for example, when the root has 2 hipJoints that are not in the Avatar definition and have no joints.
+                            //In addition, the root has other sons (the free joint, possibly a MjGeom, etc.)
+
+                            //so, the strategy is to consider that if the MjBody needs to be considered, then its son( the parent's grand-son) should also be part of the avatar definition 
+
+
+                            MjBody grandson = mjBody.GetComponentInDirectChildren<MjBody>();
+
+                            if (grandson != null) //the end of a finger not included in the avatar definition will imply have a null son
+                            {
+                                string skeletonBoneName = GetMatchingSkeletonBoneName(grandson);
+
+                                foreach (Transform fdCandidate in fdCandidates)
+                                {
+                                    Transform[] fdGrandsons = fdCandidate.GetComponentsInDirectChildren<Transform>();
+                                    Transform matchedGrandSon = fdGrandsons.FirstOrDefault(x => x.name == skeletonBoneName);
+                                    if (matchedGrandSon != null)
+                                    {
+
+                                        finiteDifferenceBody2 = matchedGrandSon.parent.AddComponent<MjFiniteDifferenceBody>();
+                                        finiteDifferenceBody2.PairedBody = mjBody;
+
+                                    }
+                                }
+                            }
+                          
+                            //if (finiteDifferenceBody2 == null)
+                            //    Debug.LogWarning($"mjBody {mjBody.name} still does not have a reference in the skeleton");
+                        }
+                     
+                    }
+
+
+
+
+
+
+                }
+            }
+
+
+            if(finiteDifferenceBody2 != null)
+            //it will be null when an MjBody is not part of hte avatar definition and it does not have a son that is not part of the avatar definition
+            //this will happen, for example, for fingers when they are not defined in the avatar. Or props that are an MjBody attached to the humanoid
+            {
+                finiteDifferenceBody2.PairedBody = mjBody;
+
+                MjFiniteDifferenceBody finiteDifferenceBody = finiteDifferenceBody2;
+
+                foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
+                {
+                    var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
+                    finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
+                    finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
+                    finiteDifferenceJoint.PairedJoint = joint;
+                }
+                foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
+                {
+
+                    RecursiveSetupFDBodies(tar, childBody, finiteDifferenceBody.transform, prefix);
+                }
+
+
+
+
+            }
+
+
+
+            /// END OF GOAL ***********************************************************************
+
+            /*
+            childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == prefix + mjBody.name).ToList();
+
+
+                if (childTransforms.Count() > 1)
+                {
+                    Debug.LogWarning($"More than 1 match found for body {mjBody.name}: {string.Join(", ", childTransforms.Select(t => t.name))} Kinematic rig creation would likely fail.");
+                    return;
+                }
+                if (childTransforms.Count() < 1)
+                {
+                    Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to share the name of the MjBody, being the ref:" + prefix + mjBody.name);
+                    return;
+                }
+
+                MjFiniteDifferenceBody finiteDifferenceBody = childTransforms.First().gameObject.GetComponent<MjFiniteDifferenceBody>();
+                if (finiteDifferenceBody == null)
+                {
+                    finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
+
+                }
+
+
+
+
+                finiteDifferenceBody.PairedBody = mjBody;
+            
+            MjFiniteDifferenceBody finiteDifferenceBody = finiteDifferenceBody2;
+
+            foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
+                {
+                    var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
+                    finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
+                    finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
+                    finiteDifferenceJoint.PairedJoint = joint;
+                }
+                foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
+                {
+
+                    RecursiveSetupFDBodies(tar, childBody, finiteDifferenceBody.transform, prefix);
+                }
+            */
+            //}//only applies recursivity when the thing is in the skeleton. This is not sufficient.
+
+
+        }
+
+
+
+
+
+
         private  void Initialize()
         {
 
@@ -389,6 +548,9 @@ public class MjResetPoseEditor : Editor
 
         public void Step()
         {
+            if (managedComponents == null)
+                return;
+
             foreach (var component in managedComponents)
                 component.Step();
         }
@@ -415,6 +577,13 @@ public class MjResetPoseEditor : Editor
 
         private void Awake()
         {
+
+            AwakeProxy();
+        }
+
+
+        public void AwakeProxy()
+        { 
             skeletonBones = referenceAvatar.humanDescription.human;
             Transform[] skeletonTransformCandidates = referenceRoot.GetComponentsInChildren<Transform>();
 
@@ -443,8 +612,9 @@ public class MjResetPoseEditor : Editor
         public virtual unsafe void HandleSetup(object sender, EventArgs eventArgs)
         {
 
-            CopyStateToPuppet();
+            
             CopyStateToPairedRagdoll();
+            CopyStateToPuppet();
 
 
         }
