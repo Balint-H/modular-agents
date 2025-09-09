@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using Mujoco.Extensions;
+
 
 
 
@@ -500,12 +502,12 @@ public class MjResetPoseEditor : Editor
 
 
 
-        
+            MjState.ExecuteAfterMjStart(Prepare);
 
-            Prepare();
+            //Prepare();
 
-
-            Initialize();
+            MjState.ExecuteAfterMjStart(Initialize);
+            //Initialize();
         }
 
         void Prepare()
