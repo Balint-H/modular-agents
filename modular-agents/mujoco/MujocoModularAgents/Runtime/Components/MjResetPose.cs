@@ -7,6 +7,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
+
+
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,6 +19,8 @@ using ModularAgents.Kinematic.Mujoco;
 
 //This class assumes there is a 1 to 1 correspondence between the joints of the Puppet and the reference animation.
 //It also assumes the same for the ragdoll
+//
+// TODO: on at least one case, the hinge joints have been shown to not work, and were replaced by ball joints. This needs to be addressed 
 
 namespace ModularAgents.TrainingEvents
 {
@@ -33,22 +38,22 @@ public class MjResetPoseEditor : Editor
     {
         serializedObject.Update();
 
-        base.OnInspectorGUI();
+       
 
 
            
-            /*
-            if (GUILayout.Button("Set up in Realtime"))
+          
+            if (GUILayout.Button("Set up FD elements for instant reset "))
             {
                 MjResetPose t = target as MjResetPose;
+                Debug.LogWarning("The setting of FD elements in Realtime can be tricky, doing it in editor is more reliable");
 
-
-                t.AwakeProxy();
+                t.AwakeAndSetupFDElements();
 
 
             }
-            */
 
+            base.OnInspectorGUI();
             serializedObject.ApplyModifiedProperties();
 
     }
@@ -107,18 +112,13 @@ public class MjResetPoseEditor : Editor
 
         public void SetupFDElements()
         {
-            MjFiniteDifferenceBody rootFDBody = referenceRoot.GetOrAddComponent<MjFiniteDifferenceBody>();
-            
-            rootRagdoll = mjRagdollRoot.transform.parent.GetComponent<MjBody>();
-            rootFDBody.PairedBody = rootRagdoll;
-
-            //AddFDBodies(rootRagdoll, referenceRoot);
 
             MjBody mjBody = mjRagdollRoot.GetComponentInParent<MjBody>();
 
             //RecursiveComponentCreation(t, mjBody,t.referenceRoot , "");
 
-            Debug.Log("running recursive FD setup at runtime!");
+            Debug.Log("running recursive FD setup");
+            //Debug.LogWarning("the setup of FD elements at runtime is still buggy");
             RecursiveSetupFDBodies(this, mjBody, referenceRoot, "");
 
 
@@ -214,89 +214,6 @@ public class MjResetPoseEditor : Editor
 
 
 
-        void AddFDBodies( MjBody rootMjBody,  Transform rootSkeleton)
-        {
-
-            MjBody[] bodies2check = rootMjBody.GetComponentsInChildren<MjBody>();
-
-             foreach(MjBody mjBody in bodies2check)
-            { 
-            
-            
-
-                List<Transform> childTransforms = new List<Transform>();
-
-                //childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == prefix + mjBody.name).ToList();
-
-                string skeletonBoneName = GetMatchingSkeletonBoneName(mjBody);
-
-
-
-                /*
-                childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == skeletonBoneName).ToList();
-
-                //TODO replace previous with the humanoid class matches.
-
-
-                if (childTransforms.Count() > 1)
-                {
-                    Debug.LogWarning($"More than 1 match found for body {mjBody.name}: {string.Join(", ", childTransforms.Select(t => t.name))} .");
-                    return;
-                }
-                if (childTransforms.Count() < 1)
-                {
-                    Debug.LogWarning($"No match found for body {mjBody.name}. The corresponding animated transform is expected to have the same avatar definition, being the targeted skeletonName:" + skeletonBoneName);
-                    return;
-                }
-
-                MjFiniteDifferenceBody finiteDifferenceBody = childTransforms.First().gameObject.GetComponent<MjFiniteDifferenceBody>();
-                if (finiteDifferenceBody == null)
-                {
-                    finiteDifferenceBody = childTransforms.First().gameObject.AddComponent<MjFiniteDifferenceBody>();
-
-                }
-                */
-                if (skeletonBoneName == null)
-                {
-                    Debug.LogWarning($"the MjBody {mjBody.name} does not seem to be associated to the Avatar definition ");
-                }
-                else
-                { 
-                    Transform targetedTransform = rootSkeleton.GetComponentsInChildren<Transform>().FirstOrDefault(x => x.name.Equals(skeletonBoneName));
-
-                    //MjFiniteDifferenceBody finiteDifferenceBody = targetedTransform.GetOrAddComponent<MjFiniteDifferenceBody>();
-
-                    MjFiniteDifferenceBody finiteDifferenceBody = targetedTransform.GetComponent<MjFiniteDifferenceBody>();
-
-                    if(finiteDifferenceBody == null)
-                        finiteDifferenceBody= targetedTransform.AddComponent<MjFiniteDifferenceBody>();
-
-
-                    finiteDifferenceBody.PairedBody = mjBody;
-
-                    MjFiniteDifferenceJoint test = finiteDifferenceBody.GetComponentInDirectChildren<MjFiniteDifferenceJoint>();
-                    if(test==null)
-                    { 
-                        foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
-                        {
-
-                            var finiteDifferenceJoint = new GameObject(joint.name).AddComponent<MjFiniteDifferenceJoint>();
-                            finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
-                            finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
-                            finiteDifferenceJoint.PairedJoint = joint;
-                        }
-                    }
-
-
-                }
-
-            }
-
-        }
-
-
-
-
 
 
         public void RecursiveSetupFDBodies(MjResetPose tar, MjBody mjBody, Transform parentTransform, string prefix)
@@ -305,10 +222,7 @@ public class MjResetPoseEditor : Editor
             List<Transform> childTransforms = new List<Transform>();
 
 
-            //GOAL: DEBUG THIS TO BE THE SAME THAN BELOW *****************************************
-
-               
-
+           
 
 
             MjFiniteDifferenceBody finiteDifferenceBody2 = GetMatchingFiniteDifferenceBodyInAvatar(mjBody, parentTransform);
@@ -403,7 +317,7 @@ public class MjResetPoseEditor : Editor
 
 
             if(finiteDifferenceBody2 != null)
-            //it will be null when an MjBody is not part of hte avatar definition and it does not have a son that is not part of the avatar definition
+            //it will be null when an MjBody is not part of the avatar definition and it does not have a son that is not part of the avatar definition
             //this will happen, for example, for fingers when they are not defined in the avatar. Or props that are an MjBody attached to the humanoid
             {
                 finiteDifferenceBody2.PairedBody = mjBody;
@@ -413,8 +327,10 @@ public class MjResetPoseEditor : Editor
                 foreach (var joint in mjBody.GetBodyChildComponents<MjBaseJoint>())
                 {
                     var finiteDifferenceJoint = new GameObject(prefix + joint.name).AddComponent<MjFiniteDifferenceJoint>();
-                    finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
                     finiteDifferenceJoint.transform.parent = finiteDifferenceBody.transform;
+                    finiteDifferenceJoint.transform.SetLocalPositionAndRotation(joint.transform.localPosition, joint.transform.localRotation);
+                    //finiteDifferenceJoint.transform.SetLocalPositionAndRotation(Vector3.zero,Quaternion.identity);
+
                     finiteDifferenceJoint.PairedJoint = joint;
                 }
                 foreach (var childBody in mjBody.GetBodyChildComponents<MjBody>())
@@ -430,7 +346,7 @@ public class MjResetPoseEditor : Editor
 
 
 
-            /// END OF GOAL ***********************************************************************
+            /// The code below only works when the bones in the skinned character and on the ragdoll are exactly the same
 
             /*
             childTransforms = parentTransform.GetComponentsInChildren<Transform>().Where(t => t.name == prefix + mjBody.name).ToList();
@@ -527,7 +443,9 @@ public class MjResetPoseEditor : Editor
 
 
         }
+       
 
+        /*
         public unsafe void CopyStateToPairedRagdoll()
         {
 
@@ -543,8 +461,8 @@ public class MjResetPoseEditor : Editor
             ForwardKinematics();
 
         }
-
-
+        */
+       
 
         public void Step()
         {
@@ -552,9 +470,11 @@ public class MjResetPoseEditor : Editor
                 return;
 
             foreach (var component in managedComponents)
+            { 
                 component.Step();
+            }
         }
-
+        
         public unsafe void ForwardKinematics()
         {
             MujocoLib.mj_forward(MjScene.Instance.Model, MjScene.Instance.Data);
@@ -563,11 +483,11 @@ public class MjResetPoseEditor : Editor
 
         public unsafe void FixedUpdate()
         {
-            Step();
+           Step();
 
         }
 
-
+        
 
 
         // end of  the finite difference strategy
@@ -575,15 +495,23 @@ public class MjResetPoseEditor : Editor
 
 
 
-        private void Awake()
+        private void Start()
         {
 
-            AwakeProxy();
+
+
+        
+
+            Prepare();
+
+
+            Initialize();
         }
 
+        void Prepare()
+        {
 
-        public void AwakeProxy()
-        { 
+
             skeletonBones = referenceAvatar.humanDescription.human;
             Transform[] skeletonTransformCandidates = referenceRoot.GetComponentsInChildren<Transform>();
 
@@ -591,8 +519,8 @@ public class MjResetPoseEditor : Editor
             skeletonTransforms = skeletonTransformCandidates.Where(x => skeletonBones.Any(b => x.name == b.boneName)).ToArray();
 
 
-             ragdollBones = mjAvatar.humanDescription.human;
-            
+            ragdollBones = mjAvatar.humanDescription.human;
+
             MjBody[] puppetCandidates = mjPuppetRoot.transform.parent.GetComponentsInChildren<MjBody>();
 
             puppetBodies = puppetCandidates.Where(x => ragdollBones.Any(b => x.name == pupetPrefix + b.boneName)).ToArray();
@@ -600,6 +528,24 @@ public class MjResetPoseEditor : Editor
             MjBody[] ragdollCandidates = mjRagdollRoot.transform.parent.GetComponentsInChildren<MjBody>();
 
             ragdollBodies = ragdollCandidates.Where(x => ragdollBones.Any(b => x.name == b.boneName)).ToArray();
+
+            //Note this will only work if the character and the puppet and the ragdoll are in T pose.
+            //If unsure this can happen in real time, it should be set up beforehand, in editor
+
+            MjFiniteDifferenceBody rootFDBody = referenceRoot.GetOrAddComponent<MjFiniteDifferenceBody>();
+
+            rootRagdoll = mjRagdollRoot.transform.parent.GetComponent<MjBody>();
+            rootFDBody.PairedBody = rootRagdoll;
+
+
+
+        }
+
+
+
+        public void AwakeAndSetupFDElements()
+        {
+            Prepare();
 
 
             SetupFDElements();
@@ -612,10 +558,16 @@ public class MjResetPoseEditor : Editor
         public virtual unsafe void HandleSetup(object sender, EventArgs eventArgs)
         {
 
-            
-            CopyStateToPairedRagdoll();
+
+           
+            //ForwardKinematics();
+
+           
             CopyStateToPuppet();
 
+            // CopyStateToPairedRagdoll(); //sometimes it rotates the foot and other stuff
+            CopyStateToRagdoll();
+            ForwardKinematics();
 
         }
 
@@ -646,35 +598,86 @@ public class MjResetPoseEditor : Editor
 
                     MjBaseJoint mjJ = mjB.GetComponentInDirectChildren<MjBaseJoint>();
 
-
+                    /*
                     if (mjJ == null)
-                    {
-                        Debug.Log($"I cannot reset {mjB.name} because it has no joint associated to it ");
-                    
-                    
-                    }
-                    else { 
+                        Debug.Log($"I cannot reset {mjB.name} because it has no MjBaseJoint component ");
+                    else if (fdJoint == null)
+                        Debug.Log($"I cannot reset {mjB.name} because it has no fdJoint associated to it ");
+                    else
+                    */
+                    if(mjJ != null && fdJoint != null)
                         ResetJointState(fdJoint, mjJ);
-                    }
-
+                    
                 }
 
 
 
             }
          
+        }
+
+        public unsafe void CopyStateToRagdoll()
+        {
+            //for the ragdoll:
+            foreach (Transform b in skeletonTransforms)
+            {
+
+                //we find the equivalent bone Name:
+
+                string boneNameInRagdoll = GetMatchingRagdollBoneName(b);
 
 
+                //update ragdoll MjJoints:                 
+                MjBody mjB = ragdollBodies.FirstOrDefault(x => x.name == boneNameInRagdoll);
+
+                if (mjB == null)
+                    Debug.Log($"I don't have a ragdoll body instance for {boneNameInRagdoll},  equivalent to skeleton transform {b.name} ");
+
+                else
+                {
+                    Debug.Log("aligning ragdoll object: " + mjB.name);
+
+                    MjFiniteDifferenceJoint fdJoint = b.GetComponentInDirectChildren<MjFiniteDifferenceJoint>();
+
+
+                    MjBaseJoint mjJ = mjB.GetComponentInDirectChildren<MjBaseJoint>();
+
+                    
+                    if (mjJ == null)
+                        Debug.Log($"I cannot reset {mjB.name} because it has no MjBaseJoint component ");
+                    else if (fdJoint == null)
+                        Debug.Log($"I cannot reset {mjB.name} because it has no fdJoint associated to it ");
+                    else
+                    
+                    // if (mjJ != null && fdJoint != null)
+                        ResetJointState(fdJoint, mjJ);
+
+                }
+
+
+
+            }
 
         }
+
+
 
 
         public static unsafe void ResetJointState(MjFiniteDifferenceJoint fdJ, MjBaseJoint pairedJoint)
         {
 
+            if (fdJ.PairedJoint == null)
+            {
+                Debug.LogWarning($"joint {fdJ.name} has no pair to go with, MjResetPose cannot reset it");
+                return;
+            }
+
 
             double[] ps = fdJ.GetJointState().Positions;
-
+            /*
+            if (ps.Length < 4)
+                Debug.LogWarning($"joint {pairedJoint.name} is not a Ball Joint, this will not work");
+            */
 
             for (int i = 0; i < ps.Length; i++)
             {
