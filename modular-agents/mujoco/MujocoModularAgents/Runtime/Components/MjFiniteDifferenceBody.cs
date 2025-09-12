@@ -19,9 +19,10 @@ namespace ModularAgents.Kinematic.Mujoco
         public MjBody PairedBody { get => pairedBody; set => pairedBody = value; }
    
         Vector3 prevPosition;
-
         Vector3 currentPosition;
 
+        Vector3 currentVelocity;
+        //Vector3 prevVelocity;
 
         Quaternion prevRotation = Quaternion.identity;
         Quaternion currentRotation = Quaternion.identity;
@@ -40,7 +41,8 @@ namespace ModularAgents.Kinematic.Mujoco
         private Quaternion LocalRotation =>  transform.localRotation;
 
         private float fs;
-        private Vector3 Velocity => (currentPosition - prevPosition) * fs;
+        //public Vector3 Velocity => (currentPosition - prevPosition) * fs;
+        public Vector3 Velocity => currentVelocity;
 
         public Vector3 AngularVelocity => Utils.RotationVel(currentRotation, prevRotation, fs);
 
@@ -83,25 +85,46 @@ namespace ModularAgents.Kinematic.Mujoco
 
       
 
-        /*   public void FixedUpdate()
+           public void FixedUpdate()
            {
-               Step();
+             //we don't want this if the ragdoll is being reset
+             //  Step();
            }
-        */
+        
 
-        public void Step()
+        public void Step(bool resetOngoing = false)
         {
-            prevPosition = currentPosition;
-            currentPosition = transform.position;
 
-            prevRotation = currentRotation;
-            currentRotation = transform.rotation;
 
-            prevLocalRotation = currentLocalRotation;
-            currentLocalRotation = LocalRotation;
-    
 
-    }
+
+
+                prevRotation = currentRotation;
+                currentRotation = transform.rotation;
+
+                prevLocalRotation = currentLocalRotation;
+                currentLocalRotation = LocalRotation;
+
+
+
+            //prevVelocity = currentVelocity;// (currentPosition - prevPosition) * fs;//this will only be useful for the reset case, we do it before updating the other values
+            if (!resetOngoing)
+            {
+                currentPosition = transform.position;
+                currentVelocity = (currentPosition - prevPosition) * fs;
+                prevPosition = currentPosition;
+                currentPosition = transform.position;
+
+            }
+            else
+            {
+                currentPosition = transform.position;
+                prevPosition = currentPosition;
+            }
+
+
+
+        }
 
     public IKinematic GetIKinematic()
         {
@@ -363,6 +386,6 @@ namespace ModularAgents.Kinematic.Mujoco
 
     public interface IFiniteDifferenceComponent
     {
-        public void Step();
+        public void Step(bool doStep = true); //the false case is for when the reset is ongoing, if there is a teleport the values from the step would be false
     }
 }

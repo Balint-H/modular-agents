@@ -127,7 +127,7 @@ using ModularAgents;
 
 
 
-        public void Step()
+        public void Step(bool doStep = true)
         {
             //I'm not sure we need to do anything here; it might be enough to step the body kinematics, then the joint components can remain largely stateless views into the body information.
         }

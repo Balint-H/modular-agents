@@ -83,6 +83,9 @@ public class MjResetPoseEditor : Editor
         public
         Transform referenceRoot;
 
+        public Vector3 referenceRootVelocity;
+
+
         public
         Avatar mjAvatar;
 
@@ -94,6 +97,11 @@ public class MjResetPoseEditor : Editor
         MjFreeJoint mjRagdollRoot;
 
         public string pupetPrefix = "K_";
+
+
+        [Header("To Reset when training")]
+        [Tooltip("If not null, it will reset the training in the position of this game object")]
+        public Transform initialPosition;
 
         Transform[] skeletonTransforms;
         MjBody[] puppetBodies;
@@ -111,6 +119,8 @@ public class MjResetPoseEditor : Editor
         List<MjFiniteDifferenceJoint> orderedFDJoints;
         MjFiniteDifferenceBody[] managedComponents;
         MjBody rootRagdoll;
+
+        bool resetOngoing = false;
 
         public void SetupFDElements()
         {
@@ -130,7 +140,7 @@ public class MjResetPoseEditor : Editor
 
 
         }
-
+        #region setupFDelements
 
         string GetMatchingRagdollBoneName(Transform skeletonTransform)
         {
@@ -401,8 +411,8 @@ public class MjResetPoseEditor : Editor
 
 
 
-
-        private  void Initialize()
+        #endregion
+        private void Initialize()
         {
 
             //managedComponents = gameObject.transform.GetComponentsInChildren<MjFiniteDifferenceBody>();
@@ -466,28 +476,46 @@ public class MjResetPoseEditor : Editor
         */
        
 
-        public void Step()
+        public void Step(bool resetOngoing = false)
         {
             if (managedComponents == null)
                 return;
 
+
+            //if (resetOngoing)
+            //    return;
+
+            referenceRootVelocity = referenceRoot.GetComponent<MjFiniteDifferenceBody>().Velocity;
+
             foreach (var component in managedComponents)
             { 
-                component.Step();
+                component.Step(resetOngoing);
             }
         }
-        
-        public unsafe void ForwardKinematics()
-        {
-            MujocoLib.mj_forward(MjScene.Instance.Model, MjScene.Instance.Data);
-        }
-
+       
 
         public unsafe void FixedUpdate()
         {
-           Step();
 
-        }
+            if (resetOngoing)
+            {
+
+                DoTheReset();
+
+
+            }
+
+            Step(resetOngoing);
+            //Step();
+
+
+            if (resetOngoing)
+            {
+                resetOngoing = false;
+           
+            }
+
+            }
 
         
 
@@ -504,10 +532,9 @@ public class MjResetPoseEditor : Editor
 
             MjState.ExecuteAfterMjStart(Prepare);
 
-            //Prepare();
-
-            MjState.ExecuteAfterMjStart(Initialize);
-            //Initialize();
+            
+            //MjState.ExecuteAfterMjStart(Initialize);
+            Initialize();
         }
 
         void Prepare()
@@ -556,21 +583,52 @@ public class MjResetPoseEditor : Editor
         }
 
 
+        public void ResetPosition()
+        {
+            if (initialPosition != null)
+            {
+                referenceRoot.parent.position = initialPosition.position;
+
+                //MjState.TeleportMjRoot(mjRagdollRoot, referenceRoot.position, referenceRoot.rotation);
+                
+                MjState.TeleportMjRoot(mjPuppetRoot, referenceRoot.position, referenceRoot.rotation);
+
+            }
+
+
+        }
+
 
         public virtual unsafe void HandleSetup(object sender, EventArgs eventArgs)
         {
-
-
+            resetOngoing = true;
+            Debug.Log("I am resetting!");
            
-            //ForwardKinematics();
 
-           
+          
+          
+
+        }
+
+        void DoTheReset()
+        {
+
+            ResetPosition();
+
             CopyStateToPuppet();
 
             // CopyStateToPairedRagdoll(); //sometimes it rotates the foot and other stuff
             CopyStateToRagdoll();
             ForwardKinematics();
 
+
+
+        }
+
+
+        public unsafe void ForwardKinematics()
+        {
+            MujocoLib.mj_forward(MjScene.Instance.Model, MjScene.Instance.Data);
         }
 
 
@@ -590,10 +648,10 @@ public class MjResetPoseEditor : Editor
 
                 if (mjB == null)
                     Debug.Log($"I don't have a ragdoll body instance for {boneNameInPuppet},  equivalent to skeleton transform {b.name} ");
-
+                
                 else 
                 {
-                    Debug.Log("aligning puppet object: " + mjB.name);
+                    //Debug.Log("aligning puppet object: " + mjB.name);
 
                     MjFiniteDifferenceJoint fdJoint = b.GetComponentInDirectChildren<MjFiniteDifferenceJoint>();
 
@@ -607,9 +665,14 @@ public class MjResetPoseEditor : Editor
                         Debug.Log($"I cannot reset {mjB.name} because it has no fdJoint associated to it ");
                     else
                     */
-                    if(mjJ != null && fdJoint != null)
-                        ResetJointState(fdJoint, mjJ);
-                    
+
+                    if (mjJ != null && fdJoint != null)
+                    {
+                        if (mjJ.GetComponent<MjFreeJoint>() != null)
+                            MjState.TeleportMjRoot(mjPuppetRoot, referenceRoot.position, referenceRoot.rotation);
+                        else
+                            ResetJointState(fdJoint, mjJ);
+                    }
                 }
 
 
@@ -637,21 +700,21 @@ public class MjResetPoseEditor : Editor
 
                 else
                 {
-                    Debug.Log("aligning ragdoll object: " + mjB.name);
+                    //Debug.Log("aligning ragdoll object: " + mjB.name);
 
                     MjFiniteDifferenceJoint fdJoint = b.GetComponentInDirectChildren<MjFiniteDifferenceJoint>();
 
 
                     MjBaseJoint mjJ = mjB.GetComponentInDirectChildren<MjBaseJoint>();
 
-                    
+                    /*
                     if (mjJ == null)
                         Debug.Log($"I cannot reset {mjB.name} because it has no MjBaseJoint component ");
                     else if (fdJoint == null)
                         Debug.Log($"I cannot reset {mjB.name} because it has no fdJoint associated to it ");
                     else
-                    
-                    // if (mjJ != null && fdJoint != null)
+                    */
+                     if (mjJ != null && fdJoint != null)
                         ResetJointState(fdJoint, mjJ);
 
                 }
