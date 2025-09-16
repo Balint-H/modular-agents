@@ -50,7 +50,7 @@ public class MjResetPoseEditor : Editor
                 MjResetPose t = target as MjResetPose;
                 Debug.LogWarning("The setting of FD elements in Realtime can be tricky, doing it in editor is more reliable");
 
-                t.AwakeAndSetupFDElements();
+                t.PrepareAndSetupFDElements();
 
 
             }
@@ -121,6 +121,9 @@ public class MjResetPoseEditor : Editor
         MjBody rootRagdoll;
 
         bool resetOngoing = false;
+
+
+       
 
         public void SetupFDElements()
         {
@@ -491,10 +494,14 @@ public class MjResetPoseEditor : Editor
             { 
                 component.Step(resetOngoing);
             }
-        }
-       
 
-        public unsafe void FixedUpdate()
+           
+        }
+
+
+    
+
+        public virtual unsafe void HandleFixedMjStep(object sender, EventArgs eventArgs)
         {
 
             if (resetOngoing)
@@ -506,18 +513,16 @@ public class MjResetPoseEditor : Editor
             }
 
             Step(resetOngoing);
-            //Step();
-
-
+        
             if (resetOngoing)
             {
+                MjScene.Instance.SyncUnityToMjState(); //this makes sure the result is visible on the same 1 frame
                 resetOngoing = false;
-           
-            }
 
             }
 
-        
+
+        }
 
 
         // end of  the finite difference strategy
@@ -532,9 +537,11 @@ public class MjResetPoseEditor : Editor
 
             MjState.ExecuteAfterMjStart(Prepare);
 
-            
-            //MjState.ExecuteAfterMjStart(Initialize);
             Initialize();
+            MjScene.Instance.postUpdateEvent += HandleFixedMjStep;
+            Step(false);//to put in place the right positions for the FD method
+            resetOngoing = true;
+            Debug.Log("launched initial reset");
         }
 
         void Prepare()
@@ -572,13 +579,14 @@ public class MjResetPoseEditor : Editor
 
 
 
-        public void AwakeAndSetupFDElements()
+
+        public void PrepareAndSetupFDElements()
         {
             Prepare();
 
 
             SetupFDElements();
-
+          
 
         }
 
@@ -602,7 +610,7 @@ public class MjResetPoseEditor : Editor
         public virtual unsafe void HandleSetup(object sender, EventArgs eventArgs)
         {
             resetOngoing = true;
-            Debug.Log("I am resetting!");
+            
            
 
           

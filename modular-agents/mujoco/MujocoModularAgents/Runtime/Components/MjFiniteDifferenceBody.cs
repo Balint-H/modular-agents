@@ -67,7 +67,7 @@ namespace ModularAgents.Kinematic.Mujoco
 
         private void Awake()
         {
-            Step();
+           // Step();
         }
 
         private void Start()
