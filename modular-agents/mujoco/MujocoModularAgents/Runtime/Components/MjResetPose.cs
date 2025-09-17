@@ -22,7 +22,10 @@ using ModularAgents.Kinematic.Mujoco;
 //This class assumes there is a 1 to 1 correspondence between the joints of the Puppet and the reference animation.
 //It also assumes the same for the ragdoll
 //
-// TODO: on at least one case, the hinge joints have been shown to not work, and were replaced by ball joints. This needs to be addressed 
+// TODO: the parent of the puppet and the ragdoll needs to have zero rotations. When 180 dgrees on Y axis, the puppet and the ragdoll are initialized in opposite directions. Needs to be debugged
+
+// TODO: on at least one case, the hinge joints have been shown to not work, and were replaced by ball joints. This needs to be debugged 
+
 
 namespace ModularAgents.TrainingEvents
 {
@@ -532,8 +535,7 @@ public class MjResetPoseEditor : Editor
 
         private void Start()
         {
-
-
+            
 
             MjState.ExecuteAfterMjStart(Prepare);
 
@@ -597,9 +599,13 @@ public class MjResetPoseEditor : Editor
             {
                 referenceRoot.parent.position = initialPosition.position;
 
-                //MjState.TeleportMjRoot(mjRagdollRoot, referenceRoot.position, referenceRoot.rotation);
+               
                 
                 MjState.TeleportMjRoot(mjPuppetRoot, referenceRoot.position, referenceRoot.rotation);
+                MjState.TeleportMjRoot(mjRagdollRoot, referenceRoot.position, referenceRoot.rotation);
+
+
+
 
             }
 
