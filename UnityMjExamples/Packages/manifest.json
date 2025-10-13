@@ -1,10 +1,11 @@
 {
   "dependencies": {
-    "bin.mujoco": "https://github.com/joanllobera/mujoco-bin.git#3.3.0",
+    "bin.mujoco": "https://github.com/joanllobera/mujoco-bin.git#3.3.6",
     "com.github.mj-unity-extensions": "file:../../mj-unity-extensions",
     "com.github.modular-agents.core": "file:../../modular-agents/core",
     "com.github.modular-agents.mujoco": "file:../../modular-agents/mujoco",
     "com.github.modular-agents.shared-assets": "file:../../modular-agents/shared-assets",
+    "org.mujoco": "https://github.com/joanllobera/mujoco.git?path=unity#3.3.6fix",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.ads": "4.4.2",
@@ -24,7 +25,6 @@
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.4",
     "com.unity.xr.legacyinputhelpers": "2.1.10",
-    "org.mujoco": "https://github.com/deepmind/mujoco.git?path=unity#3.3.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
