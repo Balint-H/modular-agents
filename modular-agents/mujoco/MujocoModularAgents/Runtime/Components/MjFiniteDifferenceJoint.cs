@@ -119,11 +119,11 @@ using ModularAgents;
 
         void MjInitialize()
         {
-           
-            initialRotationBody = pairedJoint.transform.parent.localRotation;
-           
-         
-        }
+
+        // initialRotationBody = pairedJoint.transform.parent.localRotation;
+        initialRotationBody = transform.parent.localRotation;
+
+    }
 
 
 
@@ -142,19 +142,22 @@ using ModularAgents;
 
         public unsafe void ResetState()
         {
-           
 
-            double[] ps = GetJointState().Positions;
 
-         
-            for (int i = 0; i < ps.Length; i++)
+        //double[] ps = GetJointState().Positions;
+        double[] ps = QPos;
+
+
+        for (int i = 0; i < ps.Length; i++)
             {
                 MjScene.Instance.Data->qpos[pairedJoint.QposAddress + i] = ps[i];
             }
 
-            double[] vs = GetJointState().Velocities;
+        //double[] vs = GetJointState().Velocities;
 
-            for (int i = 0; i < vs.Length; i++)
+        double[] vs = QVel;
+
+        for (int i = 0; i < vs.Length; i++)
             {
                 MjScene.Instance.Data->qvel[pairedJoint.DofAddress + i] = vs[i];
             }
@@ -231,7 +234,8 @@ using ModularAgents;
             protected IKinematic parentKinematics;
 
             protected Quaternion LocalRotation => parentKinematics.LocalRotation;
-            protected Vector3 LocalAngularVelocity => parentKinematics.LocalAngularVelocity;
+            protected Quaternion Rotation => parentKinematics.Rotation;
+        protected Vector3 LocalAngularVelocity => parentKinematics.LocalAngularVelocity;
 
             
             public FiniteDifferenceJointState(MjFiniteDifferenceJoint component)
@@ -399,9 +403,9 @@ using ModularAgents;
                         // parentKinematics.    parentKinematics.LocalRotation;
 
                         return new double[1] { 2 * Mathf.Asin(temp.x) * Mathf.Sign(-temp.w) };  //this is what would be mathematically correct when reverting a quaternion to angles
-
+                       
                     }
-
+               
                 default: //tested only for 2 elements, the case with 3 hinges is not considered for now.
                     {
 
@@ -538,7 +542,7 @@ using ModularAgents;
                 return new double[4] { -localJointRotation.w, localJointRotation.x, localJointRotation.z, localJointRotation.y };
 
 
-        }
+            }
 
 
         public double[] PositionErrors => Utils.QuaternionError(Positions,new double[4] {1,0,0,0 });//the difference between the current position and the null rotatoin in mujoco space
@@ -582,11 +586,11 @@ using ModularAgents;
 
 
 
-            public double[] Velocities => GetVelocities();
-            public double[] Positions => GetLocalRotation();
+            public double[] Velocities => GetQVel();
+            public double[] Positions => GetQPos();
 
 
-            double[] GetVelocities()
+            double[] GetQVel()
             {
 
                 //in unity coordinates:
@@ -598,14 +602,30 @@ using ModularAgents;
                                     LocalAngularVelocity.x,     LocalAngularVelocity.z,      LocalAngularVelocity.y };
             }
 
-            double[] GetLocalRotation()
-            {
+        //double[] GetLocalRotation()
+        double[] GetQPos()
+        {
 
-                //in Mujoco coordinates: (x,z,y) (-w, x,z,y)
-                return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.z,     parentKinematics.Position.y,
-                                    - LocalRotation.w,                 LocalRotation.x,                 LocalRotation.z,                LocalRotation.y };//this is a global rotation, see in IKinematic
+            Quaternion q = Quaternion.Inverse(component.initialRotationBody) * Rotation;
 
-            }
+
+            q = Quaternion.identity;
+          
+            Debug.Log("we are taking qpos for reset here! " + component.initialRotationBody);
+
+            //in Mujoco coordinates: (x,z,y)
+            //
+            //
+            //(-w, x,z,y) //for setup 6.ViconHumanoidOnlyBallJointsNewReset_v4
+            return new double[7] { parentKinematics.Position.x,      parentKinematics.Position.z,     parentKinematics.Position.y,
+                                     -  q.w,            q.x,                 q.y,         q.z};//good for standing in any direciton, not for inclinating forward
+                                     // q.w,      -   q.x,                 q.y,       -  q.z}; //z is the vertical, it worked for 3.TestPoseReset in ALL directions, butit doesn't anymore??
+
+            
+            //                  - Rotation.w,                 Rotation.x,                 Rotation.z,                Rotation.y };
+
+
+        }
 
 
             public double[] PositionErrors => throw new System.NotImplementedException();

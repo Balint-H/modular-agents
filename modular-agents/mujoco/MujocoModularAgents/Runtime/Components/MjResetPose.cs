@@ -682,9 +682,9 @@ public class MjResetPoseEditor : Editor
 
                     if (mjJ != null && fdJoint != null)
                     {
-                        if (mjJ.GetComponent<MjFreeJoint>() != null)
-                            MjState.TeleportMjRoot(mjPuppetRoot, referenceRoot.position, referenceRoot.rotation);
-                        else
+                        //if (mjJ.GetComponent<MjFreeJoint>() != null)
+                        //    MjState.TeleportMjRoot(mjPuppetRoot, referenceRoot.position, referenceRoot.rotation);
+                        //else
                             ResetJointState(fdJoint, mjJ);
                     }
                 }
