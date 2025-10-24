@@ -11,7 +11,11 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Environments/0.CartPole/cartpole.unity
     guid: f585428f8b92bf24e9de8f871aaf158d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Environments/2.Walk/DeepMimic env/StraightWalk_DeepMimic_HDF5.unity
     guid: 1cd15f5e5860252499cc569fc15d51c0
+  - enabled: 1
+    path: Assets/Environments/2.Walk/DeepMimic env/StraightWalk_DeepMimic.unity
+    guid: 92bdbdf4ce7483a4b871cc50490d506c
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
