@@ -404,15 +404,22 @@ namespace Mujoco.Extensions
             int[] geomidArr = new int[1];
             byte[] groupArr = new byte[MujocoLib.mjNGROUP];
 
+
+
             groupArr[groundGroup - 1] = 1;
             groupArr[groundGroup] = 1;
             double dist;
+
+
+
             fixed (int* geomid = geomidArr)
             {
                 fixed (double* pnt = pntArr, vec = vecArr)
                 {
                     fixed (byte* group = groupArr)
-                        dist = MujocoLib.mj_ray(model, data, pnt, vec, geomgroup: group, flg_static: 1, bodyexclude: -1, geomid);
+                        
+                        dist = MujocoLib.mj_ray(model, data, pnt, vec, geomgroup: group, flg_static: 1, bodyexclude: -1, geomid, null);
+                        //dist = MujocoLib.mj_ray(model, data, pnt, vec, geomgroup: group, flg_static: 1, bodyexclude: -1, geomid);
                 }
             }
 
@@ -815,7 +822,7 @@ namespace Mujoco.Extensions
         public unsafe static Dictionary<(int, int), int> GetInertiaSubMatrixIndexMap(List<int> dofAddressList, MjStepArgs mjStepArgs)
         {
             int curNv = dofAddressList.Count;
-            int nv = mjStepArgs.model->nv;
+            int nv = (int) mjStepArgs.model->nv;
 
             Dictionary<(int, int), int> subMatrixMap = new Dictionary<(int, int), int>();
 

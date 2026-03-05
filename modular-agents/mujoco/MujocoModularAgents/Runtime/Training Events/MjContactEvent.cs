@@ -44,7 +44,7 @@ namespace ModularAgents.TrainingEvents
             }
             else
             {
-                includedIds = Enumerable.Range(0, MjScene.Instance.Model->ngeom);
+                includedIds = Enumerable.Range(0, (int) MjScene.Instance.Model->ngeom);
             }
             
             var excludedIds = ExclusionFilter.Select(mjg => mjg.MujocoId);

@@ -7,7 +7,6 @@ using UnityEngine;
 using Mujoco;
 using System;
 using Mujoco.Extensions;
-using Unity.VisualScripting;
 
 namespace Mujoco.Extensions
 {

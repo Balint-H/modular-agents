@@ -46,7 +46,7 @@ namespace ModularAgents
             }
             else
             {
-                includedIds = Enumerable.Range(0, MjScene.Instance.Model->ngeom);
+                includedIds = Enumerable.Range(0, (int) MjScene.Instance.Model->ngeom);
             }
 
             List<Vector3> pos = new List<Vector3>();
