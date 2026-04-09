@@ -5,7 +5,11 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scaling/StraightWalk_DReCon.unity
     guid: 150f8cfd471ab824d93e43f9d3b48916
+  - enabled: 1
+    path: Assets/Environments/2.Walk/DeepMimic env/StraightWalk_DeepMimic.unity
+    guid: 92bdbdf4ce7483a4b871cc50490d506c
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
