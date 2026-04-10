@@ -44,7 +44,6 @@ namespace ModularAgents.DReCon
    
         private float CalculateReward()
         {
-
             ReferenceFrame fKin = new ReferenceFrame(kinChain.RootForward, kinChain.CenterOfMass);
             ReferenceFrame fSim = new ReferenceFrame(kinChain.RootForward, simChain.CenterOfMass); // Same orientation, different origin
 
@@ -93,15 +92,15 @@ namespace ModularAgents.DReCon
 
             foreach (int idx in Enumerable.Range(0, kinChain.ColliderCount).Where((x, i) => i % 1 == 0))
             {
-                Gizmos.color = Color.clear;
+                Gizmos.color = Color.cyan;
 
                 kinChain.DrawVelocities(fKin, idx);
 
-                Gizmos.color = Color.clear;
+                Gizmos.color = Color.magenta;
 
                 simChain.DrawVelocities(fSim, idx);
 
-                Gizmos.color = Color.cyan;
+                Gizmos.color = Color.clear;
 
                 //BoundingBoxChain.DrawPositionalDifferences(kinChain, fKin, simChain, fSim, idx);
                 BoundingBoxChain.DrawVelocityDifferences(simChain, fSim, kinChain, fKin, idx);

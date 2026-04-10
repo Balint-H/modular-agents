@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ModularAgents.Kinematic;
 
-public class JumpToClipHandler : DelayableEventHandler
+public class JumpToClipHandler : TrainingEventHandler
 {
     [SerializeField]
     Animator animator;
@@ -22,25 +23,11 @@ public class JumpToClipHandler : DelayableEventHandler
 
     void JumpToClip(object sender, EventArgs args)
     {
-        
-        if (IsWaiting) return;
-        if(framesToWait!=0)
-        {
-            StartCoroutine(DelayedExecution(sender, args));
-            return;
-        }
-
         animator.Play(stateName:clipName, layer: 0, normalizedTime: UnityEngine.Random.Range(0f, normalizedTimeRange));
+        animator.Update(0f);
     }
 
-    protected override IEnumerator DelayedExecution(object sender, EventArgs args)
-    {
-        IsWaiting = true;
-        yield return WaitFrames();
-        animator.Play(stateName: clipName, layer: 0, normalizedTime: UnityEngine.Random.Range(0f, normalizedTimeRange));
-        IsWaiting = false;
-    }
-
+    
 
     public void PlayAtJump()
     {

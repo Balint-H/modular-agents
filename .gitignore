@@ -12,9 +12,10 @@
 /UnityMjExamples/Assets/TrainedModelTests*
 
 /UnityMjExamples/Assets/ML-Agents
-
-
-
+/UnityMjExamples/Recordings
+/Training/envs/*
+/Training/config
+Assets/ML-Agents
 # Environemnt logfile
 *UnityMjExamples.log
 
@@ -37,6 +38,8 @@
 *.pdb
 *.vsidx
 *.vsconfig
+*.h5
+*.h5.meta
 
 # Unity3D generated meta files
 *.pidb.meta

@@ -5,6 +5,7 @@ using System.Linq;
 using System;
 using ModularAgents.MotorControl;
 using Mujoco;
+using Mujoco.Extensions;
 using MathNet.Numerics.LinearAlgebra;
 using static ModularAgents.MathNet.Numerics.LinearAlgebra.LinAlgUtils;
 

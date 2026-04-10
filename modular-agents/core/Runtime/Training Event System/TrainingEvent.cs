@@ -30,7 +30,18 @@ public abstract class TrainingEvent : MonoBehaviour
 
     public void ManuallyTrigger(EventArgs e)
     {
-        OnTrainingEvent(e);
+
+        if (!Application.isPlaying)
+        {
+            foreach(var eventHandler in triggeredHandlers)
+            {
+                eventHandler.Handler?.Invoke(this, e);
+            }
+        }
+        else
+        {
+            OnTrainingEvent(e);
+        }
     }
 
     [SerializeField, Tooltip("All handlers in this list will subscribe to this event. Can be empty if you subscribe to this event elsewhere (e.g. an EventBuilder).")]
@@ -40,14 +51,16 @@ public abstract class TrainingEvent : MonoBehaviour
     [SerializeField, HideInInspector]
     private List<TrainingEventHandler> _triggeredHandlers;  // We'll use this buffer to check which elements changed in OnValidate
 
-    // Note that if your child class training event overrides start, it should call SubscribeSerializedHandlers itself. Alternatively you can override InitializeEvent().
+    // Note that if your child class training event overrides OnEnable, it should call SubscribeSerializedHandlers itself. Alternatively you can override InitializeEvent().
     protected virtual void InitializeEvent()
     {
 
     }
-    
-    
-    private void Start()
+
+    /// <summary>
+    /// If you override this, make sure to call SubscribeSerializeHandlers().
+    /// </summary>
+    private void OnEnable ()
     {
         InitializeEvent();
         SubscribeSerializedHandlers();
@@ -64,11 +77,7 @@ public abstract class TrainingEvent : MonoBehaviour
 
     private void OnDisable()
     {
-        if (triggeredHandlers == null) return;
-        foreach (var handler in triggeredHandlers)
-        {
-            UnsubscribeHandler(handler.Handler);
-        }
+        eventHandler = null;
     }
 
     private void OnValidate()

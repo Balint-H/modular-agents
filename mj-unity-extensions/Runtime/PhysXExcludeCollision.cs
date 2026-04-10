@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ModularAgents
+namespace Mujoco.Extensions
 {
     /// <summary>
     /// This is present in the Mujoco package because of the converter to PhysX

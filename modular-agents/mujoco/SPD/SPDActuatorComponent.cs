@@ -1,13 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
-using static Mujoco.MjScene;
 using MathNet.Numerics.LinearAlgebra;
-using System.Runtime.InteropServices;
 using Unity.MLAgents.Actuators;
 using Mujoco;
+using Mujoco.Extensions;
 using static ModularAgents.MathNet.Numerics.LinearAlgebra.LinAlgUtils;
 
 namespace ModularAgents.MotorControl.Mujoco
@@ -122,6 +120,7 @@ namespace ModularAgents.MotorControl.Mujoco
 
         unsafe private void UpdateTorque(object sender, MjStepArgs e)
         {
+            //Debug.Log("Control");
             var posError = useRegularPD? IMjJointState.GetPosErrorVector(jointStates) + nextActions : IMjJointState.GetStablePosErrorVector(jointStates, dt) + nextActions;
             var velError = IMjJointState.GetVelErrorVector(jointStates);
 
@@ -148,6 +147,7 @@ namespace ModularAgents.MotorControl.Mujoco
 
         unsafe public void ApplyActions(float[] actions)
         {
+            //Debug.Log("Action");
             nextActions = actionScale * ActionsToVector(actions, activeDofLocalIndices, dofAddresses.Length);
 
         }
@@ -195,7 +195,7 @@ namespace ModularAgents.MotorControl.Mujoco
             {
                 jointStates = actuatedJoints.Select(j => IMjJointState.GetJointState(j)).ToList();
 
-                activeReferenceStates = jointStates.Where(js => IsActive(js.Joint)).Select(js => IMjJointState.GetJointState(FindReference(js.Joint))).ToList();
+                activeReferenceStates = jointStates.Where(js => IsActive(js.Joint)).Select(js => FindReference(js.Joint)).ToList();
             }
 
             activeDofLocalIndices = GetActiveDofIndices(actuatedJoints).ToArray();
@@ -215,24 +215,43 @@ namespace ModularAgents.MotorControl.Mujoco
             if (MjScene.InstanceExists) MjScene.Instance.ctrlCallback -= UpdateTorque;
         }
 
-        private MjBaseJoint FindReference(MjBaseJoint joint)
+        private IMjJointState FindReference(MjBaseJoint joint)
         {
-            return kinematicRef ? kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)) : null;
+            if(!kinematicRef) return null;
+
+            if (kinematicRef.GetComponentInChildren<MjBaseJoint>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjBaseJoint>().First(rj => rj.name.Contains(joint.name)));
+            }
+
+            else if( kinematicRef.GetComponentInChildren<MjMocapJointStateComponent>())
+            {
+                return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjMocapJointStateComponent>().First(rj => rj.name.Contains(joint.name)).transform);
+            }
+
+            else if (kinematicRef.GetComponentInChildren<MjFiniteDifferenceJoint>())
+            {
+                // return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().First(rj => rj.name.Contains(joint.name)).transform);
+
+                //return IMjJointState.GetJointState(kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().First(rj => rj.PairedJoint.name.Contains(joint.name)).transform);
+                MjFiniteDifferenceJoint targetJoint = kinematicRef.GetComponentsInChildren<MjFiniteDifferenceJoint>().FirstOrDefault(rj => rj.PairedJoint.Equals(joint));
+                if(targetJoint == null)
+                    return IMjJointState.GetZeroJointStateLike(joint);
+                else
+                {
+
+                   // Debug.LogWarning("checking targetJoint: " + targetJoint.name);
+                    return IMjJointState.GetJointState(targetJoint.transform);
+
+                }
+
+            }
+            return null;
         }
 
         private unsafe void Start()
         {
-            if (updateAlone)
-            {
-                if (MjScene.InstanceExists && MjScene.Instance.Data != null)
-                {
-                    MjInitialize();
-                }
-                else
-                {
-                    MjScene.Instance.sceneCreatedCallback += (_, _) => MjInitialize();
-                }
-            }
+            MjState.ExecuteAfterMjStart(MjInitialize);
         }
 
         public void SetStiffnessMatrix(Matrix<double> stiffness)
@@ -249,7 +268,6 @@ namespace ModularAgents.MotorControl.Mujoco
         {
             if (agent)
             {
-                MjScene.Instance.sceneCreatedCallback += (_, _) => MjInitialize();
                
                 if (smoothingObject)
                 {

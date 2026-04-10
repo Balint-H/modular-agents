@@ -88,6 +88,32 @@ namespace ModularAgents.DeepMimic
             kinEEs = kinEETransforms.Select(x => x.GetKinematic()).ToList();
             simEEs = simEETransforms.Select(x => x.GetKinematic()).ToList();
         }*/
+
+        /// <summary>
+        /// Only intended for editor scripts.
+        /// </summary>
+        public void SetEndEffectors(IEnumerable<Transform> kinEEInput, IEnumerable<Transform> simEEInput)
+        {
+            kinEETransforms = kinEEInput.ToList();
+            simEETransforms = simEEInput.ToList();
+        }
+        public Transform KinRoot => kinRoot;
+        public Transform SimRoot => simRoot;
+
+        private void OnDrawGizmosSelected()
+        {
+            if (!Application.isPlaying) return;
+            foreach((var simK, var kinK) in simChain.Zip(kinChain, Tuple.Create))
+            {
+                var targetRot = kinK.LocalRotation * Quaternion.Inverse(simK.LocalRotation) * simK.Rotation;
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+                Gizmos.color = Color.green;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(simK.Position, targetRot * Vector3.right);
+            }
+        }
     }
 
 }

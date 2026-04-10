@@ -21,9 +21,11 @@ namespace ModularAgents
     {
         [SerializeField]
         ActuatorSignal actuatorSignal;
+        public ActuatorSignal ActuatorSignal => actuatorSignal;
 
         [SerializeField]
         ObservationSignal observationSignal;
+        public ObservationSignal ObservationSignal => observationSignal;
 
         [SerializeField]
         List<RewardSignal> rewardSignals;

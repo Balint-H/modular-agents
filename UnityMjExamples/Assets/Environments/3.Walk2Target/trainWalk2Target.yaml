@@ -1,0 +1,25 @@
+behaviors:
+    DeepMimic-Mj:
+        trainer_type: ppo
+        hyperparameters:
+            num_epoch: 3
+            beta: 2e-4
+            epsilon: 0.1
+            learning_rate: 5e-5
+            batch_size: 2048 
+            buffer_size: 40960 # 768 * 4
+        summary_freq: 50000
+        checkpoint_interval: 500000
+        keep_checkpoints: 20
+        reward_signals:
+            extrinsic:
+                gamma: 0.995
+                strength: 1.0
+        network_settings:
+            num_layers: 3
+            hidden_units: 512    
+            normalize: true
+        max_steps: 85000000
+        time_horizon: 1024
+   
+   

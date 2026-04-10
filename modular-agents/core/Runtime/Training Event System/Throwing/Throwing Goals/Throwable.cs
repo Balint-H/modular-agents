@@ -49,7 +49,7 @@ public class Throwable : MonoBehaviour
 
         if (releaseTime <= 0f)
         {
-            distanceTimeStamps.Add((BallisticsRange(throwableRigidbody.velocity, throwableRigidbody.position.y), Time.time - startTime)); //Store tuple of (range, time when it would be released), so we can find the timestamp of the max range)
+            distanceTimeStamps.Add((BallisticsRange(throwableRigidbody.linearVelocity, throwableRigidbody.position.y), Time.time - startTime)); //Store tuple of (range, time when it would be released), so we can find the timestamp of the max range)
         }
 
         throwableRigidbody.MovePosition(trackedTransform.position + posOffset); //Track transform as if it was its child (without having to actually be, since that has weird effects on the RB)

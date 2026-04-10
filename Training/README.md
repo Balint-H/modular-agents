@@ -7,7 +7,23 @@ We use the following folder structure:
 - **config**: This folder contains the configuration files that work for a build using the example projects. 
 - **results**: The results of the training (the control policy model and the learning metrics) will appear in this folder.
 
-To install the learning environment, you can use file *environment.yaml* in conda to install the ml-agents package. The installation procedure is analogous to the one in the older *Marathon* project. The instructions can be found [`here`](https://github.com/joanllobera/marathon-envs/blob/feautre/cleanup-mujoco/docs/installation.md). 
+
+
+### Setup
+
+To install the learning environment, you can use file *environment.yml* in conda to install the ml-agents package. The installation procedure is analogous to the one in the older *Marathon* project. The instructions can be found [`here`](https://github.com/joanllobera/marathon-envs/blob/feautre/cleanup-mujoco/docs/installation.md). 
+
+Sometimes installing *ml-agents* in computers with recent graphic cards can be troublesome. A solution that has worked is install the package locally. For this, you can use the file environment22.yml, and do:
+
+```shell
+conda env create -f environment22.yml
+conda activate ml-agents22
+git clone --branch release_22 https://github.com/Unity-Technologies/ml-agents.git
+cd ml-agents/ml-agents
+pip install -e .
+```
+
+### Test training
 
 To train a simple environment you can make a build from the DeepMimic walk scene and then do:
 
@@ -15,10 +31,7 @@ To train a simple environment you can make a build from the DeepMimic walk scene
 (ml-agents) PS D:\PUT_HERE_PATH_TO_REPO\Training>  mlagents-learn config/trainMujoco.yaml --run-id=DeepMimic_Walk --env=envs/UnityMjExamples --num-envs=8
 ```
 
-
 A summary of how to train an environment is available [`here`](https://github.com/joanllobera/marathon-envs/blob/feautre/cleanup-mujoco/docs/marathon-controller-training.md) 
-
-
 
 ## How to train on  cloud infrastructure
 

@@ -20,14 +20,11 @@ namespace ModularAgents.DeepMimic
         protected Transform rootTransform;
 
         [SerializeField]
-        Animator animator;
-
-        [SerializeField]
         protected bool usePhase = true;
         protected IKinematic root;
         protected IReadOnlyList<IKinematic> observedKinematics;
 
-     
+
 
         public override int Size => (FilterTransforms(rootTransform.GetComponentsInChildren<Transform>()).Count()) * 15 + (usePhase ? 1 : 0);
 
@@ -46,11 +43,12 @@ namespace ModularAgents.DeepMimic
             }
             if (usePhase)
             {
-                sensor.AddObservation(animator.GetCurrentAnimatorStateInfo(0).normalizedTime % 1);
+                sensor.AddObservation(GetPhase() % 1);
             }
 
         }
 
+        protected abstract float GetPhase();
 
         protected abstract IEnumerable<Transform> FilterTransforms(IEnumerable<Transform> transformCollection);
 

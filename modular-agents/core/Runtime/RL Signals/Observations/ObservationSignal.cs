@@ -51,6 +51,8 @@ public class ObservationSignal : SensorComponent
         return sensors.ToArray();
     }
 
+    public IEnumerable<(string, int)> SensorInfo => observationSources.Where(os => os).Select(os => (os.name, os.Size));
+
 }
 
 public class ObservationSignalSensor : ISensor
