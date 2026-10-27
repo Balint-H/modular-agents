@@ -43,4 +43,4 @@ ___
 
 ## Connector/Meta events and handlers
 
-This category of events and handlers always involve other events or handlers, and modify their behaviours. For example you can wrap a handler in a `CounterWrapHandler`, which will invoke the wrappd handler every $n_{th}$ time itself is called (e.g., to execute a behaviour every fifth frame).
+This category of events and handlers always involve other events or handlers, and modify their behaviours. For example you can wrap a handler in a `CounterWrapHandler`, which will invoke the wrapped handler every $n_{th}$ time itself is called (e.g., to execute a behaviour every fifth frame).
