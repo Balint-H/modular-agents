@@ -25,7 +25,7 @@ For custom rewards you'd subclass `RewardSource` and implement the following ele
 - `Reward`: A float property, in the getter of which you should calculate a (or provide a precalculated) reward of the current frame.
 
 The reason why `ModularAgent` has a list of `RewardSignal`s instead of a single one is to allow a combination of continuous and sparse reward signals to be used together. 
-`RewardSignal` inherits from `TrainingEventHandler` (more about the [Training Event system](<core/Runtime/Training Event System/README.md>)), and if its paired with any `TrainingEvent` it will be used as a sparse reward. 
+`RewardSignal` inherits from `TrainingEventHandler` (more about the [Training Event system](<../Training Event System/README.md>)), and if its paired with any `TrainingEvent` it will be used as a sparse reward. 
 In this case, it will only assign rewards when its invoked by its triggering events, otherwise it is assigned continuously after every action of the `ModularAgent`.
 
 ## Actuator Signal and Actuator Wrappers
